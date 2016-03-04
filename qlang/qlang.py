@@ -1,3 +1,4 @@
+import argparse
 import os.path
 
 import xlrd
@@ -32,15 +33,28 @@ class QlangError(Exception):
 
 def questionnaire_to_translations(filename, prefix):
     with xlrd.open_workbook(filename) as book:
-        # TODO try - except with choices worksheet. possible not exists
-        choices_ws = book.sheet_by_name(CHOICES)
-        choices, c_others = process_worksheet(choices_ws)
-        choices_dict = group_choices(choices)
+        # if no survey worksheet, then abort (don't catch exception here
         survey_ws = book.sheet_by_name(SURVEY)
         survey, s_others = process_worksheet(survey_ws)
-        if set(c_others) != set(s_others):
-            raise QlangError()
-        write_out_translations(filename, prefix, c_others, survey, choices_dict)
+
+        c_others = []
+        choices_dict = {}
+        try:
+            choices_ws = book.sheet_by_name(CHOICES)
+            choices, c_others = process_worksheet(choices_ws)
+            choices_dict = group_choices(choices)
+            if set(c_others) != set(s_others):
+                # TODO Allow choices and survey to start with diff other langs
+                m = 'Languages not the same in the {} and {} worksheets.'
+                m = m.format(SURVEY, CHOICES)
+                raise QlangError(m)
+        except xlrd.XLRDError as e:
+            # TODO Eventually reformat what is printed. May not be an error
+            print(e)
+            m = 'Likely error: No "choices" worksheet found in "{}"'
+            m = m.format(filename)
+            print(m)
+        write_out_translations(filename, prefix, s_others, survey, choices_dict)
 
 
 def write_out_translations(filename, prefix, others, survey, choices_dict):
@@ -53,7 +67,7 @@ def write_out_translations(filename, prefix, others, survey, choices_dict):
     ws.write_row(0, 0, basic_header)
     ws.write_row(0, len(basic_header), others)
     n = 1
-    used_list_names = list(choices_dict.keys())
+    remaining_list_names = list(choices_dict.keys())
     for line in survey:
         out_row = [line[QLANG_WORKSHEET], line[QLANG_ROW] + 1,
                      line[QLANG_TYPE], line[QLANG_NAME], line[QLANG_COLUMN],
@@ -63,25 +77,23 @@ def write_out_translations(filename, prefix, others, survey, choices_dict):
         n += 1
         this_type = line[QLANG_TYPE].split(None)
         has_choice_list = this_type[0] in (SELECT_ONE, SELECT_MULTIPLE)
-        if has_choice_list and this_type[1] in used_list_names:
-            try:
-                these_choices = choices_dict[this_type[1]]
-                for c in these_choices:
-                    choice_row = [c[QLANG_WORKSHEET], c[QLANG_ROW] + 1,
-                                  c[QLANG_TYPE], c[QLANG_NAME],
-                                  c[QLANG_COLUMN], c[ENGLISH]]
-                    choice_row += c[TRANSLATIONS]
-                    ws.write_row(n, 0, choice_row)
-                    n += 1
-                used_list_names.remove(this_type[1])
-            except KeyError as e:
-                # TODO make more informative message
-                # don't terminate
-                print(e)
+        if has_choice_list and this_type[1] in remaining_list_names:
+            these_choices = choices_dict[this_type[1]]
+            for c in these_choices:
+                choice_row = [c[QLANG_WORKSHEET], c[QLANG_ROW] + 1,
+                              c[QLANG_TYPE], c[QLANG_NAME],
+                              c[QLANG_COLUMN], c[ENGLISH]]
+                choice_row += c[TRANSLATIONS]
+                ws.write_row(n, 0, choice_row)
+                n += 1
+            remaining_list_names.remove(this_type[1])
     wb.close()
-    print('### Unused list names in "{}"'.format(filename))
-    for list_name in used_list_names:
-        print(' - {}'.format(list_name))
+    if remaining_list_names:
+        print('### Unused list names in "{}"'.format(filename))
+        for list_name in remaining_list_names:
+            print(' - {}'.format(list_name))
+    m = 'Translation file created: "{}"'.format(out_file)
+    print(m)
 
 
 def group_choices(choices):
@@ -95,27 +107,31 @@ def group_choices(choices):
     return choices_dict
 
 
+# returns list of tuples for English columns
+# returns sorted list of languages found that are translations
+# returns dict of dictionaries to find where translations are
 def preprocess_header(header):
-    # list of tuples, index and column name, e.g. 'hint'
+    # list of tuples, index and column name, e.g. (4, 'hint')
     english = []
     for i, cell in enumerate(header):
-        # TODO check for string format, not empty string
-        if cell.value.endswith(ENGLISH_SUFFIX):
-            english.append((i, cell.value[:-len(ENGLISH_SUFFIX)]))
+        if cell.endswith(ENGLISH_SUFFIX):
+            english.append((i, cell[:-len(ENGLISH_SUFFIX)]))
     if not english:
-        raise QlangError()
+        m = 'English not found in a worksheet'
+        raise QlangError(m)
 
-    # by end of for-loop, should contain all the languages used in the header
+    # to contain all OTHER (non-English) languages used in the header
     other_languages = set()
-    # by end of for-loop, keys are columns with ::English. values are dicts
-    # that have language and column
+    # #by end of for-loop, keys are columns with ::English. values are dicts
+    # #that have language and column
+    # e.g. {label: {Hindi: 10, French: 11}, hint: {Hindi: 12, French: 13}}
+    # except with quotes around the strings.
     translation_lookup = {}
     for i, column in english:
         prefix = COL_FORMAT.format(column)
         translations = [item for item in enumerate(header) if item[0] != i and
-                        item[1].value.startswith(prefix)]
-        these_languages = {lang.value[len(prefix):]: j for j, lang in
-                           translations}
+                        item[1].startswith(prefix)]
+        these_languages = {lang[len(prefix):]: j for j, lang in translations}
         translation_lookup[column] = these_languages
         other_languages |= set(these_languages.keys())
     others = list(other_languages)
@@ -123,43 +139,44 @@ def preprocess_header(header):
     return english, others, translation_lookup
 
 
+# Return the worksheet and the list of other languages (not english)
 def process_worksheet(worksheet):
+    unicode = get_unicode_ws(worksheet)
     # Assumption that first row is the header
-    header = worksheet.row(0)
+    header = unicode[0]
     english, others, translations = preprocess_header(header)
     type_col = get_type_col(header)
-    name_col = ([cell.value for cell in header]).index(QLANG_NAME)
+    name_col = header.index(QLANG_NAME)
     rows_for_output = []
-    for i in range(worksheet.nrows):
+    for i, row in enumerate(unicode):
         if i == 0:
             continue
-        this_row = list(worksheet.row(i))
-        # TODO error catching (index error)
         for j, column in english:
-            this_cell = this_row[j]
+            this_cell = row[j]
             # No more blank values! Use '#####'
-            if this_cell.value:
+            if this_cell != '':
                 this_dict = {}
                 this_dict[QLANG_WORKSHEET] = worksheet.name
                 this_dict[QLANG_ROW] = i
-                this_dict[QLANG_TYPE] = this_row[type_col].value
-                this_dict[QLANG_NAME] = this_row[name_col].value
+                this_dict[QLANG_TYPE] = row[type_col]
+                this_dict[QLANG_NAME] = row[name_col]
                 this_dict[QLANG_COLUMN] = column
-                this_dict[ENGLISH] = this_cell.value
-                this_dict[TRANSLATIONS] = get_translations(this_row, others,
+                this_dict[ENGLISH] = this_cell
+                this_dict[TRANSLATIONS] = get_translations(row, others,
                                                            translations[column])
                 rows_for_output.append(this_dict)
     return rows_for_output, others
 
 
 def get_type_col(header):
-    headings = [cell.value for cell in header]
-    if QLANG_TYPE in headings:
-        col = headings.index(QLANG_TYPE)
-    elif QLANG_LIST_NAME in headings:
-        col = headings.index(QLANG_LIST_NAME)
+    if QLANG_TYPE in header:
+        col = header.index(QLANG_TYPE)
+    elif QLANG_LIST_NAME in header:
+        col = header.index(QLANG_LIST_NAME)
     else:
-        raise QlangError()
+        m = 'Unable to find "{}" or "{}" in header'
+        m = m.format(QLANG_TYPE, QLANG_LIST_NAME)
+        raise QlangError(m)
     return col
 
 
@@ -168,48 +185,59 @@ def get_translations(row, others, translations):
     for lang in others:
         try:
             lang_col = translations[lang]
-            these_translations.append(row[lang_col].value)
+            these_translations.append(row[lang_col])
         except KeyError:
             these_translations.append('')
     return these_translations
 
 
+# throws errors: file not found (xlrd.open_workbook)
+#                sheet not found (xlrd.sheet_by_name)
 def translations_to_questionnaire(filename, prefix, suffix):
     first_part, second_part = os.path.split(filename)
+    if not second_part.startswith(prefix):
+        m = '"{}" does not start with supplied prefix "{}"'
+        m = m.format(second_part, prefix)
+        raise QlangError(m)
     orig_filename = os.path.join(first_part,second_part[len(prefix):])
     full_file, ext = os.path.splitext(orig_filename)
     dest_filename = full_file + suffix + ext
-    print("{} -> {}".format(filename, orig_filename))
     with xlrd.open_workbook(filename) as book:
         with xlrd.open_workbook(orig_filename) as orig:
-            wb = xlsxwriter.Workbook(dest_filename)
             trans_ws = book.sheet_by_name(QLANG_WORKSHEET_NAME)
             survey_ws = orig.sheet_by_name(SURVEY)
-            new_survey = get_worksheet_w_trans(survey_ws, trans_ws, SURVEY)
+            new_survey = get_worksheet_w_trans(survey_ws, trans_ws)
+
+            choices_ws = orig.sheet_by_name(CHOICES)
+            new_choices = get_worksheet_w_trans(choices_ws, trans_ws)
+
+            settings_ws = orig.sheet_by_name(SETTINGS)
+            new_settings = get_unicode_ws(settings_ws)
+
+            wb = xlsxwriter.Workbook(dest_filename)
             survey_out_ws = wb.add_worksheet(SURVEY)
             write_out_worksheet(survey_out_ws, new_survey)
-            choices_ws = orig.sheet_by_name(CHOICES)
-            new_choices = get_worksheet_w_trans(choices_ws, trans_ws, CHOICES)
             choices_out_ws = wb.add_worksheet(CHOICES)
             write_out_worksheet(choices_out_ws, new_choices)
-            settings_ws = orig.sheet_by_name(SETTINGS)
-            new_settings = get_worksheet(settings_ws)
             settings_out_ws = wb.add_worksheet(SETTINGS)
             write_out_worksheet(settings_out_ws, new_settings)
             wb.close()
+    m = 'Translations successfully merged: "{}"'.format(dest_filename)
+    print(m)
 
 
 def write_out_worksheet(ws, lines):
     for i, line in enumerate(lines):
         ws.write_row(i, 0, line)
 
-def get_worksheet_w_trans(ws, trans, ws_name):
+
+# TODO does it work if there are no translation languages?
+def get_worksheet_w_trans(ws, trans):
     # for each heading in built header, check if it exists in original header
     # then check if it is in translation file
 
-    trans_rows = get_worksheet(trans)
+    trans_rows = get_unicode_ws(trans)
     trans_header = trans_rows[0]
-    print(trans_header)
     ws_ind = trans_header.index(QLANG_WORKSHEET)
     row_ind = trans_header.index(QLANG_ROW)
     name_ind = trans_header.index(QLANG_NAME)
@@ -217,12 +245,17 @@ def get_worksheet_w_trans(ws, trans, ws_name):
     english_ind = trans_header.index(ENGLISH)
     trans_langs = trans_header[(english_ind + 1):]
 
+    # Keep rows for this sheet
+    ws_name = ws.name
     correct_trans_rows = [row for row in trans_rows if row[ws_ind] == ws_name]
-    ws_rows = get_worksheet(ws)
+    # Get this sheet
+    ws_rows = get_unicode_ws(ws)
     ws_header = ws_rows[0]
 
     # dictionary: key is row, inside is another dictionary. key is column, and
     # value is text value
+    # e.g. {1: {name: your_name, label::English: Name?, label::French: Nom?}}
+    # except with quotes around the strings
     trans_dict = {}
     for row in correct_trans_rows:
         row_number = row[row_ind] - 1
@@ -248,11 +281,14 @@ def get_worksheet_w_trans(ws, trans, ws_name):
         this_row = []
         for col in combined_header:
             orig = ''
+            # see if original WS has column from combined header, then get val
+            # for current row.
             try:
                 orig_ind = ws_header.index(col)
                 orig = line[orig_ind]
             except ValueError:
                 pass
+            # then see if there is corresponding value in translation lookup
             try:
                 this_dict = trans_dict[i]
                 new_val = this_dict[col]
@@ -261,6 +297,10 @@ def get_worksheet_w_trans(ws, trans, ws_name):
                     raise QlangError(m)
                 else:
                     orig = new_val
+                if new_val == '':
+                    m = '### Missing translation for row {} and col "{}"'
+                    m = m.format(i + 1, col)
+                    print(m)
             except (IndexError, KeyError) as e:
                 pass
             this_row.append(orig)
@@ -271,6 +311,7 @@ def get_worksheet_w_trans(ws, trans, ws_name):
 def build_combined_header(ws_header, trans_langs):
     # need to know which are english columns
     # need to know which are translation columns
+    # this probably could be optimized....
     combined_trans = []
     english_col = []
     for col in ws_header:
@@ -281,7 +322,7 @@ def build_combined_header(ws_header, trans_langs):
                 new_col = BOTH_COL_FORMAT.format(base, lang)
                 combined_trans.append(new_col)
     combined_header = []
-    for i, col in enumerate(ws_header):
+    for col in ws_header:
         split_col = col.split(LANGUAGE_SEP)
         if split_col[0] not in english_col or split_col[1] == ENGLISH:
             combined_header.append(col)
@@ -289,65 +330,85 @@ def build_combined_header(ws_header, trans_langs):
     return combined_header
 
 
-def get_worksheet(ws):
+def get_unicode_ws(ws):
     rows = []
     for i in range(ws.nrows):
         this_row = ws.row(i)
-        these_vales = [f(cell) for cell in this_row]
-        rows.append(these_vales)
+        try:
+            these_vales = [f(cell) for cell in this_row]
+            rows.append(these_vales)
+        except QlangError as e:
+            m = 'Excel sheet "{}", row {}: {}'
+            m.format(ws.name, i+1, e)
+            raise QlangError(m)
     return rows
+
+
+def newline_space_fix(s):
+    newline_space = '\n '
+    fix = '\n'
+    while newline_space in s:
+        s = s.replace(newline_space, fix)
+    return s
 
 
 def f(cell):
     # Can format differently?
     if cell.ctype == xlrd.XL_CELL_BOOLEAN:
-        return cell.value == 1
+        return 'TRUE' if cell.value == 1 else 'FALSE'
     elif cell.ctype == xlrd.XL_CELL_EMPTY:
         return ''
     elif cell.ctype == xlrd.XL_CELL_TEXT:
-        return cell.value.strip()
+        s = cell.value.strip()
+        s = newline_space_fix(s)
+        return s
     elif cell.ctype == xlrd.XL_CELL_NUMBER:
         return cell.value
     else:
-        # TODO informative error messages here
-        raise QlangError('Bad cell type: {}'.format(cell.ctype))
+        m = 'Bad cell type: {}. May be DATE'.format(cell.ctype)
+        raise QlangError(m)
     return cell.value
 
 
 if __name__ == '__main__':
-    # filename = ['RJR1-Household-Questionnaire-v3-jkp.xlsx',
-    #             'bootcamp_2.xlsx', 'RJR1-Listing-v3-jkp.xlsx',
-    #             'RJR1-Household-Questionnaire-v3-jkp.xlsx',
-    #             'RJR1-Female-Questionnaire-v3-jkp.xlsx',
-    #             'RJR1-Reinterview-Questionnaire-v3-jkp.xlsx',
-    #             'RJR1-SDP-Questionnaire-v3-jkp.xlsx',
-    #             'RJR1-Selection-v3-jkp.xlsx']
-    filename = [
-        'PMARJ-FinalODKExam-RJ-v3-2016-02-11.xlsx',
-        'PMARJ-Quiz1-ML-v2-2016-02-03-jkp.xlsx',
-        'PMARJ-Quiz2-HQ-v4-2016-02-04-jkp.xlsx',
-        'PMARJ-Quiz3-FQ-v2-2016-02-04-jkp.xlsx',
-        'PMARJ-Quiz4-SDP-v3-2016-02-08.xlsx'
-    ]
-    prefix = QLANG_PREFIX
-    suffix = QLANG_SUFFIX
+    prog_desc = ('From an XLSForm create an MS-Excel file to facilitate quick '
+                 'translation. Also, merge a translation file back into '
+                 'XLSForm.')
+    parser = argparse.ArgumentParser(description=prog_desc)
 
-    for i in filename:
-        print(i)
-        questionnaire_to_translations(i, prefix)
+    file_help = 'One or more paths to files destined for conversion.'
+    parser.add_argument('xlsxfile', nargs='+', help=file_help)
 
-    # file_in = 'RJR1-SDP-Questionnaire-v6-jkp.xlsx'
-    # file_out = 'qlang-RJR1-SDP-Questionnaire-v6-jkp.xlsx'
-    # questionnaire_to_translations(file_in, prefix)
-    # file_out = 'qlang-PMARJ-FinalODKExam-RJ-v2-2015.02.17.xlsx'
-    # translations_to_questionnaire(file_out, prefix, suffix)
+    merge_help = ('Include this flag to merge translation files back into '
+                  'XLSForms. Do not include this flag to tell the program to '
+                  'create translation files.')
+    parser.add_argument('-m', '--merge', action='store_true',
+                        help=merge_help)
 
-    #file_in = 'testqlang/PMARJ-Quiz2-HQ-v2-2016-02-04-jkp.xlsx'
-    #questionnaire_to_translations(file_in, prefix)
+    prefix_help = ('A prefix to prepend to the base file name.')
+    parser.add_argument('-p', '--prefix', help=prefix_help)
 
-    #file1 = 'testqlang/qlang-RJR1-Household-Questionnaire-v3-jkp.xlsx'
-    #file1 = 'testqlang/qlang-RJR1-Female-Questionnaire-v3-jkp.xlsx'
-    #translations_to_questionnaire(file1, prefix, suffix)
+    suffix_help = ('A suffix to add to the base file name. Cannot start with a '
+                   'hyphen ("-").')
+    parser.add_argument('-s', '--suffix', help=suffix_help)
 
-    # check for dups
-    # translations_to_questionnaire(prefix+filename[1], prefix, suffix)
+    args = parser.parse_args()
+
+    if args.suffix is None:
+        args.suffix = QLANG_SUFFIX
+    else:
+        args.suffix = args.suffix.replace('%', '-')
+    if args.prefix is None:
+        args.prefix = QLANG_PREFIX
+    else:
+        args.prefix = args.prefix.replace('%', '-')
+
+    for filename in set(args.xlsxfile):
+        if args.merge:
+            try:
+                translations_to_questionnaire(filename, args.prefix,
+                                              args.suffix)
+            except FileNotFoundError as e:
+                print(e)
+        else:
+            questionnaire_to_translations(filename, args.prefix)

@@ -87,6 +87,15 @@ def write_out_translations(filename, prefix, others, survey, choices_dict):
                 ws.write_row(n, 0, choice_row)
                 n += 1
             remaining_list_names.remove(this_type[1])
+    # TODO add conditional formatting
+    if others:
+        red_background = wb.add_format({'bg_color':   '#FFC7CE'})
+        start_col = len(basic_header)-1
+        last_col = len(basic_header) + len(others) - 1
+        ws.conditional_format(0, start_col, len(survey), last_col, {
+            'type': 'blanks',
+            'format': red_background
+        })
     wb.close()
     if remaining_list_names:
         print('### Unused list names in "{}"'.format(filename))

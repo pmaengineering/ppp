@@ -1,0 +1,6 @@
+v0.1.1, 23 May 2016
+ * Conditional formatting to highlight missing languages (English and translations)
+
+v0.1.0, 4 March 2016
+ * Initial release
+ * Included command-line interface

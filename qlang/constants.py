@@ -26,6 +26,8 @@
 
 # Constants for string transforms
 ARGS = 'ARGS'
+LOWER = 'LOWER'
+NORMALIZE = 'NORMALIZE'
 REPLACE = 'REPLACE'
 STRIP = 'STRIP'
 SUBSTR = 'SUBSTR'

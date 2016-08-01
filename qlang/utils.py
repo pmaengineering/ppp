@@ -26,6 +26,8 @@
 import constants
 
 import re
+import json
+import unicodedata
 
 
 class TransformRule:
@@ -44,17 +46,22 @@ class TransformRule:
                 regex = args[0]
                 replacement = args[1]
                 return lambda x: re.sub(regex, replacement, x)
+            elif transform_type == constants.NORMALIZE:
+                return lambda x: unicodedata.normalize('NFKD', x).encode(
+                    'ascii', 'ignore').decode('ascii')
             elif transform_type == constants.SUBSTR:
                 args = params[constants.ARGS]
-                if args[0] == '':
+                if args[0] == None:
                     start_ind = 0
                 else:
                     start_ind = args[0]
-                if args[1] == '':
+                if args[1] == None:
                     return lambda x: x[start_ind:]
                 else:
                     end_ind = args[1]
                     return lambda x: x[start_ind:end_ind]
+            elif transform_type == constants.LOWER:
+                return lambda x: x.lower()
             else:
                 return id
         except (KeyError, IndexError):
@@ -69,4 +76,27 @@ def string_transform(s, rules):
         s = rule.apply(s)
     return s
 
+def decode_json(json_text, **kwargs):
+    obj = json.loads(json_text, **kwargs)
+    return obj
 
+
+if __name__ == '__main__':
+    text_rules = """
+        [
+            {"TYPE": "STRIP"},
+            {"TYPE": "REPLACE", "ARGS": ["[ ]+","_"]},
+            {"TYPE": "REPLACE", "ARGS": ["[_]+","_"]},
+            {"TYPE": "SUBSTR", "ARGS": [null, 18]},
+            {"TYPE": "STRIP"}
+
+        ]
+    """
+    obj = decode_json(text_rules)
+    print(obj)
+
+    rules = [TransformRule(params) for params in obj]
+
+    strings = [" a b é c ф d ","01234567890123456789012345678901234567890"]
+    for s in strings:
+        print("'{}' -> '{}'".format(s, string_transform(s, rules)))

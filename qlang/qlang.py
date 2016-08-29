@@ -238,22 +238,22 @@ def translations_to_questionnaire(filename, prefix, suffix):
     with xlrd.open_workbook(filename) as book:
         with xlrd.open_workbook(orig_filename) as orig:
             trans_ws = book.sheet_by_name(QLANG_WORKSHEET_NAME)
+            # Copy over "survey" and "choices" after merging translations
             survey_ws = orig.sheet_by_name(SURVEY)
             new_survey = get_worksheet_w_trans(survey_ws, trans_ws)
-
             choices_ws = orig.sheet_by_name(CHOICES)
             new_choices = get_worksheet_w_trans(choices_ws, trans_ws)
-
-            settings_ws = orig.sheet_by_name(SETTINGS)
-            new_settings = get_unicode_ws(settings_ws)
-
             wb = xlsxwriter.Workbook(dest_filename)
             survey_out_ws = wb.add_worksheet(SURVEY)
             write_out_worksheet(survey_out_ws, new_survey)
             choices_out_ws = wb.add_worksheet(CHOICES)
             write_out_worksheet(choices_out_ws, new_choices)
-            settings_out_ws = wb.add_worksheet(SETTINGS)
-            write_out_worksheet(settings_out_ws, new_settings)
+            # Copy all other sheets over
+            for sheet in orig.sheet_names():
+                if sheet not in (SURVEY, CHOICES):
+                    rows = get_unicode_ws(orig.sheet_by_name(sheet))
+                    this_ws = wb.add_worksheet(sheet)
+                    write_out_worksheet(this_ws, rows)
             wb.close()
     m = 'Translations successfully merged: "{}"'.format(dest_filename)
     print(m)
@@ -376,7 +376,7 @@ def get_unicode_ws(ws):
             raise QlangError(m)
     return rows
 
-
+# important for switching between google docs and xlsx
 def newline_space_fix(s):
     newline_space = '\n '
     fix = '\n'

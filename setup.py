@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='qlang',
-    version='0.1.1',
+    version='0.1.2',
     author='James K. Pringle',
     author_email='jpringle@jhu.edu',
     url='http://www.pma2020.org',

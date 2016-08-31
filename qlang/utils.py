@@ -76,9 +76,26 @@ def string_transform(s, rules):
         s = rule.apply(s)
     return s
 
+
 def decode_json(json_text, **kwargs):
     obj = json.loads(json_text, **kwargs)
     return obj
+
+
+# col should be a zero-indexed integer
+def number_to_excel_column(col):
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if len(letters) * len(letters) < col:
+        raise ValueError(col)
+    remainder = col % len(letters)
+    primary_letter = letters[remainder]
+    quotient = col // len(letters)
+    if quotient > 0:
+        return letters[quotient - 1] + primary_letter
+    else:
+        return primary_letter
+
+
 
 
 if __name__ == '__main__':

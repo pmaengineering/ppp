@@ -32,3 +32,7 @@ REPLACE = 'REPLACE'
 STRIP = 'STRIP'
 SUBSTR = 'SUBSTR'
 TYPE = 'TYPE'
+
+
+# Read in a workbook
+DEFAULT_WS_NAME = 'sheet'

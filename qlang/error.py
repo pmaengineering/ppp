@@ -1,0 +1,2 @@
+class ComparatorError(Exception):
+    pass

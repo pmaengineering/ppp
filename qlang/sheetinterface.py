@@ -7,20 +7,18 @@ import os.path
 
 class Workbook:
 
-    def __init__(self, file=None):
+    def __init__(self, file):
         self.file = file
-
         self.data = []
 
-        if file is not None:
-            ext = os.path.splitext(file)[1]
-            if ext in ('.xls', '.xlsx'):
-                self.data = self.data_from_excel(file)
-            else:
-                raise TypeError(file)
+        ext = os.path.splitext(file)[1]
+        if ext in ('.xls', '.xlsx'):
+            self.data = self.data_from_excel(file)
+        else:
+            raise TypeError(file)
 
     def get_sheetnames(self):
-        return [sheet.name for sheet in self]
+        return tuple(sheet.name for sheet in self)
 
     def __len__(self):
         return len(self.data)

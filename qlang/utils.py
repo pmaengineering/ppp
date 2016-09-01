@@ -96,6 +96,16 @@ def number_to_excel_column(col):
         return primary_letter
 
 
+def write_out_worksheet(ws, lines):
+    for i, line in enumerate(lines):
+        ws.write_row(i, 0, line)
+
+
+def format_header(s):
+    inner_header = " {} "
+    section_header = "{:*^80}"
+    return section_header.format(inner_header.format(s))
+
 
 
 if __name__ == '__main__':

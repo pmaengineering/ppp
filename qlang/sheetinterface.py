@@ -78,6 +78,9 @@ class Worksheet:
     def __getitem__(self, key):
         return self.data[key]
 
+    def __len__(self):
+        return len(self.data)
+
     @staticmethod
     def cell_value(cell, datemode=None, unicode=True):
         if cell.ctype == xlrd.XL_CELL_BOOLEAN:

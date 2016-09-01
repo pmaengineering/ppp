@@ -106,6 +106,7 @@ class Comparator:
                         else:
                             out_ws.write(diff.a_loc[0], diff.a_loc[1], diff.b_cell)
             wb.close()
+            print('Successfully created: "{}"'.format(a_dest))
 
         if self.b_diffs:
             b_source = self.B.file
@@ -130,6 +131,7 @@ class Comparator:
                         else:
                             ws.write(diff.b_loc[0], diff.b_loc[1], diff.a_cell)
             wb.close()
+            print('Successfully created: "{}"'.format(b_dest))
 
     @staticmethod
     def get_set_pieces(a, b):
@@ -534,7 +536,10 @@ class IComparator:
         if cell_differences:
             print(utils.format_header("Cell by cell comparison"))
         for diff in cell_differences:
+            total_rows = len(self.comparator.A[diff.a_sheetname])
+            location = "{}/{}. ".format(diff.a_loc[0], total_rows)
             print()
+            print("Row", location, end="")
             print(diff)
             print("[{}] Copy B to A".format(b_to_a))
             print("[{}] Copy B to A and highlight".format(b_to_a_highlight))

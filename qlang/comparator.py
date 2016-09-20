@@ -200,7 +200,7 @@ class Comparator:
         b_columns = b_sheet.get_columns()
 
         if checks:
-            self.column_checks(a_sheet, b_columns, a_columns, b_columns)
+            self.column_checks(a_sheet, b_sheet, a_columns, b_columns)
 
         d = self.get_set_pieces(a_columns, b_columns)
         d["indexed_ab"] = [(v, a_columns.index(v), b_columns.index(v)) for v in
@@ -537,7 +537,7 @@ class IComparator:
             print(utils.format_header("Cell by cell comparison"))
         for diff in cell_differences:
             total_rows = len(self.comparator.A[diff.a_sheetname])
-            location = "{}/{}. ".format(diff.a_loc[0], total_rows)
+            location = "{}/{}. ".format(diff.a_loc[0] + 1, total_rows)
             print()
             print("Row", location, end="")
             print(diff)
@@ -590,8 +590,10 @@ class IComparator:
 
 if __name__ == '__main__':
     files = [
-        'test/files/IDR2-Household-Questionnaire-v5-jkp.xlsx',
-        'test/files/GHR5-Household-Questionnaire-v12-jkp.xlsx'
+        '/Users/jpringle/Downloads/IDR2-SDP-Questionnaire-v6-jkp.xlsx',
+        '/Users/jpringle/Downloads/IDR2-SDP-Questionnaire-v2-lhm-qlang.xlsx'
+        #'test/files/IDR2-SDP-Questionnaire-v2-lhm.xlsx',
+        #'test/files/GHR5-SDP-Questionnaire-v13-jkp.xlsx'
         #'test/files/test1.xlsx',
         #'test/files/test2.xlsx'
     ]

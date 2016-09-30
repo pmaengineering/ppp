@@ -48,7 +48,7 @@ The best there ever were
 
 """
 
-import sheetinterface
+import spreadsheet
 import utils
 import error
 
@@ -590,15 +590,15 @@ class IComparator:
 
 if __name__ == '__main__':
     files = [
-        '/Users/jpringle/Downloads/IDR2-SDP-Questionnaire-v6-jkp.xlsx',
-        '/Users/jpringle/Downloads/IDR2-SDP-Questionnaire-v2-lhm-qlang.xlsx'
+        '/Users/jpringle/Downloads/KER5-SDP-Questionnaire-v2-jef.xlsx',
+        '/Users/jpringle/Downloads/NER3-SDP-Questionnaire-v3-jkp.xlsx'
         #'test/files/IDR2-SDP-Questionnaire-v2-lhm.xlsx',
         #'test/files/GHR5-SDP-Questionnaire-v13-jkp.xlsx'
         #'test/files/test1.xlsx',
         #'test/files/test2.xlsx'
     ]
-    wb1 = sheetinterface.Workbook(files[0])
-    wb2 = sheetinterface.Workbook(files[1])
+    wb1 = spreadsheet.Workbook(files[0])
+    wb2 = spreadsheet.Workbook(files[1])
     c = Comparator(wb1, wb2)
     ic = IComparator(c)
     ic.run()

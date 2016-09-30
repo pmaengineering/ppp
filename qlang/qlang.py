@@ -385,6 +385,14 @@ def newline_space_fix(s):
     return s
 
 
+def space_newline_fix(s):
+    space_newline = ' \n'
+    fix = '\n'
+    while space_newline in s:
+        s = s.replace(space_newline, fix)
+    return s
+
+
 def f(cell):
     # Can format differently?
     if cell.ctype == xlrd.XL_CELL_BOOLEAN:

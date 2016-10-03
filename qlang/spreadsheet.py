@@ -1,6 +1,8 @@
 import xlrd
 
 import constants
+import qlang
+from borrow import TranslationDict
 
 import os.path
 
@@ -19,6 +21,11 @@ class Workbook:
 
     def get_sheetnames(self):
         return tuple(sheet.name for sheet in self)
+
+    def merge_translations(self, translations):
+        if isinstance(translations, TranslationDict):
+            for sheet in self:
+                sheet.merge_translations(translations)
 
     def __len__(self):
         return len(self.data)
@@ -56,6 +63,7 @@ class Worksheet:
 
     def __init__(self, data=None, name=None, datemode=None):
         self.data = []
+        self.style = []
         for i in range(data.nrows):
             cur_row = []
             for j, cell in enumerate(data.row(i)):
@@ -68,6 +76,65 @@ class Worksheet:
             self.name = constants.DEFAULT_WS_NAME + str(Worksheet.count)
         else:
             self.name = name
+
+    # generator to give (row, col) of English and (row, col) of Foreign
+    def translation_pairs(self):
+        english, others, translations = self.preprocess_header()
+        for row, line in enumerate(self):
+            for eng_col, name in english:
+                eng_text = line[eng_col]
+                eng_text = eng_text.strip()
+                eng_dict = {
+                    constants.LANGUAGE: constants.ENGLISH,
+                    constants.LOCATION: (row, eng_col),
+                    constants.TEXT:     eng_text
+                }
+                these_translations = translations[name]
+                for lang in others:
+                    try:
+                        lang_col = these_translations[lang]
+                        lang_text = line[lang_col]
+                        lang_text = lang_text.strip()
+                        lang_dict = {
+                            constants.LANGUAGE: lang,
+                            constants.LOCATION: (row, lang_col),
+                            constants.TEXT:     lang_text
+                        }
+                        if eng_text != '' and lang_text != '':
+                            yield eng_dict, lang_dict
+                    except KeyError:
+                        # Translation not found, skip
+                        pass
+
+    def merge_translations(self, translations):
+        if isinstance(translations, TranslationDict):
+            for eng, lang in self.translation_pairs():
+                eng_text = eng[constants.TEXT]
+                if eng_text == '':
+                    # TODO HIGHLIGHT MISSING ENGLISH
+                    continue
+                lang_text = lang[constants.TEXT]
+                other_lang = lang[constants.LANGUAGE]
+                # TODO CATCH ERROR WHEN TRANSLATION IS MISSING
+                translated_eng = translations.get_numbered_translation(
+                        eng_text, other_lang)
+
+
+    def preprocess_header(self):
+        # TODO move qlang.preprocess_header into this method
+        english, others, translations = qlang.preprocess_header(self.data[0])
+        return english, others, translations
+
+    def create_translation_dict(self):
+        result = TranslationDict()
+        for eng, lang in self.translation_pairs():
+            eng_text = eng[constants.TEXT]
+            # only add translations if the english exists first
+            if eng_text == '':
+                continue
+            lang_text = lang[constants.TEXT]
+            other_lang = lang[constnats.LANGUAGE]
+            result.add_translation(eng_text, lang_text, other_lang)
 
     def get_columns(self):
         if self.data:
@@ -114,3 +181,4 @@ class Worksheet:
         else:
             m = 'Bad cell type: {}. Value is: {}'.format(cell.ctype, cell.value)
             return m
+

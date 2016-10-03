@@ -33,6 +33,12 @@ STRIP = 'STRIP'
 SUBSTR = 'SUBSTR'
 TYPE = 'TYPE'
 
+ENGLISH = 'English'
+LANGUAGE = 'language'
+LOCATION = 'location'
+TEXT = 'text'
 
 # Read in a workbook
 DEFAULT_WS_NAME = 'sheet'
+TRANSLATION_WS_NAME = 'translations'
+BORROW_OUT = 'translations.xlsx'

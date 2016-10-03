@@ -1,8 +1,9 @@
 import xlrd
+import xlsxwriter
 
 import constants
-import qlang
 from borrow import TranslationDict
+from error import SpreadsheetError
 
 import os.path
 
@@ -26,6 +27,31 @@ class Workbook:
         if isinstance(translations, TranslationDict):
             for sheet in self:
                 sheet.merge_translations(translations)
+
+    def create_translation_dict(self):
+        result = TranslationDict()
+        for sheet in self:
+            this_result = sheet.create_translation_dict()
+            result.update(this_result)
+        return result
+
+    def write_out(self, path):
+        wb = xlsxwriter.Workbook(path)
+        formats = {}
+        for worksheet in self.data:
+            ws = wb.add_worksheet(worksheet.name)
+            for i, line in enumerate(worksheet):
+                ws.write_row(i, 0, line)
+            for s in worksheet.style:
+                bg_color = s[constants.BG_COLOR_KEY]
+                if bg_color not in formats:
+                    this_format = wb.add_format({constants.BG_COLOR_KEY: bg_color})
+                    formats[bg_color] = this_format
+            for s in worksheet.style:
+                row, col = s[constants.LOCATION]
+                text = s[constants.TEXT]
+                this_format = formats[s[constants.BG_COLOR_KEY]]
+                ws.write(row, col, text, this_format) 
 
     def __len__(self):
         return len(self.data)
@@ -78,52 +104,128 @@ class Worksheet:
             self.name = name
 
     # generator to give (row, col) of English and (row, col) of Foreign
+    # returns two dictionaries, each of the same format
+    # {
+    #   constants.LANGUAGE: "English",
+    #   constants.LOCATION: (row, col),
+    #   constants.TEXT:     "What is your name?"
+    # }
+    # First dictionary is for English. Second is for the foreign language
     def translation_pairs(self):
-        english, others, translations = self.preprocess_header()
-        for row, line in enumerate(self):
-            for eng_col, name in english:
-                eng_text = line[eng_col]
-                eng_text = eng_text.strip()
-                eng_dict = {
-                    constants.LANGUAGE: constants.ENGLISH,
-                    constants.LOCATION: (row, eng_col),
-                    constants.TEXT:     eng_text
-                }
-                these_translations = translations[name]
-                for lang in others:
-                    try:
-                        lang_col = these_translations[lang]
-                        lang_text = line[lang_col]
-                        lang_text = lang_text.strip()
-                        lang_dict = {
-                            constants.LANGUAGE: lang,
-                            constants.LOCATION: (row, lang_col),
-                            constants.TEXT:     lang_text
-                        }
-                        if eng_text != '' and lang_text != '':
-                            yield eng_dict, lang_dict
-                    except KeyError:
-                        # Translation not found, skip
-                        pass
+        try:
+            english, others, translations = self.preprocess_header()
+            for row, line in enumerate(self):
+                for eng_col, name in english:
+                    eng_text = line[eng_col]
+                    eng_text = eng_text.strip()
+                    eng_dict = {
+                        constants.LANGUAGE: constants.ENGLISH,
+                        constants.LOCATION: (row, eng_col),
+                        constants.TEXT:     eng_text
+                    }
+                    these_translations = translations[name]
+                    for lang in others:
+                        try:
+                            lang_col = these_translations[lang]
+                            lang_text = line[lang_col]
+                            lang_text = lang_text.strip()
+                            lang_dict = {
+                                constants.LANGUAGE: lang,
+                                constants.LOCATION: (row, lang_col),
+                                constants.TEXT:     lang_text
+                            }
+                            if eng_text != '' and lang_text != '':
+                                yield eng_dict, lang_dict
+                        except KeyError:
+                            # Translation not found, skip
+                            pass
+        except SpreadsheetError:
+            # Nothing found from preprocess_header
+            return
 
     def merge_translations(self, translations):
         if isinstance(translations, TranslationDict):
             for eng, lang in self.translation_pairs():
                 eng_text = eng[constants.TEXT]
                 if eng_text == '':
-                    # TODO HIGHLIGHT MISSING ENGLISH
+                    self.format_missing_text(eng[constants.LOCATION], eng_text)
                     continue
                 lang_text = lang[constants.TEXT]
                 other_lang = lang[constants.LANGUAGE]
-                # TODO CATCH ERROR WHEN TRANSLATION IS MISSING
-                translated_eng = translations.get_numbered_translation(
+                location = lang[constants.LOCATION]
+                try:
+                    translated_eng = translations.get_numbered_translation(
                         eng_text, other_lang)
+                    self.update_singleton(lang_text, translated_eng, location)
+                except KeyError:
+                    # Might be wrong exception
+                    self.format_missing_translation(location, '')
 
+    def update_singleton(self, prev_text, new_text, location):
+        if prev_text != new_text:
+            line = self.data[location[0]]
+            line[location[1]] = new_text
+            if new_text == '':
+                self.format_missing_text(location, new_text)
+            elif prev_text != '':
+                self.format_overwrite_text(location, new_text)
 
+    def format_missing_text(self, location, text):
+        d = {
+                constants.BG_COLOR_KEY: constants.HIGHLIGHT_RED,
+                constants.LOCATION: location,
+                constants.TEXT: text
+        }
+        self.style.append(d)
+
+    def format_overwrite_text(self, location, text):
+        d = {
+                constants.BG_COLOR_KEY: constants.HIGHLIGHT_BLUE,
+                constants.LOCATION: location,
+                constants.TEXT: text
+        }
+        self.style.append(d)
+
+    def format_missing_translation(self, location, text):
+        d = {
+                constants.BG_COLOR_KEY: constants.HIGHLIGHT_GREEN,
+                constants.LOCATION: location,
+                constants.TEXT: text
+        }
+        self.style.append(d)
+
+    # returns list of tuples for English columns
+    # returns sorted list of languages found that are translations
+    # returns dict of dictionaries to find where translations are
     def preprocess_header(self):
-        # TODO move qlang.preprocess_header into this method
-        english, others, translations = qlang.preprocess_header(self.data[0])
-        return english, others, translations
+        header = self.data[0]
+        # list of tuples, index and column name, e.g. (4, 'hint')
+        english = []
+        for i, cell in enumerate(header):
+            if cell.endswith(constants.ENGLISH_SUFFIX):
+                english.append((i, cell[:-len(constants.ENGLISH_SUFFIX)]))
+        if not english:
+            m = 'Columns labeled English not found in a worksheet "{}"'
+            m = m.format(self.name)
+            raise SpreadsheetError(m)
+
+        # to contain all OTHER (non-English) languages used in the header
+        other_languages = set()
+        # #by end of for-loop, keys are columns with ::English. values are dicts
+        # #that have language and column
+        # e.g. {label: {Hindi: 10, French: 11}, hint: {Hindi: 12, French: 13}}
+        # except with quotes around the strings.
+        translation_lookup = {}
+        for i, column in english:
+            prefix = constants.COL_FORMAT.format(column)
+            translations = [item for item in enumerate(header) if item[0] != i and
+                            item[1].startswith(prefix)]
+            these_languages = {lang[len(prefix):]: j for j, lang in translations}
+            translation_lookup[column] = these_languages
+            other_languages |= set(these_languages.keys())
+        others = list(other_languages)
+        others.sort()
+        return english, others, translation_lookup
 
     def create_translation_dict(self):
         result = TranslationDict()
@@ -133,14 +235,18 @@ class Worksheet:
             if eng_text == '':
                 continue
             lang_text = lang[constants.TEXT]
-            other_lang = lang[constnats.LANGUAGE]
+            other_lang = lang[constants.LANGUAGE]
             result.add_translation(eng_text, lang_text, other_lang)
+        return result
 
     def get_columns(self):
         if self.data:
             return self.data[0]
         else:
             return []
+
+    def __iter__(self):
+        return iter(self.data)
 
     def __getitem__(self, key):
         return self.data[key]

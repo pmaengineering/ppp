@@ -7,15 +7,15 @@ get the translations from different file(s)
 import xlsxwriter
 
 import argparse
+import os.path
 import re
 
-import qlang 
-from qlang import QlangError
 import spreadsheet
 import constants
+import utils
 
 
-class TranslationDict():
+class TranslationDict:
     """
     Intermediate product is a dictionary
     {
@@ -50,8 +50,8 @@ class TranslationDict():
         this_dict = self.data[eng]
         all_found = this_dict[lang]
         max_count = max((all_found.count(s) for s in set(all_found)))
-        first_max = next((s for s in all_found if all_found.count(s) == 
-            max_count))
+        first_max = next((s for s in all_found if all_found.count(s) ==
+                          max_count))
         return first_max
 
     def get_numbered_translation(self, eng, lang):
@@ -62,38 +62,38 @@ class TranslationDict():
         return numbered_translation
 
     def update(self, other):
-        if isinstance(other, TranslationDict):
-            self.languages |= other.languages
-            for k in other:
-                try:
-                    this_dict = self.data[k]
-                    other_dict = other[k]
-                    for lang in other_dict:
-                        if lang in this_dict:
-                            this_dict[lang].extend(other_dict[lang])
-                        else:
-                            this_dict[lang] = other_dict[lang]
-                except KeyError:
-                    self.data[k] = other[k]
+        self.languages |= other.languages
+        for k in other:
+            try:
+                this_dict = self.data[k]
+                other_dict = other[k]
+                for lang in other_dict:
+                    if lang in this_dict:
+                        this_dict[lang].extend(other_dict[lang])
+                    else:
+                        this_dict[lang] = other_dict[lang]
+            except KeyError:
+                self.data[k] = other[k]
 
     def write_out(self, path):
         languages = list(self.languages)
         wb = xlsxwriter.Workbook(path)
+        red_background = wb.add_format()
+        red_background.set_bg_color(constants.HIGHLIGHT_XL_RED)
         ws = wb.add_worksheet(constants.TRANSLATION_WS_NAME)
-        heading = [constants.ENGLISH] + languages
+        all_languages = [constants.ENGLISH] + languages
+        heading = [constants.BOTH_COL_FORMAT.format(constants.TEXT, h) for h 
+                   in all_languages]
         ws.write_row(0, 0, heading)
         for i, k in enumerate(self.data):
             ws.write(i+1, 0, k)
-            translations = self.data[k]
             for j, lang in enumerate(languages):
                 try:
                     translation = self.get_translation(k, lang)
                     ws.write(i+1, j+1, translation)
                 except KeyError:
-                    # TODO HIGHLIGHT missing translation
-                    # Text not found in translations
-                    # Language not found in translations
-                    pass
+                    # Missing information is highlighted
+                    ws.write(i+1, j+1, '', red_background)
 
     def get_number(self, s):
         s = s.strip()
@@ -107,7 +107,8 @@ class TranslationDict():
     def clean_string(self, s):
         s = s.replace('\r', '\n')
         s = s.strip()
-        s = qlang.space_newline_fix(s)
+        s = utils.space_newline_fix(s)
+        s = utils.newline_space_fix(s)
         m = self.number_prog.match(s)
         if m:
             s = s[m.span()[1]:]
@@ -126,65 +127,74 @@ class TranslationDict():
     def __getitem__(self, key):
         return self.data[key]
 
+#### CODE BELOW SLATED FOR DELETION
+# def translation_dict_from_file(f):
+#     result = TranslationDict()
+#     wb = spreadsheet.Workbook(f)
+#     source_worksheets = [
+#         constants.SURVEY,
+#         constants.CHOICES,
+#         constants.TRANSLATION_WS_NAME
+#     ]
+#     for sheetname in source_worksheets:
+#         try:
+#             ws = wb[sheetname]
+#             this_dict = create_translation_dict(ws)
+#             result.update(this_dict)
+#         except KeyError:
+#             # Sheetname not found in workbook. That is OK.
+#             pass
+#     return result
+#
+#
+# # give me a worksheet, and I will give you
+# def create_translation_dict(ws):
+#     result = TranslationDict()
+#     header = ws[0]
+#     try:
+#         english, others, translations = qlang.preprocess_header(header)
+#         for line in ws[1:]:
+#             found = extract_line_translations(line, english, others, translations)
+#             result.update(found)
+#     except QlangError:
+#         # English not found, do nothing
+#         pass
+#     return result
+#
+#
+# def extract_line_translations(line, english, others, translations):
+#     result = TranslationDict()
+#     for col, name in english:
+#         eng = line[col]
+#         if eng == '':
+#             continue
+#         these_translations = translations[name]
+#         for lang in others:
+#             try:
+#                 this_col = these_translations[lang]
+#                 foreign = line[this_col]
+#                 result.add_translation(eng, foreign, lang)
+#             except KeyError:
+#                 # This language not found... unlikely
+#                 pass
+#     return result
+#### CODE ABOVE SLATED FOR DELETION
+
 
 def translation_dict_from_files(files):
     result = TranslationDict()
-    for f in files:
-        this_dict = translation_dict_from_file(f)
+    workbooks = [spreadsheet.Workbook(f) for f in files]
+    for wb in workbooks:
+        this_dict = wb.create_translation_dict()
         result.update(this_dict)
     return result
 
 
-def translation_dict_from_file(f):
-    result = TranslationDict()
-    wb = spreadsheet.Workbook(f)
-    source_worksheets = [
-        constants.SURVEY, 
-        constants.CHOICES,
-        constants.TRANSLATION_WS_NAME
-    ]
-    for sheetname in source_worksheets:
-        try:
-            ws = wb[sheetname]
-            this_dict = create_translation_dict(ws)
-            result.update(this_dict)
-        except KeyError:
-            # Sheetname not found in workbook. That is OK.
-            pass
-    return result
-
-
-# give me a worksheet, and I will give you
-def create_translation_dict(ws):
-    result = TranslationDict()
-    header = ws[0]
-    try:
-        english, others, translations = qlang.preprocess_header(header) 
-        for line in ws[1:]:
-            found = extract_line_translations(line, english, others, translations)
-            result.update(found)
-    except QlangError:
-        # English not found, do nothing
-        pass
-    return result
-
-
-def extract_line_translations(line, english, others, translations):
-    result = TranslationDict()
-    for col, name in english:
-        eng = line[col]
-        if eng == '':
-            continue
-        these_translations = translations[name]
-        for lang in others:
-            try:
-                this_col = these_translations[lang]
-                foreign = line[this_col]
-                result.add_translation(eng, foreign, lang)
-            except KeyError:
-                # This language not found... unlikely
-                pass
-    return result
+def get_wb_outpath(wb):
+    orig = wb.file
+    base, ext = os.path.splitext(orig)
+    outpath = '{}{}{}'.format(base, constants.BORROW_SUFFIX, ext)
+    return outpath
 
 
 if __name__ == '__main__':
@@ -205,36 +215,12 @@ if __name__ == '__main__':
 
     translation_dict = translation_dict_from_files(set(args.xlsxfile))
     if args.merge is None:
-        outpath = constants.BORROW_OUT if args.merge is None else args.merge
+        outpath = constants.BORROW_OUT if args.outpath is None else args.outpath
         translation_dict.write_out(outpath)
+        print('Created translation file: "{}"'.format(outpath))
     else:
-        # In this case, we collect all the translations from xlsxfile
-        # Then merge into "merge" argument
-        # Then write out the merged argument to outpath
-        pass
-
-
-
-
-        
-    print("Received")
-    print("Files: ", args.xlsxfile)
-    print("Merge: ", args.merge)
-    print("Outpath: ", args.outpath)
-
-
-    f = [
-        'test/files/GHR5-SDP-Questionnaire-v13-jkp.xlsx',
-        '/Users/jpringle/Downloads/KER5-SDP-Questionnaire-v2-jef.xlsx',
-        '/Users/jpringle/Desktop/GHR5-Household-Questionnaire-v12-jkp.xlsx'
-    ]
-    wb = spreadsheet.Workbook(f[2])
-    cd = create_translation_dict(wb['survey'])
-    cd.write_out('translations.xlsx')
-
-    print(cd)
-    # If just input files: create a dictionary of sorts that can be used later
-    # If input files and out: write that dictionary to out
-    # If input files and merge: add translations to merge, overwrite where needed, add entire dictionary in new worksheet
-    # If input files and merge and out: above plus specified outfile
-
+        wb = spreadsheet.Workbook(args.merge)
+        wb.merge_translations(translation_dict)
+        outpath = get_wb_outpath(wb) if args.outpath is None else args.outpath
+        wb.write_out(outpath)
+        print('Merged translations into file: "{}"'.format(outpath))

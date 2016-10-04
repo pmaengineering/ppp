@@ -1,11 +1,11 @@
+import os.path
+
 import xlrd
 import xlsxwriter
 
-import constants
-from borrow import TranslationDict
 from error import SpreadsheetError
-
-import os.path
+from translation import TranslationDict
+import constants
 
 
 class Workbook:
@@ -24,9 +24,8 @@ class Workbook:
         return tuple(sheet.name for sheet in self)
 
     def merge_translations(self, translations):
-        if isinstance(translations, TranslationDict):
-            for sheet in self:
-                sheet.merge_translations(translations)
+        for sheet in self:
+            sheet.merge_translations(translations)
 
     def create_translation_dict(self):
         result = TranslationDict()
@@ -115,6 +114,8 @@ class Worksheet:
         try:
             english, others, translations = self.preprocess_header()
             for row, line in enumerate(self):
+                if row == 0:
+                    continue
                 for eng_col, name in english:
                     eng_text = line[eng_col]
                     eng_text = eng_text.strip()
@@ -159,14 +160,14 @@ class Worksheet:
                     self.update_singleton(lang_text, translated_eng, location)
                 except KeyError:
                     # Might be wrong exception
-                    self.format_missing_translation(location, '')
+                    self.format_missing_translation(location, lang_text)
 
     def update_singleton(self, prev_text, new_text, location):
         if prev_text != new_text:
             line = self.data[location[0]]
             line[location[1]] = new_text
             if new_text == '':
-                self.format_missing_text(location, new_text)
+                self.format_missing_text(location, prev_text)
             elif prev_text != '':
                 self.format_overwrite_text(location, new_text)
 
@@ -205,7 +206,7 @@ class Worksheet:
             if cell.endswith(constants.ENGLISH_SUFFIX):
                 english.append((i, cell[:-len(constants.ENGLISH_SUFFIX)]))
         if not english:
-            m = 'Columns labeled English not found in a worksheet "{}"'
+            m = 'No column labeled English found in a worksheet "{}"'
             m = m.format(self.name)
             raise SpreadsheetError(m)
 

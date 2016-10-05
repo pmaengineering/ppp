@@ -1,3 +1,8 @@
+v0.2.0, 5 October 2016
+ * Renamed package to 'pmix'.
+ * Expanded to contain borrow.py, functionality to grab translations
+ * Efficiencies from internals: more of an OO-design rather than functional.
+
 v0.1.2, 29 August 2016
  * Copy all worksheets from original file, not just survey, choices, settings
 

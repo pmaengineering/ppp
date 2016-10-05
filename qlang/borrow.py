@@ -1,70 +1,46 @@
-"""
-Supply source XLSForm
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-get the translations from different file(s)
+# The MIT License (MIT)
+#
+# Copyright (c) 2016 James K. Pringle
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+"""Build a translation file and use it
+
+Supply source XLSForm(s) to build a translation file. Optionally supply an
+XLSForm into which to merge translations.
+
+Created: 3 October 2016
+Last modified: 5 October 2016
+Author: James K. Pringle
+E-mail: jpringle@jhu.edu
 """
 
 import argparse
 import os.path
 
-from translation import TranslationDict
+from verbiage import TranslationDict
 import constants
 import spreadsheet
-
-
-
-#### CODE BELOW SLATED FOR DELETION
-# def translation_dict_from_file(f):
-#     result = TranslationDict()
-#     wb = spreadsheet.Workbook(f)
-#     source_worksheets = [
-#         constants.SURVEY,
-#         constants.CHOICES,
-#         constants.TRANSLATION_WS_NAME
-#     ]
-#     for sheetname in source_worksheets:
-#         try:
-#             ws = wb[sheetname]
-#             this_dict = create_translation_dict(ws)
-#             result.update(this_dict)
-#         except KeyError:
-#             # Sheetname not found in workbook. That is OK.
-#             pass
-#     return result
-#
-#
-# # give me a worksheet, and I will give you
-# def create_translation_dict(ws):
-#     result = TranslationDict()
-#     header = ws[0]
-#     try:
-#         english, others, translations = qlang.preprocess_header(header)
-#         for line in ws[1:]:
-#             found = extract_line_translations(line, english, others, translations)
-#             result.update(found)
-#     except QlangError:
-#         # English not found, do nothing
-#         pass
-#     return result
-#
-#
-# def extract_line_translations(line, english, others, translations):
-#     result = TranslationDict()
-#     for col, name in english:
-#         eng = line[col]
-#         if eng == '':
-#             continue
-#         these_translations = translations[name]
-#         for lang in others:
-#             try:
-#                 this_col = these_translations[lang]
-#                 foreign = line[this_col]
-#                 result.add_translation(eng, foreign, lang)
-#             except KeyError:
-#                 # This language not found... unlikely
-#                 pass
-#     return result
-#### CODE ABOVE SLATED FOR DELETION
 
 
 def translation_dict_from_files(files):
@@ -90,14 +66,16 @@ if __name__ == '__main__':
     file_help = 'One or more paths to source XLSForms containing translations.'
     parser.add_argument('xlsxfile', nargs='+', help=file_help)
 
-    merge_help = 'An XLSForm that receives the translations from source files.'
+    merge_help = ('An XLSForm that receives the translations from source '
+                  'files. If this argument is not supplied, then a translation '
+                  'file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
-    out_help = 'Path to write output.'
+    out_help = ('Path to write output. If this argument is not supplied, then '
+                'defaults are used.')
     parser.add_argument('-o', '--outpath', help=out_help)
 
     args = parser.parse_args()
-
 
     translation_dict = translation_dict_from_files(set(args.xlsxfile))
     if args.merge is None:

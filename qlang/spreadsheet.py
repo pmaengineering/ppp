@@ -4,7 +4,7 @@ import xlrd
 import xlsxwriter
 
 from error import SpreadsheetError
-from translation import TranslationDict
+from verbiage import TranslationDict
 import constants
 
 
@@ -199,31 +199,35 @@ class Worksheet:
     # returns sorted list of languages found that are translations
     # returns dict of dictionaries to find where translations are
     def preprocess_header(self):
+        if not self.data:
+            m = 'No data found in worksheet "{}"'.format(self.name)
+            raise SpreadsheetError(m)
         header = self.data[0]
         # list of tuples, index and column name, e.g. (4, 'hint')
         english = []
         for i, cell in enumerate(header):
             if cell.endswith(constants.ENGLISH_SUFFIX):
+                # e.g. from "label::English", keep "label"
                 english.append((i, cell[:-len(constants.ENGLISH_SUFFIX)]))
         if not english:
-            m = 'No column labeled English found in a worksheet "{}"'
+            m = 'No column labeled English found in worksheet "{}"'
             m = m.format(self.name)
             raise SpreadsheetError(m)
 
         # to contain all OTHER (non-English) languages used in the header
         other_languages = set()
-        # #by end of for-loop, keys are columns with ::English. values are dicts
-        # #that have language and column
+        # Build a dict with keys that are columns ending with "::English" and
+        # values are dicts them that have key -> value as language -> column
         # e.g. {label: {Hindi: 10, French: 11}, hint: {Hindi: 12, French: 13}}
-        # except with quotes around the strings.
         translation_lookup = {}
         for i, column in english:
+            # e.g. take "hint" and make "hint::"
             prefix = constants.COL_FORMAT.format(column)
-            translations = [item for item in enumerate(header) if item[0] != i and
-                            item[1].startswith(prefix)]
-            these_languages = {lang[len(prefix):]: j for j, lang in translations}
-            translation_lookup[column] = these_languages
-            other_languages |= set(these_languages.keys())
+            translations = [item for item in enumerate(header) if item[0] != i
+                            and item[1].startswith(prefix)]
+            these_langs = {lang[len(prefix):]: j for j, lang in translations}
+            translation_lookup[column] = these_langs
+            other_languages |= set(these_langs.keys())
         others = list(other_languages)
         others.sort()
         return english, others, translation_lookup

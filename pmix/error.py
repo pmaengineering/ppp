@@ -27,3 +27,7 @@ class ComparatorError(Exception):
 
 class SpreadsheetError(Exception):
     pass
+
+
+class QlangError(Exception):
+    pass

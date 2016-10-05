@@ -27,7 +27,7 @@
 """Build a translation file and use it
 
 Supply source XLSForm(s) to build a translation file. Optionally supply an
-XLSForm into which to merge translations.
+XLSForm into which to merge translations. This file is a command-line tool.
 
 Created: 3 October 2016
 Last modified: 5 October 2016

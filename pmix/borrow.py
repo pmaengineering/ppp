@@ -30,12 +30,12 @@ import os.path
 
 from verbiage import TranslationDict
 import constants
-import spreadsheet
+import workbook
 
 
 def translation_dict_from_files(files):
     result = TranslationDict()
-    workbooks = [spreadsheet.Workbook(f) for f in files]
+    workbooks = [workbook.Workbook(f) for f in files]
     for wb in workbooks:
         this_dict = wb.create_translation_dict()
         result.update(this_dict)
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         translation_dict.write_out(outpath)
         print('Created translation file: "{}"'.format(outpath))
     else:
-        wb = spreadsheet.Workbook(args.merge)
+        wb = workbook.Workbook(args.merge)
         wb.merge_translations(translation_dict)
         outpath = get_wb_outpath(wb) if args.outpath is None else args.outpath
         wb.write_out(outpath)

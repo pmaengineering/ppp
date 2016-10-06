@@ -48,7 +48,7 @@ The best there ever were
 
 """
 
-import spreadsheet
+import workbook
 import utils
 import error
 
@@ -597,8 +597,8 @@ if __name__ == '__main__':
         #'test/files/test1.xlsx',
         #'test/files/test2.xlsx'
     ]
-    wb1 = spreadsheet.Workbook(files[0])
-    wb2 = spreadsheet.Workbook(files[1])
+    wb1 = workbook.Workbook(files[0])
+    wb2 = workbook.Workbook(files[1])
     c = Comparator(wb1, wb2)
     ic = IComparator(c)
     ic.run()

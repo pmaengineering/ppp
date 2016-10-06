@@ -29,11 +29,11 @@ class TransformRule:
                     'ascii', 'ignore').decode('ascii')
             elif transform_type == constants.SUBSTR:
                 args = params[constants.ARGS]
-                if args[0] == None:
+                if args[0] is None:
                     start_ind = 0
                 else:
                     start_ind = args[0]
-                if args[1] == None:
+                if args[1] is None:
                     return lambda x: x[start_ind:]
                 else:
                     end_ind = args[1]

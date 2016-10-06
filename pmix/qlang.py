@@ -7,6 +7,8 @@ import os.path
 import xlrd
 import xlsxwriter
 
+from error import QlangError
+
 
 QLANG_PREFIX = 'qlang-'
 QLANG_SUFFIX = '-qlang'
@@ -28,10 +30,6 @@ CHOICES = 'choices'
 SETTINGS = 'settings'
 SELECT_ONE = 'select_one'
 SELECT_MULTIPLE = 'select_multiple'
-
-
-class QlangError(Exception):
-    pass
 
 
 def questionnaire_to_translations(filename, prefix):

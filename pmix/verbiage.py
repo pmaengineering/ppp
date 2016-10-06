@@ -33,17 +33,20 @@ class TranslationDict:
     Attributes:
         data (dict): Data structure described above
         languages (set of str): Keeps track of what languages are included
+
+    Class attributes:
         number_prog (regex): A regex program to detect numbering schemes at the
             beginning of a string. Examples are 'HQ1. ', 'Q. ', '401a. ', and
             'LCL_010. '. Currently (10/5/2016) numbering scheme must end with
             '.', ':', or ')' and then whitespace.
     """
 
+    number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s*'
+    number_prog = re.compile(number_re)
+
     def __init__(self):
         self.data = {}
         self.languages = set()
-        number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s+'
-        self.number_prog = re.compile(number_re)
 
     def add_translation(self, eng, other, lang):
         """Add a translation to the dictionary
@@ -165,7 +168,8 @@ class TranslationDict:
                     # Missing information is highlighted
                     ws.write(i + 1, j + 1, '', red_background)
 
-    def split_text(self, s):
+    @staticmethod
+    def split_text(s):
         """Split text into a number and the rest
 
         This splitting is done using the regex attribute `number_prog`.
@@ -178,7 +182,7 @@ class TranslationDict:
             If no number is found with the regex, then `number` is '', the
             empty string.
         """
-        m = self.number_prog.match(s)
+        m = TranslationDict.number_prog.match(s)
         if m:
             number = s[m.span()[0]:m.span()[1]]
             text = s[m.span()[1]:]
@@ -187,7 +191,8 @@ class TranslationDict:
             text = s
         return number, text
 
-    def clean_string(self, s):
+    @staticmethod
+    def clean_string(s):
         """Clean a string for addition into the translation dictionary
 
         Leading and trailing whitespace is removed. Newlines are converted to
@@ -204,7 +209,7 @@ class TranslationDict:
         s = s.replace('\r', '\n')
         s = utils.space_newline_fix(s)
         s = utils.newline_space_fix(s)
-        _, text = self.split_text(s)
+        _, text = TranslationDict.split_text(s)
         return text
 
     def __str__(self):

@@ -60,16 +60,16 @@ class TranslationDict:
             other: String in other language that is a translation of `eng`
             lang: String name of other language
         """
-        eng = self.clean_string(eng)
-        other = self.clean_string(other)
+        cleaned_eng = self.clean_string(eng)
+        cleaned_other = self.clean_string(other)
         try:
-            this_dict = self.data[eng]
+            this_dict = self.data[cleaned_eng]
             if lang in this_dict:
-                this_dict[lang].append(other)
+                this_dict[lang].append(cleaned_other)
             else:
-                this_dict[lang] = [other]
+                this_dict[lang] = [cleaned_other]
         except KeyError:
-            self.data[eng] = {lang: [other]}
+            self.data[cleaned_eng] = {lang: [cleaned_other]}
         self.languages.add(lang)
 
     def get_translation(self, eng, lang):

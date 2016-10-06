@@ -24,8 +24,7 @@ class Worksheet:
         else:
             self.name = name
 
-    # generator to give (row, col) of English and (row, col) of Foreign
-    # returns two dictionaries, each of the same format
+    # generator returns two dictionaries, each of the same format
     # {
     #   constants.LANGUAGE: "English",
     #   constants.LOCATION: (row, col),

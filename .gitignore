@@ -4,3 +4,5 @@ __pycache__
 test/files/*
 */test/files/*
 *.DS_Store
+dist/
+*.py[cod]

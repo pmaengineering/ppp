@@ -6,3 +6,4 @@ test/files/*
 *.DS_Store
 dist/
 *.py[cod]
+build

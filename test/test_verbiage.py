@@ -3,6 +3,10 @@
 
 """Unit tests for verbiage.py"""
 
+# Unittest bad-ness
+import sys
+sys.path.insert(0, 'pmix')
+
 import unittest
 
 from pmix.verbiage import TranslationDict

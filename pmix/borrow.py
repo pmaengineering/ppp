@@ -80,8 +80,8 @@ if __name__ == '__main__':
     ignore = set(args.ignore) if args.ignore else None
     add = set(args.add) if args.add else None
 
-    translation_dict = translation_dict_from_files(set(args.xlsxfile),
-                                                   ignore)
+    translation_dict = translation_dict_from_files(set(args.xlsxfile), ignore)
+
     if args.merge is None:
         outpath = constants.BORROW_OUT if args.outpath is None else args.outpath
         translation_dict.add_language(add)

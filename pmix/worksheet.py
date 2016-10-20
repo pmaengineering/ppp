@@ -29,7 +29,7 @@ class Worksheet:
             language = [language]
         try:
             english, others, translations = self.preprocess_header()
-            found_languages = others.append(constants.ENGLISH)
+            found_languages = others + [constants.ENGLISH]
             for lang in language:
                 if lang not in found_languages:
                     # Do not want to add a language we already have
@@ -86,7 +86,10 @@ class Worksheet:
                                 constants.LOCATION: (row, lang_col),
                                 constants.TEXT:     lang_text
                             }
-                            if eng_text != '' and lang_text != '':
+                            # We want to consider it as needing a translation
+                            # if there is English text defined.
+                            # TODO this may need to change
+                            if eng_text != '':
                                 yield eng_dict, lang_dict
                         except KeyError:
                             # Translation not found, skip

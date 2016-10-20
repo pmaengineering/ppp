@@ -23,14 +23,18 @@ class Workbook:
     def get_sheetnames(self):
         return tuple(sheet.name for sheet in self)
 
-    def merge_translations(self, translations):
+    def add_language(self, language):
         for sheet in self:
-            sheet.merge_translations(translations)
+            sheet.add_language(language)
 
-    def create_translation_dict(self):
+    def merge_translations(self, translations, ignore=None):
+        for sheet in self:
+            sheet.merge_translations(translations, ignore)
+
+    def create_translation_dict(self, ignore=None):
         result = TranslationDict()
         for sheet in self:
-            this_result = sheet.create_translation_dict()
+            this_result = sheet.create_translation_dict(ignore)
             result.update(this_result)
         return result
 

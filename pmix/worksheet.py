@@ -24,6 +24,32 @@ class Worksheet:
         else:
             self.name = name
 
+    def add_language(self, language):
+        if isinstance(language, str):
+            language = [language]
+        try:
+            english, others, translations = self.preprocess_header()
+            found_languages = others.append(constants.ENGLISH)
+            for lang in language:
+                if lang not in found_languages:
+                    # Do not want to add a language we already have
+                    for eng_col, name in english:
+                        new_name = constants.BOTH_COL_FORMAT.format(name, lang)
+                        self.add_col_name(new_name)
+        except TypeError:
+            # language not iterable, do nothing
+            pass
+        except SpreadsheetError:
+            # No English found, do nothing
+            pass
+
+    def add_col_name(self, col_name):
+        for i, row in enumerate(self):
+            if i == 0:
+                row.append(col_name)
+            else:
+                row.append('')
+
     # generator returns two dictionaries, each of the same format
     # {
     #   constants.LANGUAGE: "English",
@@ -31,7 +57,9 @@ class Worksheet:
     #   constants.TEXT:     "What is your name?"
     # }
     # First dictionary is for English. Second is for the foreign language
-    def translation_pairs(self):
+    def translation_pairs(self, ignore=None):
+        if ignore is None:
+            ignore = []
         try:
             english, others, translations = self.preprocess_header()
             for row, line in enumerate(self):
@@ -47,6 +75,8 @@ class Worksheet:
                     }
                     these_translations = translations[name]
                     for lang in others:
+                        if lang in ignore:
+                            continue
                         try:
                             lang_col = these_translations[lang]
                             lang_text = line[lang_col]
@@ -65,9 +95,9 @@ class Worksheet:
             # Nothing found from preprocess_header
             return
 
-    def merge_translations(self, translations):
+    def merge_translations(self, translations, ignore=None):
         if isinstance(translations, TranslationDict):
-            for eng, lang in self.translation_pairs():
+            for eng, lang in self.translation_pairs(ignore):
                 eng_text = eng[constants.TEXT]
                 if eng_text == '':
                     self.format_missing_text(eng[constants.LOCATION], eng_text)
@@ -153,9 +183,9 @@ class Worksheet:
         others.sort()
         return english, others, translation_lookup
 
-    def create_translation_dict(self):
+    def create_translation_dict(self, ignore=None):
         result = TranslationDict()
-        for eng, lang in self.translation_pairs():
+        for eng, lang in self.translation_pairs(ignore):
             eng_text = eng[constants.TEXT]
             # only add translations if the english exists first
             if eng_text == '':

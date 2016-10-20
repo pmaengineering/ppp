@@ -20,7 +20,7 @@ Example:
     file.
 
 Created: 3 October 2016
-Last modified: 5 October 2016
+Last modified: 20 October 2016
 Author: James K. Pringle
 E-mail: jpringle@jhu.edu
 """
@@ -33,11 +33,11 @@ import constants
 import workbook
 
 
-def translation_dict_from_files(files):
+def translation_dict_from_files(files, ignore=None):
     result = TranslationDict()
     workbooks = [workbook.Workbook(f) for f in files]
     for wb in workbooks:
-        this_dict = wb.create_translation_dict()
+        this_dict = wb.create_translation_dict(ignore)
         result.update(this_dict)
     return result
 
@@ -61,20 +61,36 @@ if __name__ == '__main__':
                   'file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
+    add_help = ('Add a language to the resulting output. The translation file '
+                'will have a column for that language. Or, the merged XLSForm '
+                'will include columns for that language and have translations '
+                'for them if possible. This option can be supplied multiple '
+                'times.')
+    parser.add_argument('-a', '--add', action='append', help=add_help)
+
+    ignore_help = ('A language to ignore when collecting and making '
+                   'translations. This option can be supplied multiple times')
+    parser.add_argument('-i', '--ignore', action='append', help=ignore_help)
+
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'defaults are used.')
     parser.add_argument('-o', '--outpath', help=out_help)
 
     args = parser.parse_args()
+    ignore = set(args.ignore) if args.ignore else None
+    add = set(args.add) if args.add else None
 
-    translation_dict = translation_dict_from_files(set(args.xlsxfile))
+    translation_dict = translation_dict_from_files(set(args.xlsxfile),
+                                                   ignore)
     if args.merge is None:
         outpath = constants.BORROW_OUT if args.outpath is None else args.outpath
-        translation_dict.write_out(outpath)
+        translation_dict.add_language(add)
+        translation_dict.write_excel(outpath)
         print('Created translation file: "{}"'.format(outpath))
     else:
         wb = workbook.Workbook(args.merge)
-        wb.merge_translations(translation_dict)
+        wb.add_language(add)
+        wb.merge_translations(translation_dict, ignore)
         outpath = get_wb_outpath(wb) if args.outpath is None else args.outpath
         wb.write_out(outpath)
         print('Merged translations into file: "{}"'.format(outpath))

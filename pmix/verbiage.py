@@ -1,7 +1,7 @@
 """Module for capturing translations from XLSForms
 
 Created: 3 October 2016
-Last modified: 5 October 2016
+Last modified: 20 October 2016
 Author: James K. Pringle
 E-mail: jpringle@jhu.edu
 """
@@ -38,7 +38,7 @@ class TranslationDict:
         number_prog (regex): A regex program to detect numbering schemes at the
             beginning of a string. Examples are 'HQ1. ', 'Q. ', '401a. ', and
             'LCL_010. '. Currently (10/5/2016) numbering scheme must end with
-            '.', ':', or ')' and then whitespace.
+            '.', ':', or ')' and then possibly whitespace.
     """
 
     number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s*'
@@ -47,6 +47,18 @@ class TranslationDict:
     def __init__(self):
         self.data = {}
         self.languages = set()
+        self.additionals = set()
+
+    def add_language(self, language):
+        if isinstance(language, str):
+            self.additionals.add(language)
+        else:
+            try:
+                for lang in language:
+                    self.additionals.add(lang)
+            except TypeError:
+                # Not iterable
+                pass
 
     def add_translation(self, eng, other, lang):
         """Add a translation to the dictionary
@@ -140,7 +152,7 @@ class TranslationDict:
         else:
             raise TypeError(other)
 
-    def write_out(self, path):
+    def write_excel(self, path):
         """Write data to an Excel spreadsheet
 
         An MS-Excel spreadsheet can easily handle unicode and entries with
@@ -167,6 +179,11 @@ class TranslationDict:
                 except KeyError:
                     # Missing information is highlighted
                     ws.write(i + 1, j + 1, '', red_background)
+        last = self.additionals - self.languages
+        last_heading = [constants.BOTH_COL_FORMAT.format(constants.TEXT, h)
+                        for h in last]
+        last_heading.sort()
+        ws.write_row(0, len(heading), last_heading)
 
     @staticmethod
     def split_text(s):

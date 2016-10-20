@@ -1,8 +1,8 @@
 import xlrd
 
-from error import SpreadsheetError
-from verbiage import TranslationDict
-import constants
+from pmix.error import SpreadsheetError
+from pmix.verbiage import TranslationDict
+from pmix import constants
 
 
 class Worksheet:

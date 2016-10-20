@@ -7,7 +7,7 @@ import os.path
 import xlrd
 import xlsxwriter
 
-from error import QlangError
+from pmix.error import QlangError
 
 
 QLANG_PREFIX = 'qlang-'

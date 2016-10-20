@@ -3,9 +3,9 @@ import os.path
 import xlrd
 import xlsxwriter
 
-from verbiage import TranslationDict
-from worksheet import Worksheet
-import constants
+from pmix.verbiage import TranslationDict
+from pmix.worksheet import Worksheet
+from pmix import constants
 
 
 class Workbook:

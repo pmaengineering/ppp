@@ -28,9 +28,9 @@ E-mail: jpringle@jhu.edu
 import argparse
 import os.path
 
-from verbiage import TranslationDict
-import constants
-import workbook
+from pmix.verbiage import TranslationDict
+from pmix import constants
+from pmix import workbook
 
 
 def translation_dict_from_files(files, ignore=None):

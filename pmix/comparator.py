@@ -48,14 +48,18 @@ The best there ever were
 
 """
 
-import workbook
-import utils
-import error
+import os.path
+import collections
 
 import xlsxwriter
 
-import os.path
-import collections
+from pmix import workbook
+from pmix import utils
+from pmix import error
+
+
+
+
 
 
 class Comparator:

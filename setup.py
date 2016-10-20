@@ -1,6 +1,9 @@
 from distutils.core import setup
 
+
 from pmix import __version__
+
+
 setup(
     name='pmix',
     version=__version__,

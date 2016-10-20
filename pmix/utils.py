@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import constants
-
 import re
 import json
 import unicodedata
+
+from pmix import constants
 
 
 class TransformRule:

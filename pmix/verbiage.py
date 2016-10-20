@@ -10,8 +10,8 @@ import re
 
 import xlsxwriter
 
-import constants
-import utils
+from pmix import constants
+from pmix import utils
 
 
 class TranslationDict:

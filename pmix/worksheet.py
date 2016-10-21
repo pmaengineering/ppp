@@ -30,10 +30,10 @@ class Worksheet:
         try:
             english, others, translations = self.preprocess_header()
             found_languages = others + [constants.ENGLISH]
-            for lang in language:
-                if lang not in found_languages:
+            for eng_col, name in english:
+                for lang in language:
                     # Do not want to add a language we already have
-                    for eng_col, name in english:
+                    if lang not in found_languages:
                         new_name = constants.BOTH_COL_FORMAT.format(name, lang)
                         self.add_col_name(new_name)
         except TypeError:

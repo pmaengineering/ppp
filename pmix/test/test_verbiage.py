@@ -3,9 +3,20 @@
 
 """Unit tests for verbiage.py"""
 
-# Unittest bad-ness
-import sys
-sys.path.insert(0, 'pmix')
+# Unittest bad-ness:
+# Consider package /pmix/pmix/test
+# from /pmix, write python -m pmix.test.test_verbiage
+# from /pmix, write python -m pmix.test (when I get a __main__.py)
+# from /pmix, write python -m unittest # This is a shortcut for the next line
+# from /pmix, write python -m unittest discover
+
+# import os
+# import sys
+# print("PATH")
+# print(*sys.path, sep='\n')
+# print("CWD", os.getcwd())
+# print("name", __name__)
+# print("pacakge", __package__)
 
 import unittest
 

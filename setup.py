@@ -12,7 +12,7 @@ setup(
     url='http://www.pma2020.org',
     packages=[
         'pmix', 
-        'test'
+        'pmix.test'
     ],
     license='LICENSE.txt',
     description='Smattering of Python3 tools for PMA workflow',

@@ -1,3 +1,5 @@
+import csv
+
 import xlrd
 
 from pmix.error import SpreadsheetError
@@ -208,6 +210,13 @@ class Worksheet:
         col = self.get_columns().index(name)
         for row in self:
             yield row[col]
+
+    def to_csv(self, filename):
+        with open(filename, 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            for row in self:
+                csv_writer.writerow(row)
+
 
     def __iter__(self):
         return iter(self.data)

@@ -17,6 +17,8 @@ DEFAULT_WS_NAME = 'sheet'
 TRANSLATION_WS_NAME = 'translations'
 BORROW_OUT = 'translations.xlsx'
 BORROW_SUFFIX = '-borrow'
+PMIX_SUFFIX = '-pmix'
+CSV_EXT = '.csv'
 
 
 QLANG_PREFIX = 'qlang-'

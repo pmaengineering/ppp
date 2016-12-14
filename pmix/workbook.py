@@ -1,4 +1,5 @@
 import os.path
+import argparse
 
 import xlrd
 import xlsxwriter
@@ -92,3 +93,34 @@ class Workbook:
                 my_ws = Worksheet(data=ws, name=ws_name, datemode=datemode)
                 result.append(my_ws)
         return result
+
+if __name__ == '__main__':
+    prog_desc = 'Utilities for workbooks, depending on the options provided'
+    parser = argparse.ArgumentParser(description=prog_desc)
+
+    file_help = 'Path to source XLSForms containing translations.'
+    parser.add_argument('xlsxfile', help=file_help)
+
+    csv_help = ('Write a worksheet to CSV. Supply the worksheet name here.')
+    parser.add_argument('-c', '--csv', help=csv_help)
+
+    out_help = ('Path to write output. If this argument is not supplied, then '
+                'defaults are used.')
+    parser.add_argument('-o', '--outpath', help=out_help)
+
+    args = parser.parse_args()
+
+    if args.csv is not None:
+        base = os.path.split(args.xlsxfile)[0]
+        sheet_name = args.csv
+        if args.outpath is not None:
+            outpath = args.outpath
+        elif sheet_name.endswith(constants.CSV_EXT):
+            outpath = os.path.join(base, sheet_name)
+        else:
+            outpath = os.path.join(base, sheet_name + constants.CSV_EXT)
+
+        wb = Workbook(args.xlsxfile)
+        ws = wb[args.csv]
+        ws.to_csv(outpath)
+        print('Write csv file to "{}"'.format(outpath))

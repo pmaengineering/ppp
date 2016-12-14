@@ -204,6 +204,11 @@ class Worksheet:
         else:
             return []
 
+    def get_column_by_name(self, name):
+        col = self.get_columns().index(name)
+        for row in self:
+            yield row[col]
+
     def __iter__(self):
         return iter(self.data)
 

@@ -20,6 +20,13 @@ class Workbook:
         else:
             raise TypeError(file)
 
+    def get_form_id(self):
+        settings = self[constants.SETTINGS]
+        col = settings.get_column_by_name(constants.FORM_ID)
+        heading = next(col) # discard
+        form_id = next(col)
+        return form_id
+
     def get_sheetnames(self):
         return tuple(sheet.name for sheet in self)
 

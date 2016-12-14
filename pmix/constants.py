@@ -39,6 +39,9 @@ SETTINGS = 'settings'
 SELECT_ONE = 'select_one'
 SELECT_MULTIPLE = 'select_multiple'
 
+FORM_ID = "form_id"
+
+
 # Highligher colors
 BG_COLOR_KEY = 'bg_color'
 HIGHLIGHT_ORANGE = '#FFCC2F'
@@ -46,3 +49,17 @@ HIGHLIGHT_RED = '#EF5734'
 HIGHLIGHT_BLUE = '#00ACEE'
 HIGHLIGHT_GREEN = '#2BAF2B'
 HIGHLIGHT_XL_RED = '#FFC7CE'
+
+
+# Analytics
+ODK_NOTE = 'note'
+ODK_CALCULATE = 'calculate'
+ODK_HIDDEN = 'hidden'
+BEGIN_START = 'begin '
+END_START = 'end '
+SELECT_START = 'select_'
+ODK_START = 'start'
+ODK_END = 'end'
+ODK_DEVICE = 'deviceid'
+ODK_SIM = 'simserial'
+ODK_PHONE = 'phonenumber'

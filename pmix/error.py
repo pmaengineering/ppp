@@ -8,3 +8,7 @@ class SpreadsheetError(Exception):
 
 class QlangError(Exception):
     pass
+
+
+class CascadeError(Exception):
+    pass

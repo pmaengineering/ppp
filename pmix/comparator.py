@@ -200,8 +200,8 @@ class Comparator:
         a_sheet = self.A[sheetname]
         b_sheet = self.B[sheetname]
 
-        a_columns = a_sheet.get_columns()
-        b_columns = b_sheet.get_columns()
+        a_columns = a_sheet.column_names()
+        b_columns = b_sheet.column_names()
 
         if checks:
             self.column_checks(a_sheet, b_sheet, a_columns, b_columns)
@@ -251,8 +251,8 @@ class Comparator:
         a_sheet = self.A[sheetname]
         b_sheet = self.B[sheetname]
 
-        a_columns = a_sheet.get_columns()
-        b_columns = b_sheet.get_columns()
+        a_columns = a_sheet.column_names()
+        b_columns = b_sheet.column_names()
 
         a_inds = [a_columns.index(k) for k in key]
         b_inds = [b_columns.index(k) for k in key]
@@ -341,8 +341,8 @@ class Comparator:
 
     @staticmethod
     def compare_keys(a_sheet, b_sheet, key):
-        a_columns = a_sheet.get_columns()
-        b_columns = b_sheet.get_columns()
+        a_columns = a_sheet.column_names()
+        b_columns = b_sheet.column_names()
 
         a_inds = [k if isinstance(k, int) else a_columns.index(k) for k in key]
         b_inds = [k if isinstance(k, int) else b_columns.index(k) for k in key]
@@ -385,8 +385,8 @@ class Comparator:
 
     @staticmethod
     def compare_columns(a_sheet, b_sheet):
-        a_columns = a_sheet.get_columns()
-        b_columns = b_sheet.get_columns()
+        a_columns = a_sheet.column_names()
+        b_columns = b_sheet.column_names()
 
         for i, col in enumerate(a_columns):
             if col == '' or col is None:

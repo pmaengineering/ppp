@@ -65,3 +65,8 @@ ODK_END = 'end'
 ODK_DEVICE = 'deviceid'
 ODK_SIM = 'simserial'
 ODK_PHONE = 'phonenumber'
+
+
+# simple
+NAME = "name"
+LABEL = "label"

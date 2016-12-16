@@ -34,8 +34,8 @@ def get_filtered_survey_names(xlsxfiles):
     for f in set(xlsxfiles):
         wb = Workbook(f)
         form_id = wb.get_form_id()
-        type = wb[constants.SURVEY].get_column_by_name(constants.QLANG_TYPE)
-        name = wb[constants.SURVEY].get_column_by_name(constants.QLANG_NAME)
+        type = wb[constants.SURVEY].column(constants.QLANG_TYPE)
+        name = wb[constants.SURVEY].column(constants.QLANG_NAME)
         names = [n for t, n in zip(type, name) if is_analytics_type(t)]
         results[form_id] = names
     return results

@@ -59,7 +59,7 @@ class Cascade:
                 pass
         vals = set(self.identifiers.values())
         if len(vals) != 1:
-            # if len == 0, then not formatted as e.g. [identifier]::name
+            # if len == 0, then not formatted as e.g. [identifier]|name
             # if len > 1, then too many types
             raise CascadeError()
         self.has_name, self.has_label = list(vals)[0]
@@ -147,8 +147,6 @@ class Cascade:
                 ws.write_row(i, 0, row)
                 if node.rename is not None:
                     ws.write(i, 1, node.rename, highlight)
-
-
 
     class Iter:
         def __init__(self, node):

@@ -17,6 +17,9 @@ Extra columns do not matter. Identifer should be a able to become a list_name
 name and label are optional, but at least one must exist
 """
 
+import os.path
+import argparse
+
 import xlsxwriter
 
 from pmix import constants
@@ -211,6 +214,29 @@ class Cascade:
             return m.format(self.identifier, self.get_name(), self.label)
 
 if __name__ == '__main__':
-    f = 'test/files/rj_cascade.xlsx'
-    c = Cascade(f)
-    c.write_out('test/files/rj_cascade_out.xlsx')
+    prog_desc = 'Make a cascading select for geographic identifiers'
+    parser = argparse.ArgumentParser(description=prog_desc)
+
+    file_help = 'Path to source XLSForm containing geographic identifiers.'
+    parser.add_argument('xlsxfile', help=file_help)
+
+    sheet_help = ('Supply the worksheet name here. If not, then the first '
+                  'worksheet is assumed.')
+    parser.add_argument('-s', '--sheet', help=sheet_help)
+
+    out_help = ('Path to write output. If this argument is not supplied, then '
+                'defaults are used.')
+    parser.add_argument('-o', '--outpath', help=out_help)
+
+    args = parser.parse_args()
+
+    base, file = os.path.split(args.xlsxfile)
+    name, ext = os.path.splitext(file)
+    if args.outpath is not None:
+        outpath = args.outpath
+    else:
+        outpath = os.path.join(base, name) + "-cascade" + ext
+
+    c = Cascade(args.xlsxfile)
+    c.write_out(outpath)
+    print("Successfully saved file to: {}".format(outpath))

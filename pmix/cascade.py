@@ -20,56 +20,68 @@ from pmix.error import CascadeError
 
 class Cascade:
 
+    class Iter:
+        def __init__(self, node):
+            self.queue = [node]
+
+        def __next__(self):
+            try:
+                next = self.queue.pop(0)
+                self.queue.extend(next.children)
+                return next
+            except IndexError:
+                raise StopIteration
+
+        def levels(self):
+            current = self.queue
+            while current:
+                yield current
+                next = []
+                for node in current:
+                    next.extend(node.children)
+                current = next
+
     class Node:
         def __init__(self, *, name, label, identifier):
             self.name = name
-            self.rename = None
             self.label = label
             self.identifier = identifier
             self.children = []
+
+            self.rename = None
             self.parent = None
 
-        def add_child(self, node):
+        def add(self, node):
             node.parent = self
             self.children.append(node)
 
-        def get_node(self, node):
-            new_node = None
+        # returns None if not found
+        def node(self, node):
             for child in self.children:
                 name_match = child.name == node.name
                 label_match = child.label == node.label
                 identifier_match = child.identifier == node.identifier
                 if name_match and label_match and identifier_match:
-                    new_node = child
-                    break
-            return new_node
+                    return child
 
-        def append_last(self, node):
+        def add_last(self, node):
             cur_node = self
             while cur_node.children:
                 cur_node = cur_node.children[0]
-            cur_node.add_child(node)
+            cur_node.add(node)
 
-        def next(self):
-            if self.children:
-                return self.children[0]
+        def __iter__(self):
+            return Cascade.Iter(self)
+
+        def get_name(self, name=None):
+            if name is None:
+                return self.rename if self.rename else self.name
             else:
-                raise CascadeError()
-
-        def gen(self):
-            cur = self
-            while True:
-                try:
-                    yield cur
-                    cur = cur.next()
-                except CascadeError:
-                    break
-
-        def get_name(self):
-            return self.rename if self.rename else self.name
+                self.name = name
 
         def __str__(self):
-            return "Id: {}, name: {}".format(self.identifier, self.name)
+            m = "Id: {}, name: {}, label: {}"
+            return m.format(self.identifier, self.get_name(), self.label)
 
     def __init__(self, f, sheet=None):
         self.data = Cascade.Node(name=None, label=None, identifier=None)
@@ -111,7 +123,7 @@ class Cascade:
         self.rename_data()
 
     def add_row_to_tree(self, row):
-        root = None
+        root = Cascade.Node(name=None, label=None, identifier=None)
         for i in self.identifier_order:
             has_name, has_label = self.identifiers[i]
             name = None
@@ -123,32 +135,25 @@ class Cascade:
                 label_col = constants.BOTH_COL_FORMAT.format(i, constants.LABEL)
                 label = row[self.column_names.index(label_col)]
             node = Cascade.Node(name=name, label=label, identifier=i)
-            if root is None:
-                root = node
-            else:
-                root.append_last(node)
+            root.add_last(node)
         self.insert_chain(root)
 
     def insert_chain(self, chain):
-        if self.data.children:
-            ref = self.data
-            for node in chain.gen():
-                ref_node = ref.get_node(node)
-                if ref_node:
-                    ref = ref_node
-                else:
-                    ref.add_child(node)
-                    break
-        else:
-            self.data.add_child(chain.next())
+        ref = self.data
+        for i, node in enumerate(chain):
+            if i == 0:
+                continue
+            ref_node = ref.node(node)
+            if ref_node:
+                ref = ref_node
+            else:
+                ref.add(node)
+                break
 
     def rename_data(self):
-        queue = self.data.children
-        level_names = set()
-        next_queue = []
-        while queue:
-            for node in queue:
-                next_queue.extend(node.children)
+        for level in Cascade.Iter(self.data).levels():
+            level_names = set()
+            for node in level:
                 if node.name in level_names:
                     i = 1
                     next_name = node.name + "_{}".format(i)
@@ -159,26 +164,22 @@ class Cascade:
                     level_names.add(node.rename)
                 else:
                     level_names.add(node.name)
-            queue = next_queue
-            next_queue = []
-            level_names = set()
 
     def to_rows(self):
         rows = []
-        queue = self.data.children
-        next_queue = []
-        while queue:
-            for node in queue:
-                next_queue.extend(node.children)
-                list_name = "{}_list".format(node.identifier)
-                name = node.get_name()
-                label = node.label
-                row_filter = node.parent.get_name()
-                row = [list_name, name, label, row_filter]
-                rows.append(row)
-            queue = next_queue
-            next_queue = []
+        for i, node in enumerate(self.data):
+            if i == 0:
+                continue
+            list_name = "{}_list".format(node.identifier)
+            name = node.get_name()
+            label = node.label
+            row_filter = node.parent.get_name()
+            row = [list_name, name, label, row_filter]
+            rows.append(row)
         return rows
+
+    def __iter__(self):
+        return iter(self.data)
 
 if __name__ == '__main__':
     f = 'test/files/rj_cascade.xlsx'

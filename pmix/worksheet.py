@@ -225,7 +225,6 @@ class Worksheet:
             for row in self:
                 csv_writer.writerow(row)
 
-
     def __iter__(self):
         return iter(self.data)
 

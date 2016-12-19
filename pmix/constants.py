@@ -51,6 +51,7 @@ HIGHLIGHT_RED = '#EF5734'
 HIGHLIGHT_BLUE = '#00ACEE'
 HIGHLIGHT_GREEN = '#2BAF2B'
 HIGHLIGHT_XL_RED = '#FFC7CE'
+HIGHLIGHT_PASTEL_YELLOW = "#FDFD96"
 
 
 # Analytics
@@ -70,3 +71,5 @@ ODK_PHONE = 'phonenumber'
 # simple
 NAME = "name"
 LABEL = "label"
+PIPE = "|"
+BOTH_PIPE_FORMAT = '{}|{}'

@@ -12,3 +12,7 @@ class QlangError(Exception):
 
 class CascadeError(Exception):
     pass
+
+
+class OdkformError(Exception):
+    pass

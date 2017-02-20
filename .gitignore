@@ -7,3 +7,4 @@ test/files/*
 dist/
 *.py[cod]
 build
+dev

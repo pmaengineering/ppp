@@ -1,101 +1,13 @@
-import argparse
+import os.path
 
 from pmix.error import OdkformError
 from pmix.odkchoices import Odkchoices
 from pmix.odkprompt import Odkprompt
 from pmix.workbook import Workbook
 
+
 class Odkform:
-    """
-    A json row is
-
-      {
-        "name": "question1",
-        "type": "integer",
-        "label": {
-          "English": "text here",
-          "Spanish": "palabras aquí"
-        },
-        "hint": {
-          "English": "text here",
-          "Spanish": "palabras aquí"
-        },
-        "choices": "CHOICE_LIST",
-        "constraint_message": {
-          "English": "text here",
-          "Spanish": "palabras aquí"
-        },
-        "constraint": "EQUATION",
-        "relevant": "EQUATION",
-        ...
-      }
-
-    A json choice list is object
-
-      {
-        "name": [
-          "option_name1",
-          "option_name2",
-          ...
-        ]
-        "label": {
-          "English": [
-            "Option 1",
-            "Option 2",
-            ...
-          ],
-          "Spanish": [
-            "Opción 1",
-            "Opción 2",
-            ...
-          ]
-        },
-        "filter1": [
-          "expression1",
-          "expression2",
-          ...
-        ]
-      }
-    """
-
-    select_types = (
-        'select_one',
-        'select_multiple',
-        'select_one_external',
-        'select_multiple_external',
-    )
-
-    select_alias = {
-        'select_one_external': 'select_one',
-        'select_multiple_external': 'select_multiple'
-    }
-
-    all_types = (
-        # STANDARD PROMPTS
-        'integer',
-        'decimal',
-        'note',
-        'calculate',
-        'geopoint',
-        'image',
-        'text',
-        'date',
-        'dateTime',
-        # GROUPS and REPEATS
-        'begin group',
-        'begin repeat',
-        'end group',
-        'end repeat',
-        # HIDDEN
-        'hidden',
-        'hidden string',
-        'hidden geopoint',
-        # METADATA
-        'start',
-        'end',
-        'deviceid',
-        'simserial'
-    )
+    """Class to represent an entire XLSForm"""
 
     def __init__(self, *, f=None, wb=None):
         if f is None and wb is None:
@@ -103,16 +15,25 @@ class Odkform:
         elif f is not None:
             wb = Workbook(f)
 
+        self.settings = self.get_settings(wb)
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
         self.questionnaire = self.convert_survey(wb)
 
-    def to_text(self):
-        q_text = (q.to_text() for q in self.questionnaire)
-        sep = '\n' + '=' * 50 + '\n'
-        result = sep.join(q_text)
-        return result
+        self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
 
+    def to_text(self, lang=None):
+        title_lines = (
+            '+{:-^50}+'.format(''),
+            '|{:^50}|'.format(self.title),
+            '+{:-^50}+'.format('')
+        )
+        title_box = '\n'.join(title_lines)
+
+        q_text = (q.to_text(lang=lang) for q in self.questionnaire)
+        sep = '\n\n' + '=' * 52 + '\n\n'
+        result = sep.join(q_text)
+        return title_box + sep + result + sep
 
     def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects
@@ -137,12 +58,18 @@ class Odkform:
                         choices = None
                     this_prompt = Odkprompt(json_row, choices)
                     result.append(this_prompt)
+                # TODO Check for begin group/repeat, end group/repeat, table
         except KeyError:
             # no survey found
             pass
         return result
 
     def parse_type(self, row):
+        """Describe with JSON the 'type' column of a row XLSForm
+
+        :param row: (dict) A row as a dictionary
+        :return: (dict) Info from parsing
+        """
         row_type = row['type']
         if row_type in Odkprompt.response_types + Odkprompt.non_response_types:
             return {
@@ -187,6 +114,25 @@ class Odkform:
             return {'token_type': None}
 
     @staticmethod
+    def get_settings(wb):
+        """Get the XLSForm settings as a dict
+
+        :param wb: Source workbook
+        :return: (dict) Form settings
+        """
+        d = {}
+        try:
+            settings = wb['settings']
+            header = settings[0]
+            details = settings[1]
+            d = {k: v for k, v in zip(header, details)}
+        except (KeyError, IndexError):
+            # KeyError: worksheet does not exist
+            # IndexError: does not have the correct rows
+            pass
+        return d
+
+    @staticmethod
     def get_choices(wb, ws):
         """Extract choices from an XLSForm
 
@@ -216,26 +162,3 @@ class Odkform:
             # worksheet does not exist
             pass
         return d
-
-
-if __name__ == '__main__':
-    prog_desc = 'Convert XLSForm to Paper version.'
-    parser = argparse.ArgumentParser(description=prog_desc)
-
-    file_help = 'Path to source XLSForm.'
-    parser.add_argument('xlsxfile', help=file_help)
-
-    language_help = 'Language to write the paper version in.'
-    parser.add_argument('-l', '--language', help=language_help)
-
-    format_help = ('Format to generate. Currently "text" is supported. Future '
-                   'formats include "html" and "pdf".')
-    parser.add_argument('-f', '--format', action='append', help=format_help)
-
-    out_help = ('Path to write output. If this argument is not supplied, then '
-                'STDOUT is used.')
-    parser.add_argument('-o', '--outpath', help=out_help)
-
-    args = parser.parse_args()
-
-    odkform = Odkform(f=args.xlsxfile)

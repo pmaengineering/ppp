@@ -1,11 +1,12 @@
-"""
-Class to represent a single ODK prompt from an XLSForm.
-
-This is described in a single row of an XLSForm.
-"""
+import textwrap
 
 
 class Odkprompt:
+    """
+    Class to represent a single ODK prompt from an XLSForm.
+
+    This is described in a single row of an XLSForm.
+    """
 
     select_types = (
         'select_one',
@@ -92,6 +93,10 @@ class Odkprompt:
         #         s = '\n'.join(('[Read only]', s))
         # except KeyError:  # Unable to find 'read_only'
         #     pass
+
+        if s:
+            s = textwrap.indent(s, '  ')
+
         return s
 
     def to_text(self, lang=None):

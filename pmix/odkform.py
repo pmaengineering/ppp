@@ -23,6 +23,11 @@ class Odkform:
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
 
     def to_text(self, lang=None):
+        """Get the text representation of an entire XLSForm
+
+        :param lang: The language
+        :return: The full string of the XLSForm, ready to print or save
+        """
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),

@@ -8,3 +8,4 @@ dist/
 *.py[cod]
 build
 dev
+MANIFEST

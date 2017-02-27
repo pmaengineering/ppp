@@ -42,6 +42,10 @@ class Odkprompt:
         self.choices = choices
         self.odktype = self.row['simple_type']
 
+    def text_relevant(self, lang=None):
+        """Find the relevant text for this row"""
+
+
     def text_field(self, field, lang=None):
         """Find a row value given a field and language
 
@@ -66,21 +70,40 @@ class Odkprompt:
             pass
         return value
 
-    def to_text_response(self, lang=None):
+    def to_text_relevant(self, lang=None):
+        """Get the relevant text for this prompt
+
+        :param lang: (str) The language
+        :return: (str) The text representation of the relevant
+        """
+        s = None
+        relevant_text = self.text_field('relevant_text', lang)
+        if relevant_text:
+            s = '[{}]'.format(relevant_text).rjust(50)
+        return s
+
+    def to_text_response(self, lang=None, numbered=False):
         """Get the response field for this prompt
 
         This is a text representation of the area of a paper questionnaire
         where the response is recorded.
 
         :param lang: (str) The language
+        :param numbered: (bool) Should choice options be numbered?
         :return: (str) The text representation of the response entry field
         """
         s = None
         if self.odktype == 'select_multiple':
             choices = self.choices.labels(lang=lang)
+            if numbered:
+                choices = ['{}. {}'.format(i+1, c) for i, c in
+                           enumerate(choices)]
             s = '\n'.join(('_ {}'.format(i) for i in choices))
         elif self.odktype == 'select_one':
             choices = self.choices.labels(lang=lang)
+            if numbered:
+                choices = ['{}. {}'.format(i+1, c) for i, c in
+                           enumerate(choices)]
             s = '\n'.join(('* {}'.format(i) for i in choices))
         elif self.odktype in Odkprompt.response_types:
             s = '_'*30 + '({})'.format(self.odktype)
@@ -105,9 +128,16 @@ class Odkprompt:
         :param lang: (str) The language
         :return: (str) The text from all parts of the prompt
         """
+        relevant_text = self.text_field('relevant_text', lang)
         label = self.text_field('label', lang)
         hint = self.text_field('hint', lang)
         # TODO: Audio, Image, Video
-        text = filter(None, (label, hint, self.to_text_response(lang)))
+        fields = (
+            self.to_text_relevant(lang),
+            label,
+            hint,
+            self.to_text_response(lang)
+        )
+        text = filter(None, fields)
         result = '\n\n'.join(text)
         return result

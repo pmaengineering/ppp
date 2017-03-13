@@ -20,7 +20,7 @@ class Odkgroup:
         self.add_pending()
         self.data.append(row)
 
-    def add_table(self, row):
+    def add_table(self, odkprompt):
         """Add a row of a table object to the group
 
         This method should only be called for rows from an ODK table
@@ -28,9 +28,10 @@ class Odkgroup:
         :param row: (dict) Row from XLSForm
         """
         if self.pending_table:
-            self.pending_table.add(row)
+            self.pending_table.add(odkprompt)
         else:
-            self.pending_table = Odktable(row)
+            self.pending_table = Odktable()
+            self.pending_table.add(odkprompt)
 
     def add_pending(self):
         """Add table to group data if one is in being built"""

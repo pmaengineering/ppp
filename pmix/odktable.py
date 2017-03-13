@@ -8,11 +8,12 @@ class Odktable:
         """Initialize table object with empty data bin"""
         self.data = []
 
-    def add(self, row):
+    def add(self, odkprompt):
         """Add a row of data from XLSForm
 
-        :param row: (dict) Row from XLSForm"""
-        self.data.append(row)
+        :param odkprompt: (Odkprompt) ODK table row
+        """
+        self.data.append(odkprompt)
 
     def to_text(self, lang=None):
         """Get the text representation of the table

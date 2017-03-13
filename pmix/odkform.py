@@ -114,7 +114,8 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'table':
                     if stack and isinstance(stack[-1], Odkgroup):
-                        stack[-1].add_table(json_row)
+                        this_prompt = Odkprompt(json_row, choices)
+                        stack[-1].add_table(this_prompt)
                     else:
                         m = 'Table found outside of field-list group at row {}'
                         m = m.format(i+1)

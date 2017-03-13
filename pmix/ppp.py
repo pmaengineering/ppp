@@ -29,7 +29,7 @@ if __name__ == '__main__':
     s = odkform.to_text(args.language)
 
     if args.outpath:
-        with open(args.outpath, mode='w') as f:
+        with open(args.outpath, mode='w', encoding='utf-8') as f:
             f.write(s)
     else:
         print(s)

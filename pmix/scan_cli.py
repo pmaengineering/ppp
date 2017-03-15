@@ -32,7 +32,10 @@ Last-modified: 9 March 2017
 
 # from builtins import str
 import argparse
-from scan_constants import SUFFIX, PREEXISTING, PMA, CHECK_VERSIONING, STRICT_LINKING, VALIDATE, EXTRAS, DEBUG
+try:
+    from scan_constants import SUFFIX, PREEXISTING, PMA, CHECK_VERSIONING, STRICT_LINKING, VALIDATE, EXTRAS, DEBUG
+except:
+    from .scan_constants import SUFFIX, PREEXISTING, PMA, CHECK_VERSIONING, STRICT_LINKING, VALIDATE, EXTRAS, DEBUG
 
 
 def command_line_interface():

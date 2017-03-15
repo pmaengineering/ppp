@@ -53,15 +53,24 @@ from xlrd import XLRDError
 # from pmaxform.odk_validate import ODKValidateError
 
 # from xlsform import Xlsform
-from scan_constants import SURVEY, SAVE_INSTANCE, SAVE_FORM, DELETE_FORM, CHOICES, EXTERNAL_CHOICES, SETTINGS, \
+try:
+    from scan_constants import SURVEY, SAVE_INSTANCE, SAVE_FORM, DELETE_FORM, CHOICES, EXTERNAL_CHOICES, SETTINGS, \
     ITEMSETS, LIST_NAME, NAME, TYPE, FORM_ID, FORM_TITLE, XML_ROOT, XML_EXT, MEDIA_DIR_EXT, EXTERNAL_TYPES, \
     SUFFIX, PREEXISTING, PMA, CHECK_VERSIONING, STRICT_LINKING, VALIDATE, DEBUG
-from scan_constants import xml_codes, approval_date, odk_file_model, odk_file_re, q_codes
-from scan_cli import command_line_interface
-# from .scan_xform import Xform
-from scan_errors import XlsformError, ConvertError
-# from .scan_errors import XformError
-
+    from scan_constants import xml_codes, approval_date, odk_file_model, odk_file_re, q_codes
+    from scan_cli import command_line_interface
+    # from scan_xform import Xform
+    from scan_errors import XlsformError, ConvertError
+    # from scan_errors import XformError
+except:
+    from .scan_constants import SURVEY, SAVE_INSTANCE, SAVE_FORM, DELETE_FORM, CHOICES, EXTERNAL_CHOICES, SETTINGS, \
+    ITEMSETS, LIST_NAME, NAME, TYPE, FORM_ID, FORM_TITLE, XML_ROOT, XML_EXT, MEDIA_DIR_EXT, EXTERNAL_TYPES, \
+    SUFFIX, PREEXISTING, PMA, CHECK_VERSIONING, STRICT_LINKING, VALIDATE, DEBUG
+    from .scan_constants import xml_codes, approval_date, odk_file_model, odk_file_re, q_codes
+    from .scan_cli import command_line_interface
+    # from .scan_xform import Xform
+    from .scan_errors import XlsformError, ConvertError
+    # from .scan_errors import XformError
 
 
 # From QTools2.xlsform

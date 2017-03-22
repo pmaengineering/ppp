@@ -1,25 +1,41 @@
+"""This module defines the Worksheet class"""
+
 import csv
 
 import xlrd
 
+from pmix import constants
+from pmix.cell import Cell
 from pmix.error import SpreadsheetError
 from pmix.verbiage import TranslationDict
-from pmix import constants
 
 
 class Worksheet:
+    """This module represents a worksheet in a spreadsheet"""
+    
     count = 0
 
-    def __init__(self, data=None, name=None, datemode=None):
-        self.data = []
-        self.style = []
-        for i in range(data.nrows):
-            cur_row = []
-            for j, cell in enumerate(data.row(i)):
-                this_value = self.cell_value(cell, datemode, unicode=True)
-                cur_row.append(this_value)
-            self.data.append(cur_row)
+    hl_colors = {
+        'HL_YELLOW': '#FFFA81'
+        'HL_ORANGE': '#FFD3B6'
+        'HL_RED'   : '#FFAAA5'
+        'HL_GREEN' : '#85CA5D'
+        'HL_BLUE'  : '#9ACEDF'
+    }
 
+    @classmethod
+    def from_sheet(cls, sheet, datemode):
+        worksheet = cls()
+        worksheet.name = sheet.name
+        for i in range(sheet.nrows):
+            cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
+            worksheet.data.append(cur_row)
+
+    def __init__(self, *, data=None, name=None):
+        if data is None:
+            self.data = []
+        else:
+            self.data = data
         if name is None:
             Worksheet.count += 1
             self.name = constants.DEFAULT_WS_NAME + str(Worksheet.count)
@@ -234,36 +250,3 @@ class Worksheet:
     def __len__(self):
         return len(self.data)
 
-    @staticmethod
-    def cell_value(cell, datemode=None, unicode=True):
-        if cell.ctype == xlrd.XL_CELL_BOOLEAN:
-            if unicode:
-                return 'TRUE' if cell.value == 1 else 'FALSE'
-            else:
-                return True if cell.value == 1 else False
-        elif cell.ctype == xlrd.XL_CELL_EMPTY:
-            if unicode:
-                return ''
-            else:
-                return None
-        elif cell.ctype == xlrd.XL_CELL_TEXT:
-            # Do I want to have the leading and trailing whitespace trimmed?
-            s = cell.value.strip()
-            return s
-        elif cell.ctype == xlrd.XL_CELL_NUMBER:
-            if int(cell.value) == cell.value:
-                if unicode:
-                    return str(int(cell.value))
-                else:
-                    return int(cell.value)
-            else:
-                if unicode:
-                    return str(cell.value)
-                else:
-                    return cell.value
-        elif cell.ctype == xlrd.XL_CELL_DATE:
-            date_tuple = xlrd.xldate_as_tuple(cell.value, datemode)
-            return '-'.join((str(x) for x in date_tuple))
-        else:
-            m = 'Bad cell type: {}. Value is: {}'.format(cell.ctype, cell.value)
-            raise TypeError(m)

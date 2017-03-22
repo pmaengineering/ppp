@@ -1,3 +1,6 @@
+"""This module defines the Xlsform class to work with ODK XLSForms"""
+
+from pmix.verbiage import TranslationDict
 from pmix.workbook import Workbook
 
 
@@ -5,10 +8,16 @@ class Xlsform(Workbook):
     """Class to represent an Xlsform spreadsheet"""
 
     def __init__(self, file):
+        """Initialize workbook and cache Xlsform-specific info"""
         super().__init__(file)
         self.initialize_settings()
         
     def initialize_settings(self):
+        """Get settings from Xlsform
+        
+        By the time this method concludes, the Xlsform's settings are stored 
+        in the instance
+        """
         try:
             local_settings = self['settings']
             headers = local_settings[0]
@@ -16,14 +25,6 @@ class Xlsform(Workbook):
             self.settings = {k: v for k, v in zip(headers, values) if k}
         except (KeyError, IndexError):
             self.settings = {}
-
-    def get_form_id(self):
-        """Get the form id for the Xlsform"""
-        settings = self[constants.SETTINGS]
-        col = settings.column(constants.FORM_ID)
-        heading = next(col) # discard
-        form_id = next(col)
-        return form_id
 
     def add_language(self, language):
         """Add appropriate language columns to an Xlsform"""

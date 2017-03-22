@@ -1,17 +1,20 @@
+"""This module defines a Workbook class to represent Excel files"""
+
 import os.path
 import argparse
 
 import xlrd
 import xlsxwriter
 
-from pmix.verbiage import TranslationDict
-from pmix.worksheet import Worksheet
 from pmix import constants
+from pmix.worksheet import Worksheet
 
 
 class Workbook:
+    """Class to represent an Excel file"""
 
     def __init__(self, file):
+        """Initialize by storing data from spreadsheet"""
         self.file = file
         self.data = []
 
@@ -21,32 +24,12 @@ class Workbook:
         else:
             raise TypeError(file)
 
-    def get_form_id(self):
-        settings = self[constants.SETTINGS]
-        col = settings.column(constants.FORM_ID)
-        heading = next(col) # discard
-        form_id = next(col)
-        return form_id
-
-    def get_sheetnames(self):
+    def sheetnames(self):
+        """Get sheetnames from this Workbook"""
         return tuple(sheet.name for sheet in self)
 
-    def add_language(self, language):
-        for sheet in self:
-            sheet.add_language(language)
-
-    def merge_translations(self, translations, ignore=None):
-        for sheet in self:
-            sheet.merge_translations(translations, ignore)
-
-    def create_translation_dict(self, ignore=None):
-        result = TranslationDict()
-        for sheet in self:
-            this_result = sheet.create_translation_dict(ignore)
-            result.update(this_result)
-        return result
-
     def write_out(self, path):
+        """Write this Workbook out to file"""
         wb = xlsxwriter.Workbook(path)
         formats = {}
         for worksheet in self.data:
@@ -74,25 +57,33 @@ class Workbook:
         if isinstance(key, int):
             return self.data[key]
         elif isinstance(key, str):
-            sheetnames = self.get_sheetnames()
-            try:
-                ind = sheetnames.index(key)
-                value = self.data[ind]
-                return value
-            except ValueError:
+            for sheet in self:
+                if sheet.name == key:
+                    return sheet
+            else:
                 raise KeyError(key)
+        else:
+            raise KeyError(key)
 
     @staticmethod
     def data_from_excel(file):
+        """Get data from Excel through xlrd"""
         result = []
         with xlrd.open_workbook(file) as book:
             datemode = book.datemode
             for i in range(book.nsheets):
                 ws = book.sheet_by_index(i)
-                ws_name = ws.name
-                my_ws = Worksheet(data=ws, name=ws_name, datemode=datemode)
+                my_ws = Worksheet(ws, datemode)
                 result.append(my_ws)
         return result
+
+
+def write_sheet_to_csv(inpath, outpath, sheet):
+    """Write a worksheet of a workbook to CSV"""
+    wb = Workbook(inpath)
+    ws = wb[sheet]
+    ws.to_csv(outpath)
+
 
 if __name__ == '__main__':
     prog_desc = 'Utilities for workbooks, depending on the options provided'
@@ -120,7 +111,5 @@ if __name__ == '__main__':
         else:
             outpath = os.path.join(base, sheet_name + constants.CSV_EXT)
 
-        wb = Workbook(args.xlsxfile)
-        ws = wb[args.csv]
-        ws.to_csv(outpath)
-        print('Write csv file to "{}"'.format(outpath))
+        write_sheet_to_csv(args.xlsxfile, outpath, args.csv)
+        print('Wrote csv file to "{}"'.format(outpath))

@@ -1,50 +1,98 @@
-"""This module defines the Worksheet class"""
-
+"""This module defines the Worksheet class."""
 import csv
 
-import xlrd
-
-from pmix import constants
 from pmix.cell import Cell
 from pmix.error import SpreadsheetError
-from pmix.verbiage import TranslationDict
 
 
 class Worksheet:
-    """This module represents a worksheet in a spreadsheet"""
-    
+    """This module represents a worksheet in a spreadsheet.
+
+    A Worksheet is always supposed to have rectangular dimensions. It should
+    not ever become a ragged array.
+
+    Attributes:
+        count (int): Keeps track of the sheets created without a name.
+    """
+
     count = 0
 
-    hl_colors = {
-        'HL_YELLOW_1'   : '#FDFD96'
-        'HL_YELLOW'     : '#FFFA81'
-        'HL_ORANGE'     : '#FFD3B6'
-        'HL_RED'        : '#FFAAA5'
-        'HL_GREEN'      : '#85CA5D'
-        'HL_BLUE'       : '#9ACEDF'
-    }
-
-    @classmethod
-    def from_sheet(cls, sheet, datemode=None):
-        """Create Worksheet from xlrd Sheet object"""
-        worksheet = cls(name=sheet.name)
-        for i in range(sheet.nrows):
-            cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
-            worksheet.data.append(cur_row)
-        return worksheet
-
     def __init__(self, *, data=None, name=None):
+        """Initialize the Worksheet.
+
+        Attributes:
+            data (list): The rows of the worksheet
+            name (str): The name of the worksheet
+
+        Args:
+            data: The data. Defaults to None to represent an empty worksheet.
+            name (str): The string name of the Worksheet. If not supplied,
+                then a default name is given.
+        """
         if data is None:
             self.data = []
         else:
             self.data = data
         if name is None:
             Worksheet.count += 1
-            self.name = constants.DEFAULT_WS_NAME + str(Worksheet.count)
+            self.name = 'sheet' + str(Worksheet.count)
         else:
             self.name = name
 
-    def add_col(self, header=None):
+    def dim(self):
+        """Return the dimensions of this Worksheet as tuple (nrow, ncol)."""
+        nrow = len(self)
+        ncol = self.ncol()
+        return (nrow, ncol)
+
+    def ncol(self):
+        """Return the number of columns for this Worksheet.
+
+        Checks that all rows have the same length."""
+        if len(self) > 0:
+            lengths = {len(line) for line in self}
+            if len(lengths) > 1:
+                msg = 'Worksheet has inconsistent column counts'
+                raise SpreadsheetError(msg)
+            else:
+                return iter(lengths).__next__()
+        else:
+            return 0
+
+    @classmethod
+    def from_sheet(cls, sheet, datemode=None):
+        """Create Worksheet from xlrd Sheet object.
+
+        Args:
+            sheet (xlrd.Sheet): A sheet instance to copy over
+            datemode (int): The date mode of the Excel workbook
+
+        Returns:
+            An initialized Worksheet object
+        """
+        worksheet = cls(name=sheet.name)
+        for i in range(sheet.nrows):
+            cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
+            worksheet.data.append(cur_row)
+        return worksheet
+
+    def prepend_row(self, row=None):
+        """Insert a row as the first row in this sheet.
+
+        Args:
+            row (sequence): A sequence of values to insert as the first row
+                of this worksheet.
+        """
+        if row is None and self.data:
+            new_row = [Cell() for _ in self.data[0]]
+            self.data.insert(0, new_row)
+        elif row is None:
+            self.data.append([Cell()])
+        else:
+            # TODO: row is something, add it in.
+            pass
+
+    def append_col(self, header=None):
         """Append a column to the end of the worksheet
 
         Args:
@@ -56,137 +104,39 @@ class Worksheet:
             else:
                 row.append(Cell())
 
-    def merge_translations(self, translations, ignore=None):
-        if isinstance(translations, TranslationDict):
-            for eng, lang in self.translation_pairs(ignore):
-                eng_text = eng[constants.TEXT]
-                if eng_text == '':
-                    self.format_missing_text(eng[constants.LOCATION], eng_text)
-                    continue
-                lang_text = lang[constants.TEXT]
-                other_lang = lang[constants.LANGUAGE]
-                location = lang[constants.LOCATION]
-                try:
-                    translated_eng = translations.get_numbered_translation(
-                        eng_text, other_lang)
-                    self.update_singleton(lang_text, translated_eng, location)
-                except KeyError:
-                    # Might be wrong exception
-                    self.format_missing_translation(location, lang_text)
+    def to_csv(self, path, strings=True):
+        """Write this Worksheet as a CSV.
 
-    def update_singleton(self, prev_text, new_text, location):
-        if prev_text != new_text:
-            line = self.data[location[0]]
-            line[location[1]] = new_text
-            if new_text == '':
-                self.format_missing_text(location, prev_text)
-            elif prev_text != '':
-                self.format_overwrite_text(location, new_text)
-
-    def format_missing_text(self, location, text):
-        d = {
-                constants.BG_COLOR_KEY: constants.HIGHLIGHT_RED,
-                constants.LOCATION: location,
-                constants.TEXT: text
-        }
-        self.style.append(d)
-
-    def format_overwrite_text(self, location, text):
-        d = {
-                constants.BG_COLOR_KEY: constants.HIGHLIGHT_BLUE,
-                constants.LOCATION: location,
-                constants.TEXT: text
-        }
-        self.style.append(d)
-
-    def format_missing_translation(self, location, text):
-        d = {
-                constants.BG_COLOR_KEY: constants.HIGHLIGHT_GREEN,
-                constants.LOCATION: location,
-                constants.TEXT: text
-        }
-        self.style.append(d)
-
-    # returns list of tuples for English columns
-    # returns sorted list of languages found that are translations
-    # returns dict of dictionaries to find where translations are
-    def preprocess_header(self):
-        if not self.data:
-            m = 'No data found in worksheet "{}"'.format(self.name)
-            raise SpreadsheetError(m)
-        header = self.data[0]
-        # list of tuples, index and column name, e.g. (4, 'hint')
-        english = []
-        for i, cell in enumerate(header):
-            if cell.endswith(constants.ENGLISH_SUFFIX):
-                # e.g. from "label::English", keep "label"
-                english.append((i, cell[:-len(constants.ENGLISH_SUFFIX)]))
-        if not english:
-            m = 'No column labeled English found in worksheet "{}"'
-            m = m.format(self.name)
-            raise SpreadsheetError(m)
-
-        # to contain all OTHER (non-English) languages used in the header
-        other_languages = set()
-        # Build a dict with keys that are columns ending with "::English" and
-        # values are dicts them that have key -> value as language -> column
-        # e.g. {label: {Hindi: 10, French: 11}, hint: {Hindi: 12, French: 13}}
-        translation_lookup = {}
-        for i, column in english:
-            # e.g. take "hint" and make "hint::"
-            prefix = constants.COL_FORMAT.format(column)
-            translations = [item for item in enumerate(header) if item[0] != i
-                            and item[1].startswith(prefix)]
-            these_langs = {lang[len(prefix):]: j for j, lang in translations}
-            translation_lookup[column] = these_langs
-            other_languages |= set(these_langs.keys())
-        others = list(other_languages)
-        others.sort()
-        return english, others, translation_lookup
-
-    def create_translation_dict(self, ignore=None):
-        result = TranslationDict()
-        for eng, lang in self.translation_pairs(ignore):
-            eng_text = eng[constants.TEXT]
-            # only add translations if the english exists first
-            if eng_text == '':
-                continue
-            lang_text = lang[constants.TEXT]
-            other_lang = lang[constants.LANGUAGE]
-            result.add_translation(eng_text, lang_text, other_lang)
-        return result
-
-    def column_names(self):
-        if self.data:
-            return self.data[0]
-        else:
-            return []
-
-    def column(self, i):
-        if isinstance(i, str):
-            try:
-                col = self.column_names().index(i)
-            except ValueError:
-                raise KeyError(i)
-        elif isinstance(i, int):
-            col = i
-        else:
-            raise KeyError(i)
-        for row in self:
-            yield row[col]
-
-    def to_csv(self, filename):
-        with open(filename, 'w', newline='', encoding='utf-8') as csv_file:
+        Args:
+            path (str): The path where to write the CSV
+            strings (bool): False if the original value should be written,
+                otherwise the string value of the cell is used.
+        """
+        with open(path, 'w', newline='', encoding='utf-8') as csv_file:
             csv_writer = csv.writer(csv_file)
             for row in self:
-                csv_writer.writerow(row)
+                if strings:
+                    values = [str(cell) for cell in row]
+                else:
+                    values = [cell.value for cell in row]
+                csv_writer.writerow(values)
 
     def __iter__(self):
+        """Return an iterator on the rows of this Worksheet."""
         return iter(self.data)
 
     def __getitem__(self, key):
+        """Return the row indexed by key (int)."""
         return self.data[key]
 
     def __len__(self):
+        """Return the number of rows."""
         return len(self.data)
 
+    def __str__(self):
+        msg = '<"{}": {}>'.format(self.name, self.data)
+        return msg
+
+    def __repr__(self):
+        msg = '<Worksheet(name="{}"), dim={}>'.format(self.name, self.dim())
+        return msg

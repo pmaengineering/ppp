@@ -70,7 +70,7 @@ class Workbook:
         Args:
             path (str): The path where to write the Excel file
             strings (bool): False if the original value should be written,
-            otherwise the string value of the cell is used.
+                otherwise the string value of the cell is used.
         """
         wb = xlsxwriter.Workbook(path)
         formats = self.init_formats(wb)

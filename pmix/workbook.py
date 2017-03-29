@@ -1,4 +1,4 @@
-"""This module defines a Workbook class to represent Excel files"""
+"""This module defines a Workbook class to represent Excel files."""
 
 import os.path
 import argparse
@@ -6,86 +6,155 @@ import argparse
 import xlrd
 import xlsxwriter
 
-from pmix import constants
+from pmix import wbformat
 from pmix.worksheet import Worksheet
 
 
 class Workbook:
-    """Class to represent an Excel file"""
+    """Class to represent an Excel file."""
 
-    def __init__(self, file):
-        """Initialize by storing data from spreadsheet"""
-        self.file = file
+    def __init__(self, path):
+        """Initialize by storing data from spreadsheet.
+
+        Args:
+            path (str): The path where to find the Excel file
+        """
+        self.file = path
         self.data = []
 
-        ext = os.path.splitext(file)[1]
+        ext = os.path.splitext(path)[1]
         if ext in ('.xls', '.xlsx'):
-            self.data = self.data_from_excel(file)
+            self.data = self.data_from_excel(path)
         else:
-            raise TypeError(file)
+            msg = 'Unsupported file type. Extension: "{}"'.format(ext)
+            raise TypeError(msg)
 
     def sheetnames(self):
-        """Get sheetnames from this Workbook"""
+        """Get sheetnames from this Workbook.
+
+        Returns:
+            A tuple of string, in the order of the sheets.
+        """
         return tuple(sheet.name for sheet in self)
 
-    def write_out(self, path):
-        """Write this Workbook out to file"""
-        wb = xlsxwriter.Workbook(path)
+    @staticmethod
+    def init_formats(wb):
+        """Add formats to workbook and return those formats.
+
+        Currently, only highlighting is supported. Therefore, all highlight
+        colors are added, regardless of whether or not they are used.
+
+        However, in the future, more complex formatting may be supported, so
+        searching the contents of the this object may become necessary to
+        find the formats.
+
+        Args:
+            wb (xlsxwriter.Workbook): The workbook to write to
+
+        Returns:
+            A dictionary with colors as keys and formats as values
+
+        Todo:
+            If more complicated formats are used, then make a FormatManager
+            that can look up formats based on what is stored in the Cell obj.
+        """
         formats = {}
+        for k, v in wbformat.hl_colors.items():
+            this_format = wb.add_format({'bg_color': v})
+            formats[k] = this_format
+        return formats
+
+    def write_out(self, path, strings=False):
+        """Write this Workbook out to file.
+
+        Args:
+            path (str): The path where to write the Excel file
+            strings (bool): False if the original value should be written,
+            otherwise the string value of the cell is used.
+        """
+        wb = xlsxwriter.Workbook(path)
+        formats = self.init_formats(wb)
         for worksheet in self.data:
             ws = wb.add_worksheet(worksheet.name)
             for i, line in enumerate(worksheet):
-                ws.write_row(i, 0, line)
-            for s in worksheet.style:
-                bg_color = s[constants.BG_COLOR_KEY]
-                if bg_color not in formats:
-                    this_format = wb.add_format({constants.BG_COLOR_KEY: bg_color})
-                    formats[bg_color] = this_format
-            for s in worksheet.style:
-                row, col = s[constants.LOCATION]
-                text = s[constants.TEXT]
-                this_format = formats[s[constants.BG_COLOR_KEY]]
-                ws.write(row, col, text, this_format)
+                for j, cell in enumerate(line):
+                    this_value = str(cell.value) if strings else cell.value
+                    # TODO: If more complicated formats, then use a lookup
+                    this_format = formats.get(cell.highlight, None)
+                    if this_format is None:
+                        ws.write(i, j, this_value)
+                    else:
+                        ws.write(i, j, this_value, this_format)
+
+    @staticmethod
+    def data_from_excel(path):
+        """Get data from Excel through xlrd.
+
+        Args:
+            path (str): The path where to find the Excel file.
+
+        Returns:
+            A list of worksheets, matching the source Excel file.
+        """
+        result = []
+        with xlrd.open_workbook(path) as book:
+            datemode = book.datemode
+            for i in range(book.nsheets):
+                ws = book.sheet_by_index(i)
+                my_ws = Worksheet.from_sheet(ws, datemode)
+                result.append(my_ws)
+        return result
 
     def __len__(self):
+        """Return the number of sheets in this workbook."""
         return len(self.data)
 
     def __iter__(self):
+        """Return an iter of the sheets."""
         return iter(self.data)
 
     def __getitem__(self, key):
+        """Get a worksheet from a workbook.
+
+        Args:
+            key: Match by index if key is int, match by sheet name if key is
+            str.
+
+        Returns:
+            The found worksheet is returned.
+
+        Raises:
+            IndexError: Supplied int is out of range
+            KeyError: Supplied str does not match a worksheet name
+            TypeError: If key is neither str nor int
+        """
         if isinstance(key, int):
             return self.data[key]
         elif isinstance(key, str):
             for sheet in self:
                 if sheet.name == key:
                     return sheet
-            else:
-                raise KeyError(key)
-        else:
             raise KeyError(key)
-
-    @staticmethod
-    def data_from_excel(file):
-        """Get data from Excel through xlrd"""
-        result = []
-        with xlrd.open_workbook(file) as book:
-            datemode = book.datemode
-            for i in range(book.nsheets):
-                ws = book.sheet_by_index(i)
-                my_ws = Worksheet(ws, datemode)
-                result.append(my_ws)
-        return result
+        else:
+            raise TypeError(key)
 
 
-def write_sheet_to_csv(inpath, outpath, sheet):
-    """Write a worksheet of a workbook to CSV"""
+def write_sheet_to_csv(inpath, outpath, sheet=0):
+    """Write a worksheet of a workbook to CSV.
+
+    Args:
+        inpath (str): The path where to find the source file.
+        outpath (str): The path where to write the CSV
+        sheet (str): Which sheet to write as CSV. Defaults to 0 for the first
+            sheet
+    """
     wb = Workbook(inpath)
     ws = wb[sheet]
     ws.to_csv(outpath)
 
 
-if __name__ == '__main__':
+def workbook_cli():
+    """Run the command line interface for this module."""
     prog_desc = 'Utilities for workbooks, depending on the options provided'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -106,10 +175,14 @@ if __name__ == '__main__':
         sheet_name = args.csv
         if args.outpath is not None:
             outpath = args.outpath
-        elif sheet_name.endswith(constants.CSV_EXT):
+        elif sheet_name.endswith('.csv'):
             outpath = os.path.join(base, sheet_name)
         else:
-            outpath = os.path.join(base, sheet_name + constants.CSV_EXT)
+            outpath = os.path.join(base, sheet_name + '.csv')
 
         write_sheet_to_csv(args.xlsxfile, outpath, args.csv)
         print('Wrote csv file to "{}"'.format(outpath))
+
+
+if __name__ == '__main__':
+    workbook_cli()

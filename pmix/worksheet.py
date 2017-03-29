@@ -48,7 +48,8 @@ class Worksheet:
     def ncol(self):
         """Return the number of columns for this Worksheet.
 
-        Checks that all rows have the same length."""
+        Checks that all rows have the same length.
+        """
         if len(self) > 0:
             lengths = {len(line) for line in self}
             if len(lengths) > 1:
@@ -93,7 +94,7 @@ class Worksheet:
             pass
 
     def append_col(self, header=None):
-        """Append a column to the end of the worksheet
+        """Append a column to the end of the worksheet.
 
         Args:
             header: The optional header for the column
@@ -134,9 +135,11 @@ class Worksheet:
         return len(self.data)
 
     def __str__(self):
+        """Return string representation of the Worksheet."""
         msg = '<"{}": {}>'.format(self.name, self.data)
         return msg
 
     def __repr__(self):
+        """Return formal representation of the Worksheet."""
         msg = '<Worksheet(name="{}"), dim={}>'.format(self.name, self.dim())
         return msg

@@ -6,27 +6,27 @@ from pmix.workbook import Workbook
 
 class Xlsform(Workbook):
     """Class to represent an Xlsform spreadsheet.
-    
-    The Xlsform class extends the Workbook class to provide functionality 
+
+    The Xlsform class extends the Workbook class to provide functionality
     related specifically to Xlsforms and would not be expected for a general-
     purpose Workbook.
 
     Note: Analogously, the Xlstab class extends the Worksheet class.
     """
 
-    def __init__(self, file):
+    def __init__(self, path):
         """Initialize workbook and cache Xlsform-specific info.
-        
+
         Args:
-            file (str): The path where to find the Xlsform file.
+            path (str): The path where to find the Xlsform file.
         """
-        super().__init__(file)
+        super().__init__(path)
         self.data = [Xlstab.from_worksheet(ws) for ws in self]
         self.initialize_settings()
-        
+
     def initialize_settings(self):
         """Get settings from Xlsform.
-        
+
         Post-condition: the Xlsform's settings are stored in the instance.
         """
         try:

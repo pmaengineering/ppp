@@ -105,6 +105,40 @@ class Worksheet:
             else:
                 row.append(Cell())
 
+    def column_headers(self):
+        """Get the column headers for this worksheet.
+
+        Returns:
+            A tuple of the column headers as strings
+        """
+        return tuple(str(i) for i in self.data[0])
+
+    def column(self, key):
+        """Yield the desired column cell by cell.
+
+        Args:
+            key (str or int): Str for lookup by name, int for lookup by index
+
+        Yields:
+            The cells in the requested column from the first row to the last
+
+        Raises:
+            ValueError: The supplied str does not match a column header
+            IndexError: The supplied int is out of range
+            TypeError: Neither str nor int is passed in as an argument
+        """
+        if isinstance(key, str):
+            try:
+                col = self.column_headers().index(key)
+            except ValueError:
+                raise KeyError(key)
+        elif isinstance(key, int):
+            col = key
+        else:
+            raise TypeError(key)
+        for row in self:
+            yield row[col]
+
     def to_csv(self, path, strings=True):
         """Write this Worksheet as a CSV.
 

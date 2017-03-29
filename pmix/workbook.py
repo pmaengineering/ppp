@@ -80,7 +80,11 @@ class Workbook:
                 for j, cell in enumerate(line):
                     this_value = str(cell.value) if strings else cell.value
                     # TODO: If more complicated formats, then use a lookup
-                    this_format = formats.get(cell.highlight, None)
+                    if cell.highlight is None:
+                        this_format = None
+                    else:
+                        this_format = formats[cell.highlight]
+                    # END TODO
                     if this_format is None:
                         ws.write(i, j, this_value)
                     else:

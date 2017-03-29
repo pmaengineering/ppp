@@ -22,9 +22,9 @@ class Xlsform(Workbook):
         """
         super().__init__(path)
         self.data = [Xlstab.from_worksheet(ws) for ws in self]
-        self.initialize_settings()
+        self.init_settings()
 
-    def initialize_settings(self):
+    def init_settings(self):
         """Get settings from Xlsform.
 
         Post-condition: the Xlsform's settings are stored in the instance.
@@ -38,7 +38,11 @@ class Xlsform(Workbook):
             self.settings = {}
 
     def add_language(self, language):
-        """Add appropriate language columns to an Xlsform"""
+        """Add appropriate language columns to an Xlsform.
+
+        Args:
+            language (str): The language to add to all relevant sheets.
+        """
         for sheet in self:
             sheet.add_language(language)
 

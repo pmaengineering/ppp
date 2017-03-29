@@ -22,7 +22,7 @@ class Xlstab(Worksheet):
 
     def __init__(self, *, data=None, name=None):
         super().__init__(data=data, name=name)
-        self.translate_cols = self.init_translate_cols()
+        self.init_translate_cols()
 
     @classmethod
     def from_worksheet(cls, worksheet):
@@ -30,6 +30,9 @@ class Xlstab(Worksheet):
         return xlstab
 
     def init_translate_cols(self):
+        # TODO: Get a list of all columns that are translated
+        # TODO: Get a the languages that they come in
+        # TODO: Determine a default language
         pass
 
     def add_language(self, language):
@@ -198,22 +201,3 @@ class Xlstab(Worksheet):
             other_lang = lang[constants.LANGUAGE]
             result.add_translation(eng_text, lang_text, other_lang)
         return result
-
-    def column_names(self):
-        if self.data:
-            return self.data[0]
-        else:
-            return []
-
-    def column(self, i):
-        if isinstance(i, str):
-            try:
-                col = self.column_names().index(i)
-            except ValueError:
-                raise KeyError(i)
-        elif isinstance(i, int):
-            col = i
-        else:
-            raise KeyError(i)
-        for row in self:
-            yield row[col]

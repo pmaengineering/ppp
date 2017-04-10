@@ -14,11 +14,11 @@ class Worksheet:
 
     Attributes:
         count (int): Keeps track of the sheets created without a name.
+        CellData (namedtuple): A container for tracking cell information.
     """
 
-    CellData = namedtuple('CellData', ['row', 'col', 'header', 'cell'])
-
     count = 0
+    CellData = namedtuple('CellData', ['row', 'col', 'header', 'cell'])
 
     def __init__(self, *, data=None, name=None):
         """Initialize the Worksheet.
@@ -117,16 +117,18 @@ class Worksheet:
         return tuple(str(i) for i in self.data[0])
 
     def column_pairs(self, indices=None, base=None, start=0):
-        """Yield pairs within the same row for all rows.
+        """Iterate over pairs within the same row for all rows.
 
         Args:
-            indices (sequence): A sequence of integers, selecting which 
-                columns to iterate over. Order is preserved. Default of None 
-                means to use all columns.
-            base (int): An integer for the column to use as the base/reference 
-                for pairs. Default of None means to use the first of `indices`.
+            indices (sequence): A sequence of integers or strings, selecting 
+                which columns to iterate over. Order is preserved. Default of 
+                None means to use all columns.
+            base (int or str): An integer for the column to use as the 
+                base/reference for pairs, or a string to match the column 
+                header. Default of None means to use the first of `indices`.
                 This integer should be in `indices` if both are supplied.
-            start (int): Which row to start yielding with.
+            start (int): Which row to start yielding with. Defaults to 0,
+                meaning iterate over all rows.
 
         Yields:
             Yields the pairs from the start row to the end of the sheet. They 
@@ -157,7 +159,6 @@ class Worksheet:
             for j in indices:
                 other_data = self.CellData(i, j, headers[j], row[j])
                 yield base_data, other_data
-
 
     def column(self, key):
         """Yield the desired column cell by cell.

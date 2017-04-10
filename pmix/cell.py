@@ -81,6 +81,9 @@ class Cell:
             if date_tuple[:3] == (0, 0, 0):
                 # must be time only
                 return datetime.time(*date_tuple[3:])
+            elif date_tuple[3:] == (0, 0, 0):
+                # must be date only
+                return datetime.date(*date_tuple[:3])
             else:
                 return datetime.datetime(*date_tuple)
         else:

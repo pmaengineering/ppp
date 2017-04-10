@@ -1,5 +1,6 @@
 """This module defines the Worksheet class."""
 import csv
+from collections import namedtuple
 
 from pmix.cell import Cell
 from pmix.error import SpreadsheetError
@@ -14,6 +15,8 @@ class Worksheet:
     Attributes:
         count (int): Keeps track of the sheets created without a name.
     """
+
+    CellData = namedtuple('CellData', ['row', 'col', 'header', 'cell'])
 
     count = 0
 
@@ -112,6 +115,49 @@ class Worksheet:
             A tuple of the column headers as strings
         """
         return tuple(str(i) for i in self.data[0])
+
+    def column_pairs(self, indices=None, base=None, start=0):
+        """Yield pairs within the same row for all rows.
+
+        Args:
+            indices (sequence): A sequence of integers, selecting which 
+                columns to iterate over. Order is preserved. Default of None 
+                means to use all columns.
+            base (int): An integer for the column to use as the base/reference 
+                for pairs. Default of None means to use the first of `indices`.
+                This integer should be in `indices` if both are supplied.
+            start (int): Which row to start yielding with.
+
+        Yields:
+            Yields the pairs from the start row to the end of the sheet. They 
+            are of the form (BaseData, OtherData) and the data is stored in a 
+            CellData named tuple.
+        """
+        headers = self.column_headers()
+        if indices is None:
+            indices = list(range(self.ncol()))
+        else:
+            result = []
+            for i in indices:
+                item = i if isinstance(i, int) else headers.index(i)
+                if item not in result:
+                    result.append(item)
+            indices = result
+        if not indices:
+            return
+        if base is None:
+            base = indices.pop(0)
+        else:
+            base = base if isinstance(base, int) else headers.index(base)
+            indices.remove(base)
+        for i, row in enumerate(self):
+            if i < start:
+                continue
+            base_data = self.CellData(i, base, headers[base], row[base])
+            for j in indices:
+                other_data = self.CellData(i, j, headers[j], row[j])
+                yield base_data, other_data
+
 
     def column(self, key):
         """Yield the desired column cell by cell.

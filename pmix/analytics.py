@@ -1,6 +1,4 @@
-"""
-
-Get the R code for PMA Analytics
+"""Get the tracked fields for PMA Analytics.
 
 Need to be able to get the ODK names from files (possibly collapse across groups)
 
@@ -9,8 +7,7 @@ Need to be able to get the ODK names from files (possibly collapse across groups
 
 import argparse
 
-from pmix.workbook import Workbook
-from pmix import constants
+from pmix.xlsform import Xlsform
 
 
 def is_analytics_type(type):
@@ -57,13 +54,29 @@ def send_analytics_code(xlsxfiles):
     print(string)
 
 
-if __name__ == '__main__':
-    prog_desc = 'Help facilitate analytics by extracting useful information'
+def analytics_obj(xlsxfile):
+    wb = Xlsform(xlsxfile)
+
+
+def get_analytics_objs(xlsxfiles):
+    return [analytics_obj(xlsfile) for xlsxfile in set(xlsxfiles)]
+
+
+def analytics_cli():
+    prog_desc = 'Help facilitate analytics by extracting useful information.'
     parser = argparse.ArgumentParser(description=prog_desc)
 
     file_help = 'One or more paths to source XLSForms.'
     parser.add_argument('xlsxfile', nargs='+', help=file_help)
 
+    out_help = ('Path to write output. If this argument is not supplied, then '
+                'result is sent to standard out.')
+    parser.add_argument('-o', '--outpath', help=out_help)
+
     args = parser.parse_args()
 
     send_analytics_code(args.xlsxfile)
+
+
+if __name__ == '__main__':
+    analytics_cli()

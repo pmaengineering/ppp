@@ -6,6 +6,10 @@ class SpreadsheetError(Exception):
     pass
 
 
+class XlsformError(Exception):
+    pass
+
+
 class QlangError(Exception):
     pass
 

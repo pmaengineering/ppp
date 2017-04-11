@@ -1,4 +1,7 @@
-"""Module for the Xlstab class"""
+"""Module for the Xlstab class."""
+import logging
+
+from pmix.error import XlsformError
 from pmix.worksheet import Worksheet
 
 
@@ -21,38 +24,98 @@ class Xlstab(Worksheet):
     )
 
     def __init__(self, *, data=None, name=None):
+        """Initialize an Xlstab.
+
+        See Worksheet for default implementation.
+
+        Args:
+            data: Data for the worksheet
+            name (str): The name of the worksheet.
+        """
         super().__init__(data=data, name=name)
-        self.init_translate_cols()
+        self.assert_unique_cols()
+
+    def assert_unique_cols(self):
+        """Throw an error if non-empty column headers are not unique."""
+        headers = self.column_headers()
+        found = list(filter(None, headers))
+        unique = set(found)
+        if len(found) != len(unique):
+            raise XlsformError('Headers not unique in {}'.format(self.name))
 
     @classmethod
     def from_worksheet(cls, worksheet):
+        """Create an instance of Xlstab from a Worksheet instance."""
         xlstab = cls(data=worksheet.data, name=worksheet.name)
         return xlstab
 
-    def init_translate_cols(self):
-        # TODO: Get a list of all columns that are translated
-        # TODO: Get a the languages that they come in
-        # TODO: Determine a default language
-        pass
-
     def add_language(self, language):
+        """Add the used translatable columns in the given language.
+
+        Args:
+            language (str or sequence): The language(s) to add
+        """
         if isinstance(language, str):
             language = [language]
-        try:
-            english, others, translations = self.preprocess_header()
-            found_languages = others + [constants.ENGLISH]
-            for eng_col, name in english:
-                for lang in language:
-                    # Do not want to add a language we already have
-                    if lang not in found_languages:
-                        new_name = constants.BOTH_COL_FORMAT.format(name, lang)
-                        self.add_col_name(new_name)
-        except TypeError:
-            # language not iterable, do nothing
-            pass
-        except SpreadsheetError:
-            # No English found, do nothing
-            pass
+        translate_columns = ()
+        if self.name == 'survey':
+            translate_columns = self.SURVEY_TRANSLATIONS
+        elif self.name in ('choices', 'external_choices'):
+            translate_columns = self.CHOICES_TRANSLATIONS
+        headers = self.column_headers()
+        to_translate = []
+        for col in translate_columns:
+            if any(h.startswith(col) for h in headers):
+                to_translate.append(col)
+        for col in to_translate:
+            for lang in language:
+                header = '{}::{}'.format(col, lang)
+                self.append_col(header)
+
+    def translation_pairs(self, ignore=None):
+        """Iterate through translation pairs in this tab.
+
+        This function only works for 'survey', 'choices' and
+        'external_choices'.
+
+        Args:
+            ignore: A sequence of strings. If the header contains any of these
+                then that column is ignored for translations. It is intended
+                as a way to ignore certain languages. Default None indicates
+                do not ignore any translatable columns.
+
+        Yields:
+            Yields pairs of translations from ``Worksheet.column_pairs``.
+        """
+        if ignore is None:
+            ignore = []
+        translate_columns = ()
+        if self.name == 'survey':
+            translate_columns = self.SURVEY_TRANSLATIONS
+        elif self.name in ('choices', 'external_choices'):
+            translate_columns = self.CHOICES_TRANSLATIONS
+        for col in translate_columns:
+            found = [h for h in self.column_headers() if h.startswith(col)]
+            keep = [h for h in found if not any(l in h for l in ignore)]
+            gen = (h for h in keep if self.get_lang(h) == 'English')
+            base = next(gen, None)
+            yield from self.column_pairs(keep, base, start=1)
+
+    @staticmethod
+    def get_lang(header):
+        """Get the language from a header.
+
+        Args:
+            header (str): The header, e.g. 'label::English'
+
+        Returns:
+            The language found or None if '::' is not present
+        """
+        lang = None
+        if '::' in header:
+            lang = header.split('::', maxsplit=1)[1]
+        return lang
+
 
     # generator returns two dictionaries, each of the same format
     # {
@@ -61,46 +124,46 @@ class Xlstab(Worksheet):
     #   constants.TEXT:     "What is your name?"
     # }
     # First dictionary is for English. Second is for the foreign language
-    def translation_pairs(self, ignore=None):
-        if ignore is None:
-            ignore = []
-        try:
-            english, others, translations = self.preprocess_header()
-            for row, line in enumerate(self):
-                if row == 0:
-                    continue
-                for eng_col, name in english:
-                    eng_text = line[eng_col]
-                    eng_text = eng_text.strip()
-                    eng_dict = {
-                        constants.LANGUAGE: constants.ENGLISH,
-                        constants.LOCATION: (row, eng_col),
-                        constants.TEXT:     eng_text
-                    }
-                    these_translations = translations[name]
-                    for lang in others:
-                        if lang in ignore:
-                            continue
-                        try:
-                            lang_col = these_translations[lang]
-                            lang_text = line[lang_col]
-                            lang_text = lang_text.strip()
-                            lang_dict = {
-                                constants.LANGUAGE: lang,
-                                constants.LOCATION: (row, lang_col),
-                                constants.TEXT:     lang_text
-                            }
-                            # We want to consider it as needing a translation
-                            # if there is English text defined.
-                            # TODO this may need to change
-                            if eng_text != '':
-                                yield eng_dict, lang_dict
-                        except KeyError:
-                            # Translation not found, skip
-                            pass
-        except SpreadsheetError:
-            # Nothing found from preprocess_header
-            return
+    # def translation_pairs(self, ignore=None):
+    #     if ignore is None:
+    #         ignore = []
+    #     try:
+    #         english, others, translations = self.preprocess_header()
+    #         for row, line in enumerate(self):
+    #             if row == 0:
+    #                 continue
+    #             for eng_col, name in english:
+    #                 eng_text = line[eng_col]
+    #                 eng_text = eng_text.strip()
+    #                 eng_dict = {
+    #                     constants.LANGUAGE: constants.ENGLISH,
+    #                     constants.LOCATION: (row, eng_col),
+    #                     constants.TEXT:     eng_text
+    #                 }
+    #                 these_translations = translations[name]
+    #                 for lang in others:
+    #                     if lang in ignore:
+    #                         continue
+    #                     try:
+    #                         lang_col = these_translations[lang]
+    #                         lang_text = line[lang_col]
+    #                         lang_text = lang_text.strip()
+    #                         lang_dict = {
+    #                             constants.LANGUAGE: lang,
+    #                             constants.LOCATION: (row, lang_col),
+    #                             constants.TEXT:     lang_text
+    #                         }
+    #                         # We want to consider it as needing a translation
+    #                         # if there is English text defined.
+    #                         # TODO this may need to change
+    #                         if eng_text != '':
+    #                             yield eng_dict, lang_dict
+    #                     except KeyError:
+    #                         # Translation not found, skip
+    #                         pass
+    #     except SpreadsheetError:
+    #         # Nothing found from preprocess_header
+    #         return
 
     def merge_translations(self, translations, ignore=None):
         if isinstance(translations, TranslationDict):

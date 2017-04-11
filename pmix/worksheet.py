@@ -114,25 +114,28 @@ class Worksheet:
         Returns:
             A tuple of the column headers as strings
         """
-        return tuple(str(i) for i in self.data[0])
+        if self.data:
+            return tuple(str(i) for i in self.data[0])
+        else:
+            return ()
 
     def column_pairs(self, indices=None, base=None, start=0):
         """Iterate over pairs within the same row for all rows.
 
         Args:
-            indices (sequence): A sequence of integers or strings, selecting 
-                which columns to iterate over. Order is preserved. Default of 
+            indices (sequence): A sequence of integers or strings, selecting
+                which columns to iterate over. Order is preserved. Default of
                 None means to use all columns.
-            base (int or str): An integer for the column to use as the 
-                base/reference for pairs, or a string to match the column 
+            base (int or str): An integer for the column to use as the
+                base/reference for pairs, or a string to match the column
                 header. Default of None means to use the first of `indices`.
                 This integer should be in `indices` if both are supplied.
             start (int): Which row to start yielding with. Defaults to 0,
                 meaning iterate over all rows.
 
         Yields:
-            Yields the pairs from the start row to the end of the sheet. They 
-            are of the form (BaseData, OtherData) and the data is stored in a 
+            Yields the pairs from the start row to the end of the sheet. They
+            are of the form (BaseData, OtherData) and the data is stored in a
             CellData named tuple.
         """
         headers = self.column_headers()
@@ -161,7 +164,7 @@ class Worksheet:
                 yield base_data, other_data
 
     def column(self, key):
-        """Yield the desired column cell by cell.
+        """Iterate over the desired column cell by cell.
 
         Args:
             key (str or int): Str for lookup by name, int for lookup by index

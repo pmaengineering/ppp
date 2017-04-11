@@ -23,6 +23,18 @@ class Cell:
         # TODO: More extensive formatting. For now, just support highlight
         # self.formatting = set()
 
+    def is_blank(self):
+        """Test whether cell is blank."""
+        return self.value is None or self.value == ''
+
+    def __bool__(self):
+        """Get truthiness of the cell.
+
+        Returns:
+            Returns the truthiness of the cell value.
+        """
+        return bool(self.value)
+
     def __str__(self):
         """Return unicode representation of cell."""
         if self.value is None:

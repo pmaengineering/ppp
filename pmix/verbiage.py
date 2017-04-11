@@ -1,11 +1,4 @@
-"""Module for capturing translations from XLSForms
-
-Created: 3 October 2016
-Last modified: 20 October 2016
-Author: James K. Pringle
-E-mail: jpringle@jhu.edu
-"""
-
+"""Module for capturing translations from XLSForms."""
 import re
 
 import xlsxwriter
@@ -15,7 +8,7 @@ from pmix import utils
 
 
 class TranslationDict:
-    """Store translations with English source into any foreign language
+    """Store translations with English source into any foreign language.
 
     The translation structure is a dictionary that looks like:
 
@@ -44,10 +37,13 @@ class TranslationDict:
     number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s*'
     number_prog = re.compile(number_re)
 
-    def __init__(self):
+    def __init__(self, data=None, base='English'):
         self.data = {}
         self.languages = set()
         self.additionals = set()
+
+    def extract_translations(data):
+        if isinstance(data, Xlsform):
 
     def add_language(self, language):
         if isinstance(language, str):

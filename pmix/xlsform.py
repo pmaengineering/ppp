@@ -1,6 +1,7 @@
 """This module defines the Xlsform class to work with ODK XLSForms"""
 
 from pmix.verbiage import TranslationDict
+from pmix.xlstab import Xlstab
 from pmix.workbook import Workbook
 
 
@@ -33,7 +34,8 @@ class Xlsform(Workbook):
             local_settings = self['settings']
             headers = local_settings[0]
             values = local_settings[1]
-            self.settings = {k: v for k, v in zip(headers, values) if k}
+            self.settings = {str(k): str(v) for k, v in zip(headers, values) if
+                    str(k)}
         except (KeyError, IndexError):
             self.settings = {}
 

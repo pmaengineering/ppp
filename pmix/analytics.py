@@ -5,7 +5,6 @@ groups)
 
 """
 
-
 import argparse
 import json
 
@@ -99,7 +98,7 @@ def analytics_obj(xlsxfile):
         'form_title': form_title,
         'prompts': prompts,
         'tags': tags,
-        '|--comment': 'END {}'.format(form_id)
+        '~comment': 'END {}'.format(form_id)
     }
     return obj
 

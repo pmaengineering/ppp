@@ -9,5 +9,5 @@ lint:
 	${PYTHON} -m pydocstyle ${SRC}
 
 tags:
-	ctags -R .
+	ctags -R --python-kinds=-i .
 

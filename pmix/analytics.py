@@ -1,68 +1,121 @@
 """Get the tracked fields for PMA Analytics.
 
-Need to be able to get the ODK names from files (possibly collapse across groups)
+Need to be able to get the ODK names from files (possibly collapse across
+groups)
 
 """
 
 
 import argparse
+import json
 
 from pmix.xlsform import Xlsform
 
 
-def is_analytics_type(type):
+def is_analytics_type(odk_type):
+    """Test if an odk type is suitable for tracking in analytics.
+
+    Args:
+        odk_type (str): The type to test
+
+    Returns:
+        Returns true if and only if odk_type is good for analytics
+    """
     bad_types = (
-        constants.ODK_CALCULATE,
-        constants.ODK_HIDDEN,
-        constants.BEGIN_START,
-        constants.END_START,
-        constants.ODK_START,
-        constants.ODK_END,
-        constants.ODK_DEVICE,
-        constants.ODK_SIM,
-        constants.ODK_PHONE
+        'type',
+        'calculate',
+        'hidden',
+        'start',
+        'end',
+        'begin ',
+        'deviceid',
+        'simserial',
+        'phonenumber'
     )
-    bad = any((type.startswith(bad) for bad in bad_types))
-    return not bad and type != ""
+    bad = any((odk_type.startswith(bad) for bad in bad_types))
+    return not bad and odk_type != ''
 
 
-def get_filtered_survey_names(xlsxfiles):
-    results = {}
-    for f in set(xlsxfiles):
-        wb = Workbook(f)
-        form_id = wb.get_form_id()
-        type = wb[constants.SURVEY].column(constants.QLANG_TYPE)
-        name = wb[constants.SURVEY].column(constants.QLANG_NAME)
-        names = [n for t, n in zip(type, name) if is_analytics_type(t)]
-        results[form_id] = names
-    return results
+def get_filtered_survey_names(xlsform):
+    """Returns the ODK names from 'survey' to track in analytics.
+
+    Args:
+        xlsform (pmix.Xlsform): An xlsform (workbook) object
+
+    Returns:
+        A list of ODK names to use in analytics.
+    """
+    odk_type = xlsform['survey'].column('type')
+    odk_name = xlsform['survey'].column('name')
+    filtered = [str(n) for t, n in zip(odk_type, odk_name) if
+                is_analytics_type(str(t))]
+    return filtered
 
 
-def format_dict_for_analytics(filtered_results):
-    for k in filtered_results:
-        first_line = '"{}" = c('.format(k)
-        v = filtered_results[k]
-        entries = ['    "{}"'.format(entry) for entry in v]
-        inner = ",\n".join(entries)
-        last_line = ')'
-        return "\n".join([first_line, inner, last_line])
+def get_useful_tags(xlsform):
+    """Return the ODK tags from 'survey' to retrieve the value for.
 
+    Args:
+        xlsform (pmix.Xlsform): An xlsform (workbook) object
 
-def send_analytics_code(xlsxfiles):
-    results = get_filtered_survey_names(xlsxfiles)
-    string = format_dict_for_analytics(results)
-    print(string)
+    Returns:
+        A list of ODK tags to track in analytics.
+    """
+    useful_tags = (
+        'your_name',
+        'name_typed',
+        'level1',
+        'level2',
+        'level3',
+        'level4',
+        'EA',
+        'level1_unlinked',
+        'level2_unlinked',
+        'level3_unlinked',
+        'level4_unlinked',
+        'EA_unlinked',
+        'facility_type',
+        'deviceid',
+        'start',
+        'end',
+        'HHQ_result',
+        'FRS_result',
+        'SDP_result'
+    )
+    odk_name = set(str(c) for c in xlsform['survey'].column('name'))
+    keepers = [t for t in useful_tags if t in odk_name]
+    return keepers
 
 
 def analytics_obj(xlsxfile):
-    wb = Xlsform(xlsxfile)
+    """Create an analytics object based on supplied path."""
+    xls = Xlsform(xlsxfile)
+    form_id = xls.form_id
+    form_title = xls.form_title
+    prompts = get_filtered_survey_names(xls)
+    tags = get_useful_tags(xls)
+    obj = {
+        'form_id': form_id,
+        'form_title': form_title,
+        'prompts': prompts,
+        'tags': tags,
+        '|--comment': 'END {}'.format(form_id)
+    }
+    return obj
 
 
 def get_analytics_objs(xlsxfiles):
-    return [analytics_obj(xlsfile) for xlsxfile in set(xlsxfiles)]
+    """Get the list of analytics objects based on supplied paths."""
+    return [analytics_obj(xlsxfile) for xlsxfile in set(xlsxfiles)]
+
+
+def prettify(obj):
+    """Get the prettified string to represent the supplied object."""
+    return json.dumps(obj, sort_keys=True, indent=2)
 
 
 def analytics_cli():
+    """Run the command line interface for this module."""
     prog_desc = 'Help facilitate analytics by extracting useful information.'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -75,7 +128,14 @@ def analytics_cli():
 
     args = parser.parse_args()
 
-    send_analytics_code(args.xlsxfile)
+    objs = get_analytics_objs(args.xlsxfile)
+    result = prettify(objs)
+    if args.outpath:
+        with open(args.outpath, encoding='utf-8') as out:
+            out.write(result)
+        print('Wrote analytics file to "{}"'.format(args.outpath))
+    else:
+        print(result)
 
 
 if __name__ == '__main__':

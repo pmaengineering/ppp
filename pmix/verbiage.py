@@ -44,6 +44,7 @@ class TranslationDict:
 
     def extract_translations(data):
         if isinstance(data, Xlsform):
+            pass
 
     def add_language(self, language):
         if isinstance(language, str):

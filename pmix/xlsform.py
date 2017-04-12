@@ -34,10 +34,24 @@ class Xlsform(Workbook):
             local_settings = self['settings']
             headers = local_settings[0]
             values = local_settings[1]
-            self.settings = {str(k): str(v) for k, v in zip(headers, values) if
-                    str(k)}
+            self.settings = {str(k): v for k, v in zip(headers, values) if not
+                    k.is_blank()}
         except (KeyError, IndexError):
             self.settings = {}
+
+    @property
+    def form_id(self):
+        """Return form_id setting value."""
+        self.init_settings()
+        form_id = self.settings['form_id']
+        return str(form_id)
+
+    @property
+    def form_title(self):
+        """Return form_title setting value."""
+        self.init_settings()
+        form_title = self.settings['form_title']
+        return str(form_title)
 
     def add_language(self, language):
         """Add appropriate language columns to an Xlsform.

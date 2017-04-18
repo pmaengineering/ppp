@@ -24,7 +24,7 @@ class Xlstab(Worksheet):
         'image'
     )
 
-    TCellData = namedtuple('CellData', ['row', 'col', 'header', 'cell',
+    TCellData = namedtuple('TCellData', ['row', 'col', 'header', 'cell',
                            'language'])
 
     def __init__(self, *, data=None, name=None):
@@ -106,9 +106,9 @@ class Xlstab(Worksheet):
             for pair in self.column_pairs(keep, base, start=1):
                 base, other = pair
                 base_lang = self.get_lang(base.header)
-                new_base = TCellData(*base, base_lang)
+                new_base = self.TCellData(*base, base_lang)
                 other_lang = self.get_lang(other.header)
-                new_other = TCellData(*other, other_lang)
+                new_other = self.TCellData(*other, other_lang)
                 yield new_base, new_other
 
     @staticmethod

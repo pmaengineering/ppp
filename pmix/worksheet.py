@@ -92,9 +92,13 @@ class Worksheet:
             self.data.insert(0, new_row)
         elif row is None:
             self.data.append([Cell()])
+        elif len(row) != self.ncol():
+            msg = 'Worksheet and supplied row width inconsistent ({} vs. {})'
+            msg = msg.format(self.ncol(), len(row))
+            raise SpreadsheetError(msg)
         else:
-            # TODO: row is something, add it in.
-            pass
+            new_row = [c if isinstance(c, Cell) else Cell(c) for c in row]
+            self.data.insert(0, new_row)
 
     def append_col(self, header=None):
         """Append a column to the end of the worksheet.

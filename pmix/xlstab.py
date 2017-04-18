@@ -1,4 +1,5 @@
 """Module for the Xlstab class."""
+from collections import namedtuple
 import logging
 
 from pmix.error import XlsformError
@@ -22,6 +23,9 @@ class Xlstab(Worksheet):
         'video',
         'image'
     )
+
+    TCellData = namedtuple('CellData', ['row', 'col', 'header', 'cell',
+                           'language'])
 
     def __init__(self, *, data=None, name=None):
         """Initialize an Xlstab.
@@ -99,7 +103,13 @@ class Xlstab(Worksheet):
             keep = [h for h in found if not any(l in h for l in ignore)]
             gen = (h for h in keep if self.get_lang(h) == 'English')
             base = next(gen, None)
-            yield from self.column_pairs(keep, base, start=1)
+            for pair in self.column_pairs(keep, base, start=1):
+                base, other = pair
+                base_lang = self.get_lang(base.header)
+                new_base = TCellData(*base, base_lang)
+                other_lang = self.get_lang(other.header)
+                new_other = TCellData(*other, other_lang)
+                yield new_base, new_other
 
     @staticmethod
     def get_lang(header):

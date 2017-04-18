@@ -1,6 +1,5 @@
 """This module defines the Xlsform class to work with ODK XLSForms"""
 
-from pmix.verbiage import TranslationDict
 from pmix.xlstab import Xlstab
 from pmix.workbook import Workbook
 
@@ -66,11 +65,3 @@ class Xlsform(Workbook):
         """Merge translations"""
         for sheet in self:
             sheet.merge_translations(translations, ignore)
-
-    def create_translation_dict(self, ignore=None):
-        """Create a TranslationDict object from this Xlsform"""
-        result = TranslationDict()
-        for sheet in self:
-            this_result = sheet.create_translation_dict(ignore)
-            result.update(this_result)
-        return result

@@ -6,6 +6,7 @@ groups)
 """
 
 import argparse
+import datetime
 import json
 
 from pmix.xlsform import Xlsform
@@ -93,11 +94,13 @@ def analytics_obj(xlsxfile):
     form_title = xls.form_title
     prompts = get_filtered_survey_names(xls)
     tags = get_useful_tags(xls)
+    today = str(datetime.date.today())
     obj = {
         'form_id': form_id,
         'form_title': form_title,
         'prompts': prompts,
         'tags': tags,
+        'created': today,
         '~comment': 'END {}'.format(form_id)
     }
     return obj

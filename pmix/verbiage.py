@@ -3,6 +3,8 @@ import re
 
 import xlsxwriter
 
+from pmix.workbook import Workbook
+from pmix.xlsform import Xlsform
 from pmix import constants
 from pmix import utils
 
@@ -13,15 +15,16 @@ class TranslationDict:
     The translation structure is a dictionary that looks like:
 
         {
-            "eng-string1" : {
+            "eng1" : {
                 "language1" : ["found1", "found2", ...]
                 "language2" : ["found1", "found2", ...]
             },
-            "eng-string2" : ...
+            "eng2" : ...
         }
 
-    Keys are English strings. Values are dictionaries with language as key and
-    all found translations in that language as values.
+    Keys are English strings. Values are dictionaries with language string as
+    key and all found translations in that language as values. The found
+    translations are objects that store extra information.
 
     Attributes:
         data (dict): Data structure described above
@@ -37,14 +40,36 @@ class TranslationDict:
     number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s*'
     number_prog = re.compile(number_re)
 
-    def __init__(self, data=None, base='English'):
+    def __init__(self, src=None, base='English'):
         self.data = {}
+        self.base = base
+        self.extract_translations(src)
         self.languages = set()
         self.additionals = set()
 
-    def extract_translations(data):
-        if isinstance(data, Xlsform):
-            pass
+    def extract_translations(self, obj):
+        if isinstance(obj, Xlsform):
+            self.translations_from_xlsform(obj)
+        elif isinstance(obj, Workbook):
+            self.translations_from_workbook(obj)
+
+    def translations_from_xlsform(self, xlsform):
+        for xlstab in xlsform:
+            for pair in xlstab.translation_pairs():
+                pass # do stuff
+
+    def translations_from_workbook(self, workbook):
+        for worksheet in workbook:
+            try:
+                base = worksheet.column_headers().index(self.base)
+                ncol = worksheet.ncol()
+                indices = range(base, ncol)
+                for pair in worksheet.column_pairs(indices=indices, start=1):
+                    pass
+            except ValueError:
+                # TODO: possibly match text::English to other columns
+                pass
+
 
     def add_language(self, language):
         if isinstance(language, str):

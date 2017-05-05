@@ -1,6 +1,12 @@
 import argparse
 
-from pmix.odkform import Odkform
+try:
+    from odkform import Odkform
+except:
+    try:
+        from .odkform import Odkform
+    except:
+        from pmix.odkform import Odkform
 
 
 if __name__ == '__main__':

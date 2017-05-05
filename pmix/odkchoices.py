@@ -1,4 +1,10 @@
-from pmix.error import OdkformError
+try:
+    from error import OdkformError
+except:
+    try:
+        from .error import OdkformError
+    except:
+        from pmix.error import OdkformError
 
 
 class Odkchoices:

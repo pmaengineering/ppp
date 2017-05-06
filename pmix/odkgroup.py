@@ -10,9 +10,10 @@ except:
 class Odkgroup:
     """Class to represent a field-list group in XLSForm"""
 
-    def __init__(self, opener):
+    def __init__(self, opener, output_format):
         """Initialize a group"""
         self.opener = opener
+        self.output_format = output_format
         self.data = []
         self.pending_table = None
 
@@ -54,4 +55,13 @@ class Odkgroup:
         obj_texts = (d.to_text(lang) for d in self.data)
         sep = '\n\n{}\n\n'.format(' -' * 25)
         group_text = sep.join(obj_texts)
+        return group_text
+
+    def to_html(self, lang=None):
+        """Get the text representation of the full group
+
+        :param lang: (str) The language.
+        :return: (dict) The text for this group.
+        """
+        group_text = 'Group (temporary placeholder)'
         return group_text

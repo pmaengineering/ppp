@@ -4,9 +4,10 @@ import textwrap
 class Odkrepeat:
     """Class to represent repeat construct from XLSForm"""
 
-    def __init__(self, opener):
+    def __init__(self, opener, output_format):
         """Initialize repeat object with empty data bin"""
         self.opener = opener
+        self.output_format = output_format
         self.data = []
 
     def add(self, obj):
@@ -28,4 +29,13 @@ class Odkrepeat:
         sep = '\n\n{}\n\n'.format('=' * 50)
         repeat_text = sep.join(obj_texts)
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
+        return wrapped
+
+    def to_html(self, lang=None):
+        """Get the text representation of the entire repeat group
+
+        :param lang: (str) The language.
+        :return: (dict) The text for this repeat.
+        """
+        wrapped = 'Repeat (temporary placeholder)'
         return wrapped

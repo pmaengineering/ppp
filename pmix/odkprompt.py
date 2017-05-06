@@ -28,17 +28,19 @@ class Odkprompt:
         'note',
     )
 
-    def __init__(self, row, choices=None):
+    def __init__(self, row, output_format, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type)
 
         Row is a dict object. It is guaranteed to have the "simple_type" key
         with a value from the class member variables `select_types`,
         `response_types`, or `non_response_types`.
 
-        :param row: (dict) XLSForm headers as keys, row entries as values
-        :param choices: An Odkchoices object, or None if not a select type
+        :param row: (dict) XLSForm headers as keys, row entries as values.
+        :param output_format: A string representing output format of text or html.
+        :param choices: An Odkchoices object, or None if not a select type.
         """
         self.row = row
+        self.output_format = output_format
         self.choices = choices
         self.odktype = self.row['simple_type']
 
@@ -131,7 +133,7 @@ class Odkprompt:
         relevant_text = self.text_field('relevant_text', lang)
         label = self.text_field('label', lang)
         hint = self.text_field('hint', lang)
-        # TODO: Audio, Image, Video
+        # Need done: Audio, Image, Video, Relevant
         fields = (
             self.to_text_relevant(lang),
             label,
@@ -140,4 +142,22 @@ class Odkprompt:
         )
         text = filter(None, fields)
         result = '\n\n'.join(text)
+        return result
+
+    def to_html(self, lang=None):
+        """Get the text representation of the full prompt
+
+        :param lang: (str) The language.
+        :return: (dict) The text from all parts of the prompt.
+        """
+        # TODO: Audio, Image, Video, Relevant
+        prompt = {
+            'label': self.text_field('label', lang),
+            'hint': self.text_field('hint', lang),
+            'to_text_response': self.to_text_response(lang),
+            # 'to_text_relevant': self.to_text_relevant(lang),
+            # 'relevant_text': self.text_field('relevant_text', lang),
+            'json_row': self.row,
+        }
+        result = prompt
         return result

@@ -1,7 +1,7 @@
 PYTHON=./env/bin/python3
 SRC=pmix/
 
-.PHONY: lint tags
+.PHONY: lint tags ltags test
 
 lint:
 	${PYTHON} -m pylint ${SRC} 	&& \
@@ -10,4 +10,10 @@ lint:
 
 tags:
 	ctags -R --python-kinds=-i .
+
+ltags:
+	ctags -R --python-kinds=-i ./${SRC}
+
+test:
+	${PYTHON} -m unittest discover -v
 

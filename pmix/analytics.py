@@ -55,6 +55,9 @@ def get_filtered_survey_names(xlsform):
 def get_useful_tags(xlsform):
     """Return the ODK tags from 'survey' to retrieve the value for.
 
+    This function compares each ODK 'name' to a pre-approved list and keeps
+    that name if there is a match.
+
     Args:
         xlsform (pmix.Xlsform): An xlsform (workbook) object
 
@@ -69,6 +72,8 @@ def get_useful_tags(xlsform):
         'level3',
         'level4',
         'EA',
+        'structure',
+        'household',
         'level1_unlinked',
         'level2_unlinked',
         'level3_unlinked',
@@ -133,7 +138,7 @@ def analytics_cli():
     objs = get_analytics_objs(args.xlsxfile)
     result = prettify(objs)
     if args.outpath:
-        with open(args.outpath, encoding='utf-8') as out:
+        with open(args.outpath, mode='w', encoding='utf-8') as out:
             out.write(result)
         print('Wrote analytics file to "{}"'.format(args.outpath))
     else:

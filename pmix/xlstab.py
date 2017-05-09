@@ -7,6 +7,16 @@ from pmix.worksheet import Worksheet
 
 
 class Xlstab(Worksheet):
+    """Class to represent a tab in an XLSForm, such as "survey".
+
+    Class attributes:
+        SURVEY_TRANSLATIONS (tuple of str): The columns in "survey" that
+            can be translated.
+        CHOICES_TRANSLATIONS (tuple of str): The columns in "choices" or
+            "external_choices" that can be translated.
+        TCellData (namedtuple): A named tuple to carry specific data for
+            translations.
+    """
 
     SURVEY_TRANSLATIONS = (
         'label',
@@ -82,6 +92,8 @@ class Xlstab(Worksheet):
         This function only works for 'survey', 'choices' and
         'external_choices'.
 
+        The program searches for specific columns (class attributes).
+
         Args:
             ignore: A sequence of strings. If the header contains any of these
                 then that column is ignored for translations. It is intended
@@ -110,6 +122,42 @@ class Xlstab(Worksheet):
                 other_lang = self.get_lang(other.header)
                 new_other = self.TCellData(*other, other_lang)
                 yield new_base, new_other
+
+    def lazy_translation_pairs(self, ignore=None, base='English'):
+        """Iterate through translation pairs in this tab.
+
+        This method is based on finding things of the form
+
+            [column]::[language]
+
+        in the questionnaire, matching based on [column].
+
+        Args:
+            ignore (seq of str): If the header contains any of these
+                then that column is ignored for translations. It is intended
+                as a way to ignore certain languages. Default None indicates
+                do not ignore any translatable columns.
+            base (str): The base language. The default is 'English'.
+
+        Yields:
+            Yields pairs of translations from ``Worksheet.column_pairs``.
+        """
+        if ignore is None:
+            ignore = []
+        headers = self.column_headers()
+        ending = '::{}'.format(base)
+        found = [h for h in headers if h.endswith(ending)]
+        for col in found:
+            start, _ = col.rsplit(sep='::', maxsplit=1)
+            others = [h for h in headers if h.startswith(start) and h != col]
+            for pair in self.column_pairs(others, col, start=1):
+                first, second = pair
+                base_lang = self.get_lang(first.header)
+                new_base = self.TCellData(*first, base_lang)
+                other_lang = self.get_lang(second.header)
+                new_other = self.TCellData(*second, other_lang)
+                if base_lang not in ignore and other_lang not in ignore:
+                    yield new_base, new_other
 
     @staticmethod
     def get_lang(header):

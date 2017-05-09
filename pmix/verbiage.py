@@ -43,7 +43,8 @@ class TranslationDict:
     def __init__(self, src=None, base='English'):
         self.data = {}
         self.base = base
-        self.extract_translations(src)
+        if src:
+            self.extract_translations(src)
         self.languages = set()
         self.additionals = set()
 
@@ -55,8 +56,13 @@ class TranslationDict:
 
     def translations_from_xlsform(self, xlsform):
         for xlstab in xlsform:
-            for pair in xlstab.translation_pairs():
-                pass # do stuff
+            for pair in xlstab.lazy_translation_pairs(base=self.base):
+                first, second = pair
+                if first.cell.is_blank() or second.cell.is_blank():
+                    continue
+                src = first.cell.value
+                lang = second.language
+                self.add_translation(src, second, lang)
 
     def translations_from_workbook(self, workbook):
         for worksheet in workbook:

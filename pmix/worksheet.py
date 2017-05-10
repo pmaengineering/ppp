@@ -1,6 +1,5 @@
 """This module defines the Worksheet class."""
 import csv
-from collections import namedtuple
 
 from pmix.cell import Cell
 from pmix.error import SpreadsheetError
@@ -14,11 +13,9 @@ class Worksheet:
 
     Attributes:
         count (int): Keeps track of the sheets created without a name.
-        CellData (namedtuple): A container for tracking cell information.
     """
 
     count = 0
-    CellData = namedtuple('CellData', ['row', 'col', 'header', 'cell'])
 
     def __init__(self, *, data=None, name=None):
         """Initialize the Worksheet.
@@ -158,13 +155,24 @@ class Worksheet:
             base = indices.pop(0)
         else:
             base = base if isinstance(base, int) else headers.index(base)
-            indices.remove(base)
+            if base in indices:
+                indices.remove(base)
         for i, row in enumerate(self):
             if i < start:
                 continue
-            base_data = self.CellData(i, base, headers[base], row[base])
+            base_data = {
+                'row': i,
+                'col': base,
+                'header': headers[base],
+                'cell': row[base]
+            }
             for j in indices:
-                other_data = self.CellData(i, j, headers[j], row[j])
+                other_data = {
+                    'row': i,
+                    'col': j,
+                    'header': headers[j],
+                    'cell': row[j]
+                }
                 yield base_data, other_data
 
     def column(self, key):

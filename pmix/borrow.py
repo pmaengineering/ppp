@@ -29,23 +29,15 @@ import argparse
 import os.path
 
 from pmix.verbiage import TranslationDict
+from pmix.xlsform import Xlsform
 from pmix import constants
 from pmix import workbook
-
-
-def translation_dict_from_files(files, ignore=None):
-    result = TranslationDict()
-    workbooks = [workbook.Workbook(f) for f in files]
-    for wb in workbooks:
-        this_dict = wb.create_translation_dict(ignore)
-        result.update(this_dict)
-    return result
 
 
 def get_wb_outpath(wb):
     orig = wb.file
     base, ext = os.path.splitext(orig)
-    outpath = '{}{}{}'.format(base, constants.BORROW_SUFFIX, ext)
+    outpath = '{}{}{}'.format(base, '-borrow', ext)
     return outpath
 
 
@@ -80,17 +72,20 @@ if __name__ == '__main__':
     ignore = set(args.ignore) if args.ignore else None
     add = set(args.add) if args.add else None
 
-    translation_dict = translation_dict_from_files(set(args.xlsxfile), ignore)
+    translation_dict = TranslationDict()
+    for path in set(args.xlsxfile):
+        xlsform = Xlsform(path)
+        translation_dict.extract_translations(xlsform)
 
     if args.merge is None:
-        outpath = constants.BORROW_OUT if args.outpath is None else args.outpath
-        translation_dict.add_language(add)
+        outpath = 'translations.xlsx' if args.outpath is None else args.outpath
+        # translation_dict.add_language(add)
         translation_dict.write_excel(outpath)
         print('Created translation file: "{}"'.format(outpath))
     else:
-        wb = workbook.Workbook(args.merge)
-        wb.add_language(add)
-        wb.merge_translations(translation_dict, ignore)
-        outpath = get_wb_outpath(wb) if args.outpath is None else args.outpath
-        wb.write_out(outpath)
+        xlsform = Xlsform(args.merge)
+        # wb.add_language(add)
+        xlsform.merge_translations(translation_dict, ignore)
+        outpath = get_wb_outpath(xlsform) if args.outpath is None else args.outpath
+        xlsform.write_out(outpath)
         print('Merged translations into file: "{}"'.format(outpath))

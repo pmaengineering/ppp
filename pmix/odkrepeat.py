@@ -31,7 +31,7 @@ class Odkrepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    def to_html(self, lang=None):
+    def to_dict(self, lang=None):
         """Get the text representation of the entire repeat group
 
         :param lang: (str) The language.

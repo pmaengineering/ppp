@@ -1,4 +1,5 @@
 import os.path
+from jinja2 import Environment, PackageLoader
 from pmix.error import OdkformError
 from pmix.odkchoices import Odkchoices
 from pmix.odkgroup import Odkgroup
@@ -54,6 +55,26 @@ class Odkform:
         for q in self.questionnaire:
             html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
+
+    def render_html_output(self, data):
+        output_file = 'html_rendering_in_development.html'
+        ENV = Environment(loader=PackageLoader('pmix'))
+        template = ENV.get_template('base.html')
+        # try:
+        #     # try: os.path.join(os.path.split(__file__)[0], 'file')
+        #     # Or try jinja2 package loader.
+        #     ENV = Environment(loader=FileSystemLoader('./templates'))
+        #     template = ENV.get_template('base.html')
+        # except:
+        #     ENV = Environment(loader=FileSystemLoader('./pmix/templates'))
+        #     template = ENV.get_template('base.html')
+
+        html = template.render(data=data)
+
+        print('Writing: ', output_file)
+        with open(output_file, 'w') as out_file:
+            out_file.write(html)
+
 
     def convert_survey(self, of, wb):
         """Convert rows and strings of a workbook into better python objects

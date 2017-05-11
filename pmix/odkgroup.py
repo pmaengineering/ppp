@@ -51,7 +51,7 @@ class Odkgroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    def to_html(self, lang=None):
+    def to_dict(self, lang=None):
         """Get the text representation of the full group
 
         :param lang: (str) The language.

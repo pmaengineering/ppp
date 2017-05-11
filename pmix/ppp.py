@@ -1,15 +1,22 @@
 import argparse
 
-try:
-    from odkform import Odkform
-    from ppp_render_html import render_html
-except:
-    try:
-        from .odkform import Odkform
-        from .ppp_render_html import render_html
-    except:
-        from pmix.odkform import Odkform
-        from pmix.ppp_render_html import render_html
+# try from roto directory of pmix: python3 -m pmix.ppp
+# -m will treat ppp as main.
+# or try from roto directory of pmix: python3 pmix/ppp.py
+# try:
+#     from odkform import Odkform
+#     from ppp_render_html import render_html
+# except:
+#     try:
+#         from .odkform import Odkform
+#         from .ppp_render_html import render_html
+#     except:
+#         from pmix.odkform import Odkform
+#         from pmix.ppp_render_html import render_html
+
+from pmix.odkform import Odkform
+from pmix.ppp_render_html import render_html
+
 
 class OutputModeError(Exception):
     def __init__(self):
@@ -36,11 +43,14 @@ if __name__ == '__main__':
     language_help = 'Language to write the paper version in.'
     parser.add_argument('-l', '--language', help=language_help)
 
-    # Note: Temporarily disabled. Other form of mode input is being used.
     # format_help = ('Format to generate. Currently "text" is supported. Future '
     #                'formats include "html" and "pdf".')
-    # parser.add_argument('-f', '--format', choices=('text', 'html', 'pdf'),
+    # parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
     #                     help=format_help)
+
+
+    #  Default behavior: html, to terminal
+    # example: python3 -m pmix.ppp <path_to_form>.xlsx > file.html
 
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'STDOUT is used.')
@@ -54,6 +64,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # Change the following a little bit.
     output_modes = get_output_modes(args)
     if len(output_modes) > 0:
         if ('terminal' or 'text_file') in output_modes:
@@ -66,9 +77,13 @@ if __name__ == '__main__':
                 print(s)
         elif 'html_file' in output_modes:
             odkform = Odkform(of='html', f=args.xlsxfile)
+            # change so that when odkform intiializes, don't need output format. use odkform.to_dict instead
             html_questionnaire = odkform.to_html(args.language)
+            # render_html(html_questionnaire)
             # Testing
-            print(html_questionnaire['questions'][50])
+            test = html_questionnaire['questions'][52]
+            print(test)
+            # render_html(test)
             render_html(html_questionnaire)
     else:
         raise OutputModeError

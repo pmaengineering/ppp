@@ -72,7 +72,7 @@ class Odkform:
             'questions': []
         }
         for q in self.questionnaire:
-            html_questionnaire['questions'].append(q.to_html(lang=lang))
+            html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
 
     def convert_survey(self, of, wb):
@@ -99,7 +99,7 @@ class Odkform:
             header = survey[0]
 
             # Temp for debugging.
-            temp_count = 0
+            # temp_count = 0
 
             for i, row in enumerate(survey):
                 if i == 0:

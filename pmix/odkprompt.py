@@ -124,6 +124,26 @@ class Odkprompt:
 
         return s
 
+    def to_html_input_field(self, lang=None):
+        """Get the response field for this prompt
+
+        This is a representation of the area of a paper questionnaire where the response is recorded.
+
+        :param lang: (str) The language.
+        :return: (str or dict) The representation of the entry field
+        """
+        field = None
+        if self.odktype == 'select_multiple':
+            choices = self.choices.labels(lang=lang)
+            field = choices
+        elif self.odktype == 'select_one':
+            choices = self.choices.labels(lang=lang)
+            field = choices
+        elif self.odktype in Odkprompt.response_types:
+            field = '_'*30 + '({})'.format(self.odktype)
+
+        return field
+
     def to_text(self, lang=None):
         """Get the text representation of the full prompt
 
@@ -144,20 +164,30 @@ class Odkprompt:
         result = '\n\n'.join(text)
         return result
 
-    def to_html(self, lang=None):
+    def to_dict(self, lang=None):
         """Get the text representation of the full prompt
 
         :param lang: (str) The language.
         :return: (dict) The text from all parts of the prompt.
         """
         # TODO: Audio, Image, Video, Relevant
-        prompt = {
-            'label': self.text_field('label', lang),
-            'hint': self.text_field('hint', lang),
-            'to_text_response': self.to_text_response(lang),
-            # 'to_text_relevant': self.to_text_relevant(lang),
-            # 'relevant_text': self.text_field('relevant_text', lang),
-            'json_row': self.row,
-        }
-        result = prompt
-        return result
+        prompt = self.row
+        prompt['formatted_label'] = self.text_field('label', lang),
+        prompt['formatted_hint'] = self.text_field('hint', lang),
+        prompt['label'] = prompt['label::English']
+        prompt['hint'] = prompt['hint::English']
+        prompt['constraint_message'] = prompt['constraint_message::English']
+        try:
+            prompt['image'] = prompt['image::English']
+        except:
+            prompt['image'] = ''
+        try:
+            prompt['audio'] = prompt['audio::English']
+        except:
+            prompt['audio'] = ''
+        try:
+            prompt['video'] = prompt['video::English']
+        except:
+            prompt['video'] = ''
+        prompt['input_field'] = self.to_html_input_field(lang),
+        return prompt

@@ -1,6 +1,4 @@
-from jinja2 import Environment, FileSystemLoader
-
-ENV = Environment(loader=FileSystemLoader('./templates'))
+from jinja2 import Environment, FileSystemLoader, PackageLoader
 
 def reference_material():
     def rotate_array(active):
@@ -42,13 +40,21 @@ def reference_material():
 
 # # # # # Everything above is just temporary reference material. # # # # #
 
-def render_html(json_row):
-    test_var = 'still testing'
-    item = 'still_testing'
-    file_name = item + '.html'
-    template = ENV.get_template(file_name)
-    html = template.render(test=test_var)
+def render_html(data):
+    output_file = 'html_rendering_in_development.html'
+    ENV = Environment(loader=PackageLoader('pmix'))
+    template = ENV.get_template('base.html')
+    # try:
+    #     # try: os.path.join(os.path.split(__file__)[0], 'file')
+    #     # Or try jinja2 package loader.
+    #     ENV = Environment(loader=FileSystemLoader('./templates'))
+    #     template = ENV.get_template('base.html')
+    # except:
+    #     ENV = Environment(loader=FileSystemLoader('./pmix/templates'))
+    #     template = ENV.get_template('base.html')
 
-    print('Writing', file_name)
-    with open(file_name, 'w') as out_file:
+    html = template.render(data=data)
+
+    print('Writing: ', output_file)
+    with open(output_file, 'w') as out_file:
         out_file.write(html)

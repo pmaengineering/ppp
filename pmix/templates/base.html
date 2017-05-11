@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>{{ data.title }}</title>
+        {# {% block styles -%}<link rel="stylesheet" type="text/css" href="styles.html">{%- endblock styles %} #}
+        {% block styles -%}{% include "styles.html" %}{%- endblock styles %}
+    </head>
+    <body>
+        <div id="container">
+            <div id="identification_section" class="section">
+                {% block questions -%}
+                    {% for question in data.questions %}
+                        {% set question_block_loop = loop %}
+                        {% include "prompt.html" %}
+                        <!-- 'question' will just be a raw, static html string -->
+                        {# {{ question }} #}
+                    {% endfor %}
+                {%- endblock questions %}
+            </div>
+        </div>
+    </body>
+</html>

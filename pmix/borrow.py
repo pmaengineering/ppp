@@ -64,6 +64,10 @@ if __name__ == '__main__':
                    'translations. This option can be supplied multiple times')
     parser.add_argument('-i', '--ignore', action='append', help=ignore_help)
 
+    carry_help = ('If translations are missing, carry over the same text from '
+                  'the source language. The default is to leave missing.')
+    parser.add_argument('-c', '--carry', action='store_true', help=carry_help)
+
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'defaults are used.')
     parser.add_argument('-o', '--outpath', help=out_help)
@@ -85,7 +89,7 @@ if __name__ == '__main__':
     else:
         xlsform = Xlsform(args.merge)
         # wb.add_language(add)
-        xlsform.merge_translations(translation_dict, ignore)
+        xlsform.merge_translations(translation_dict, ignore, carry=args.carry)
         outpath = get_wb_outpath(xlsform) if args.outpath is None else args.outpath
         xlsform.write_out(outpath)
         print('Merged translations into file: "{}"'.format(outpath))

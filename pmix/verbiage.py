@@ -142,7 +142,8 @@ class TranslationDict:
         all_found = [other['translation'] for other in all_found_data]
         unique_all_found = set(all_found)
         if len(unique_all_found) > 1:
-            msg = '"{}" has {} translations'.format(src, len(unique_all_found))
+            msg = '"{}" has {} translations {}'
+            msg = msg.format(src, len(unique_all_found), unique_all_found)
             logging.warn(msg)
         max_count = max((all_found.count(s) for s in unique_all_found))
         first_max = next((s for s in all_found if all_found.count(s) ==

@@ -182,9 +182,29 @@ class Xlstab(Worksheet):
                 other['language'] = other_lang
                 if src_lang in ignore or other_lang in ignore:
                     continue
-                if src['cell'].is_blank() or other['cell'].is_blank():
+                if src['cell'].is_blank() and other['cell'].is_blank():
                     continue
                 yield src, other
+
+    def easy_translation_pairs(self, ignore=None, base='English'):
+        if ignore is None:
+            ignore = []
+        try:
+            base = self.column_headers().index(base)
+            ncol = worksheet.ncol()
+            indices = range(base, ncol)
+            for pair in worksheet.column_pairs(indices=indices, start=1):
+                src, other = pair
+                if src['header'] in ignore or other['header'] in ignore:
+                    continue
+                if src['cell'].is_blank() and other['cell'].is_blank():
+                    continue
+                src['language'] = src['header']
+                other['language'] = other['header']
+                yield src, other
+        except ValueError:
+            # Base language not found. No translations
+            pass
 
     @staticmethod
     def get_lang(header):
@@ -201,9 +221,12 @@ class Xlstab(Worksheet):
             lang = header.split('::', maxsplit=1)[1]
         return lang
 
-    def merge_translations(self, translations, ignore=None, base='English'):
+    def merge_translations(self, translations, ignore=None, base='English',
+                           carry=False):
         for src, other in self.lazy_translation_pairs(ignore, base):
             src_text = str(src['cell'])
+            if src_text == '':
+                continue
             other_text = str(other['cell'])
             other_lang = other['language']
             try:
@@ -213,6 +236,14 @@ class Xlstab(Worksheet):
                 if src_text == translated:
                     other['cell'].highlight = 'HL_ORANGE'
                 elif translated != other_text:
-                    other['cell'].highlight = 'HL_GREEN'
+                    other['cell'].highlight = 'HL_BLUE'
             except KeyError:
-                other['cell'].highlight = 'HL_BLUE'
+                if other['cell'].is_blank():
+                    if carry:
+                        other['cell'].value = src_text
+                        other['cell'].highlight = 'HL_ORANGE'
+                    else:
+                        other['cell'].highlight = 'HL_RED'
+                else:
+                    other['cell'].highlight = 'HL_GREEN'
+

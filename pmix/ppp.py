@@ -1,21 +1,5 @@
 import argparse
-
-# try from roto directory of pmix: python3 -m pmix.ppp
-# -m will treat ppp as main.
-# or try from roto directory of pmix: python3 pmix/ppp.py
-# try:
-#     from odkform import Odkform
-#     from ppp_render_html import render_html
-# except:
-#     try:
-#         from .odkform import Odkform
-#         from .ppp_render_html import render_html
-#     except:
-#         from pmix.odkform import Odkform
-#         from pmix.ppp_render_html import render_html
-
 from pmix.odkform import Odkform
-from pmix.ppp_render_html import render_html
 
 
 class OutputModeError(Exception):
@@ -79,11 +63,11 @@ if __name__ == '__main__':
             odkform = Odkform(of='html', f=args.xlsxfile)
             # change so that when odkform intiializes, don't need output format. use odkform.to_dict instead
             html_questionnaire = odkform.to_html(args.language)
-            # render_html(html_questionnaire)
+            # odkform.render_html_output(html_questionnaire)
             # Testing
             test = html_questionnaire['questions'][52]
             print(test)
-            # render_html(test)
-            render_html(html_questionnaire)
+            # odkform.render_html_output(test)
+            odkform.render_html_output(html_questionnaire)
     else:
         raise OutputModeError

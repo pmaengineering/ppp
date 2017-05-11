@@ -1,10 +1,4 @@
-try:
-    from error import OdkformError
-except:
-    try:
-        from .error import OdkformError
-    except:
-        from pmix.error import OdkformError
+from pmix.error import OdkformError
 
 
 class Odktable:

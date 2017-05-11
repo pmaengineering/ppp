@@ -1,30 +1,10 @@
 import os.path
-
-try:
-    from ppp_render_html import render_html
-    from error import OdkformError
-    from odkchoices import Odkchoices
-    from odkgroup import Odkgroup
-    from odkprompt import Odkprompt
-    from odkrepeat import Odkrepeat
-    from workbook import Workbook
-except:
-    try:
-        from .ppp_render_html import render_html
-        from .error import OdkformError
-        from .odkchoices import Odkchoices
-        from .odkgroup import Odkgroup
-        from .odkprompt import Odkprompt
-        from .odkrepeat import Odkrepeat
-        from .workbook import Workbook
-    except:
-        from pmix.ppp_render_html import render_html
-        from pmix.error import OdkformError
-        from pmix.odkchoices import Odkchoices
-        from pmix.odkgroup import Odkgroup
-        from pmix.odkprompt import Odkprompt
-        from pmix.odkrepeat import Odkrepeat
-        from pmix.workbook import Workbook
+from pmix.error import OdkformError
+from pmix.odkchoices import Odkchoices
+from pmix.odkgroup import Odkgroup
+from pmix.odkprompt import Odkprompt
+from pmix.odkrepeat import Odkrepeat
+from pmix.workbook import Workbook
 
 
 class Odkform:

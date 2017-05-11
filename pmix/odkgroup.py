@@ -1,10 +1,4 @@
-try:
-    from odktable import Odktable
-except:
-    try:
-        from .odktable import Odktable
-    except:
-        from pmix.odktable import Odktable
+from pmix.odktable import Odktable
 
 
 class Odkgroup:

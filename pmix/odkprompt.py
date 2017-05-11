@@ -28,7 +28,7 @@ class Odkprompt:
         'note',
     )
 
-    def __init__(self, row, output_format, choices=None):
+    def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type)
 
         Row is a dict object. It is guaranteed to have the "simple_type" key
@@ -36,17 +36,17 @@ class Odkprompt:
         `response_types`, or `non_response_types`.
 
         :param row: (dict) XLSForm headers as keys, row entries as values.
-        :param output_format: A string representing output format of text or html.
         :param choices: An Odkchoices object, or None if not a select type.
         """
         self.row = row
-        self.output_format = output_format
         self.choices = choices
         self.odktype = self.row['simple_type']
 
+    @staticmethod
     def text_relevant(self, lang=None):
+        # TODO: Create this method.
         """Find the relevant text for this row"""
-
+        pass
 
     def text_field(self, field, lang=None):
         """Find a row value given a field and language
@@ -150,7 +150,8 @@ class Odkprompt:
         :param lang: (str) The language
         :return: (str) The text from all parts of the prompt
         """
-        relevant_text = self.text_field('relevant_text', lang)
+        # Note: May not need 'relevant_text'.
+        # relevant_text = self.text_field('relevant_text', lang)
         label = self.text_field('label', lang)
         hint = self.text_field('hint', lang)
         # Need done: Audio, Image, Video, Relevant
@@ -177,17 +178,9 @@ class Odkprompt:
         prompt['label'] = prompt['label::English']
         prompt['hint'] = prompt['hint::English']
         prompt['constraint_message'] = prompt['constraint_message::English']
-        try:
-            prompt['image'] = prompt['image::English']
-        except:
-            prompt['image'] = ''
-        try:
-            prompt['audio'] = prompt['audio::English']
-        except:
-            prompt['audio'] = ''
-        try:
-            prompt['video'] = prompt['video::English']
-        except:
-            prompt['video'] = ''
+        media_types = ['image', 'audio', 'video']
+        for media in media_types:
+            if (media + '::English') in prompt:
+                prompt[media] = prompt.pop(media + '::English')
         prompt['input_field'] = self.to_html_input_field(lang),
         return prompt

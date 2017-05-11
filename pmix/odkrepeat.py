@@ -4,10 +4,9 @@ import textwrap
 class Odkrepeat:
     """Class to represent repeat construct from XLSForm"""
 
-    def __init__(self, opener, output_format):
+    def __init__(self, opener):
         """Initialize repeat object with empty data bin"""
         self.opener = opener
-        self.output_format = output_format
         self.data = []
 
     def add(self, obj):

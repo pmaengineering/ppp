@@ -11,7 +11,7 @@ from pmix.workbook import Workbook
 class Odkform:
     """Class to represent an entire XLSForm"""
 
-    def __init__(self, *, of=None, f=None, wb=None):
+    def __init__(self, *, f=None, wb=None):
         if f is None and wb is None:
             raise OdkformError()
         elif f is not None:
@@ -20,7 +20,7 @@ class Odkform:
         self.settings = self.get_settings(wb)
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
-        self.questionnaire = self.convert_survey(of, wb)
+        self.questionnaire = self.convert_survey(wb)
 
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
 
@@ -43,6 +43,9 @@ class Odkform:
         return title_box + sep + result + sep
 
     def to_html(self, lang=None):
+        pass
+
+    def to_dict(self, lang=None):
         """Get the html representation of an entire XLSForm.
 
         :param lang: The language
@@ -56,10 +59,12 @@ class Odkform:
             html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
 
-    def render_html_output(self, data):
+    @staticmethod
+    def render_html_output(data):
         output_file = 'html_rendering_in_development.html'
-        ENV = Environment(loader=PackageLoader('pmix'))
-        template = ENV.get_template('base.html')
+        env = Environment(loader=PackageLoader('pmix'))
+        template = env.get_template('base.html')
+        # Note: To be removed.
         # try:
         #     # try: os.path.join(os.path.split(__file__)[0], 'file')
         #     # Or try jinja2 package loader.
@@ -71,12 +76,12 @@ class Odkform:
 
         html = template.render(data=data)
 
+        # TODO: Remove this statement, as all that should be output should be the html.
         print('Writing: ', output_file)
         with open(output_file, 'w') as out_file:
             out_file.write(html)
 
-
-    def convert_survey(self, of, wb):
+    def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects
 
         Main types are
@@ -94,7 +99,6 @@ class Odkform:
         """
         result = []
         stack = []
-        output_format = of
         try:
             survey = wb['survey']
             header = survey[0]
@@ -105,7 +109,8 @@ class Odkform:
             for i, row in enumerate(survey):
                 if i == 0:
                     continue
-                # Temp note: May be an issue using as is for Jinja2 if relying on being JSON standard compliant, as uses ' instead of ".
+                # Temp note: May be an issue using as is for Jinja2 if relying on being JSON standard compliant, as uses
+                #  ' instead of ".
                 json_row = {k: v for k, v in zip(header, row)}
                 token = self.parse_type(json_row)
 
@@ -116,7 +121,7 @@ class Odkform:
                         choices = token['choice_list']
                     else:
                         choices = None
-                    this_prompt = Odkprompt(json_row, output_format, choices)
+                    this_prompt = Odkprompt(json_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
                     else:
@@ -129,10 +134,9 @@ class Odkform:
                         #     print(json_row, '\n')
                         #     temp_count += 1
 
-
                 elif token['token_type'] == 'begin group':
                     if not stack or isinstance(stack[-1], Odkrepeat):
-                        group = Odkgroup(json_row, output_format)
+                        group = Odkgroup(json_row, )
                         stack.append(group)
                     else:
                         m = 'Unable to add group at row {}'.format(i+1)
@@ -150,7 +154,7 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
-                        repeat = Odkrepeat(json_row, output_format)
+                        repeat = Odkrepeat(json_row, )
                         stack.append(repeat)
                     else:
                         m = 'Unable to add repeat at row {}'.format(i+1)
@@ -165,7 +169,8 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'table':
                     if stack and isinstance(stack[-1], Odkgroup):
-                        this_prompt = Odkprompt(json_row, output_format, choices)
+                        # Note: Choices may be referenced before assignment.
+                        this_prompt = Odkprompt(json_row, choices)
                         stack[-1].add_table(this_prompt)
                     else:
                         m = 'Table found outside of field-list group at row {}'
@@ -292,7 +297,7 @@ class Odkform:
                 list_name = json_row['list_name']
                 if list_name in d:
                     d[list_name].add(json_row)
-                elif list_name: # not "else:" because possibly blank rows
+                elif list_name:  # not "else:" because possibly blank rows
                     odkchoices = Odkchoices(list_name)
                     odkchoices.add(json_row)
                     d[list_name] = odkchoices

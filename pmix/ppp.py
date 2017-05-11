@@ -2,20 +2,6 @@ import argparse
 from pmix.odkform import Odkform
 
 
-class OutputModeError(Exception):
-    def __init__(self):
-        print('Output Mode Error: Need to supply an output mode: text file, terminal, or HTML.')
-
-def get_output_modes(args):
-    output_modes = []
-    if args.outpath:
-        output_modes.append('text_file')
-    elif args.toterminal:
-        output_modes.append('terminal')
-    elif not(args.nohtml):
-        output_modes.append('html_file')
-    return output_modes
-
 if __name__ == '__main__':
     prog_desc = 'Convert XLSForm to Paper version.'
     parser = argparse.ArgumentParser(description=prog_desc)
@@ -23,51 +9,41 @@ if __name__ == '__main__':
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
 
-    # Note: I believe this is currently disabled. To activate, add: action='store_true'.
     language_help = 'Language to write the paper version in.'
     parser.add_argument('-l', '--language', help=language_help)
 
-    # format_help = ('Format to generate. Currently "text" is supported. Future '
-    #                'formats include "html" and "pdf".')
-    # parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
-    #                     help=format_help)
-
-
-    #  Default behavior: html, to terminal
-    # example: python3 -m pmix.ppp <path_to_form>.xlsx > file.html
+    format_help = ('Format to generate. Currently "text" and "html" are supported. Future '
+                   'formats include "pdf". If this flag is not supplied, output is html by default.')
+    parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
+                        help=format_help)
 
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'STDOUT is used.')
-    parser.add_argument('-o', '--outpath', action='store_true', help=out_help)
-
-    toterminal_help = ('Prints output to terminal.')
-    parser.add_argument('-t', '--toterminal', action='store_true', help=toterminal_help)
-
-    nohtml_help = ('Option to refrain from generating HTML output.')
-    parser.add_argument('-n', '--nohtml', action='store_true', help=nohtml_help)
+    parser.add_argument('-o', '--outpath', help=out_help)
 
     args = parser.parse_args()
 
-    # Change the following a little bit.
-    output_modes = get_output_modes(args)
-    if len(output_modes) > 0:
-        if ('terminal' or 'text_file') in output_modes:
-            odkform = Odkform(of='plain_text', f=args.xlsxfile)
-            s = odkform.to_text(args.language)
-            if 'text_file' in output_modes:
-                with open(args.outpath, mode='w', encoding='utf-8') as f:
-                    f.write(s)
-            elif 'terminal' in output_modes:
-                print(s)
-        elif 'html_file' in output_modes:
-            odkform = Odkform(of='html', f=args.xlsxfile)
-            # change so that when odkform intiializes, don't need output format. use odkform.to_dict instead
-            html_questionnaire = odkform.to_html(args.language)
-            # odkform.render_html_output(html_questionnaire)
-            # Testing
-            test = html_questionnaire['questions'][52]
-            print(test)
-            # odkform.render_html_output(test)
-            odkform.render_html_output(html_questionnaire)
+    s = ''
+    odkform = Odkform(f=args.xlsxfile)
+    if args.format == 'text':
+        s = odkform.to_text(args.language)
+    elif args.format == 'html' or not args.format:
+        s = odkform.to_html(args.language)
+        # Remove lines marked 'to-remove' this after using outpath instead. Try this example:
+        # python3 -m pmix.ppp .dev/forms/FQ.xlsx > FQ.html
+        d = odkform.to_dict(args.language)  # to-remove
+
+        # <Testing>
+        test = d['questions'][52]
+        print(test)
+        # odkform.render_html_output(test)
+        # </Testing>
+
+        odkform.render_html_output(d)  # to-remove
+    if args.outpath:
+        # TODO: Need to re-instate this after and use instead of render_html_output.
+        with open(args.outpath, mode='w', encoding='utf-8') as f:
+            f.write(s)
+        pass
     else:
-        raise OutputModeError
+        print(s)

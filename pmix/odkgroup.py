@@ -4,10 +4,9 @@ from pmix.odktable import Odktable
 class Odkgroup:
     """Class to represent a field-list group in XLSForm"""
 
-    def __init__(self, opener, output_format):
+    def __init__(self, opener):
         """Initialize a group"""
         self.opener = opener
-        self.output_format = output_format
         self.data = []
         self.pending_table = None
 

@@ -55,7 +55,9 @@ class Odkform:
         footer = env.get_template('footer.html').render()
         html_questionnaire += footer
 
-        return html_questionnaire
+        # TEMP DEBUGGING
+        # return html_questionnaire
+        return ''
 
     def to_dict(self, lang=None):
         """Get the dictionary representation of an entire XLSForm.
@@ -100,7 +102,8 @@ class Odkform:
         try:
             survey = wb['survey']
 
-            print(survey)
+            # DEBUGGING
+            print(enumerate(survey))
 
             header = survey[0]
 
@@ -110,19 +113,17 @@ class Odkform:
             for i, row in enumerate(survey):
                 if i == 0:
                     continue
-                # Temp note: May be an issue using as is for Jinja2 if relying on being JSON standard compliant, as uses
-                #  ' instead of ".
-                json_row = {k: v for k, v in zip(header, row)}
-                token = self.parse_type(json_row)
+                dict_row = {k: v for k, v in zip(header, row)}
+                token = self.parse_type(dict_row)
 
                 # START HERE
                 if token['token_type'] == 'prompt':
-                    json_row['simple_type'] = token['simple_type']
+                    dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
                         choices = token['choice_list']
                     else:
                         choices = None
-                    this_prompt = Odkprompt(json_row, choices)
+                    this_prompt = Odkprompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
                     else:
@@ -132,12 +133,12 @@ class Odkform:
                         #     print('Testing: ')
                         #     print(this_prompt)
                         #     print('')
-                        #     print(json_row, '\n')
+                        #     print(dict_row, '\n')
                         #     temp_count += 1
 
                 elif token['token_type'] == 'begin group':
                     if not stack or isinstance(stack[-1], Odkrepeat):
-                        group = Odkgroup(json_row, )
+                        group = Odkgroup(dict_row, )
                         stack.append(group)
                     else:
                         m = 'Unable to add group at row {}'.format(i+1)
@@ -155,7 +156,7 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
-                        repeat = Odkrepeat(json_row, )
+                        repeat = Odkrepeat(dict_row, )
                         stack.append(repeat)
                     else:
                         m = 'Unable to add repeat at row {}'.format(i+1)
@@ -171,7 +172,7 @@ class Odkform:
                 elif token['token_type'] == 'table':
                     if stack and isinstance(stack[-1], Odkgroup):
                         # Note: Choices may be referenced before assignment.
-                        this_prompt = Odkprompt(json_row, choices)
+                        this_prompt = Odkprompt(dict_row, choices)
                         stack[-1].add_table(this_prompt)
                     else:
                         m = 'Table found outside of field-list group at row {}'

@@ -58,10 +58,10 @@ class Odkform:
         return html_questionnaire
 
     def to_dict(self, lang=None):
-        """Get the html representation of an entire XLSForm.
+        """Get the dictionary representation of an entire XLSForm.
 
-        :param lang: The language
-        :return: A dictionary formatted for rendering to HTML.
+        :param lang: The language.
+        :return: A dictionary formatted questionnaire.
         """
         html_questionnaire = {
             'title': self.title,
@@ -72,6 +72,11 @@ class Odkform:
         return html_questionnaire
 
     def to_json(self, lang=None):
+        """Get the JSON representation of an entire XLSForm.
+
+        :param lang: The language.
+        :return: A JSON formatted questionnaire.
+        """
         return str(self.to_dict(lang)).replace('\'', '\"')
 
 

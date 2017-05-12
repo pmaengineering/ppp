@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     format_help = ('Format to generate. Currently "text" and "html" are supported. Future '
                    'formats include "pdf". If this flag is not supplied, output is html by default.')
-    parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
+    parser.add_argument('-f', '--format', choices=('html', 'text', 'json', 'pdf'),
                         help=format_help)
 
     out_help = ('Path to write output. If this argument is not supplied, then '
@@ -27,6 +27,8 @@ if __name__ == '__main__':
     odkform = Odkform(f=args.xlsxfile)
     if args.format == 'text':
         s = odkform.to_text(args.language)
+    elif args.format == 'json':
+        s = odkform.to_json(args.language)
     elif args.format == 'html' or not args.format:
         s = odkform.to_html(args.language)
     if args.outpath:

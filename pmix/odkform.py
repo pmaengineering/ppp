@@ -71,6 +71,11 @@ class Odkform:
             html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
 
+    def to_json(self, lang=None):
+        dict = self.to_dict(lang)
+        return str(dict).replace('\'', '\"')
+
+
     def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects
 

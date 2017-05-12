@@ -72,8 +72,7 @@ class Odkform:
         return html_questionnaire
 
     def to_json(self, lang=None):
-        dict = self.to_dict(lang)
-        return str(dict).replace('\'', '\"')
+        return str(self.to_dict(lang)).replace('\'', '\"')
 
 
     def convert_survey(self, wb):

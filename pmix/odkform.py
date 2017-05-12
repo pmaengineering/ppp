@@ -79,7 +79,6 @@ class Odkform:
         """
         return str(self.to_dict(lang)).replace('\'', '\"')
 
-
     def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects
 
@@ -100,6 +99,9 @@ class Odkform:
         stack = []
         try:
             survey = wb['survey']
+
+            print(survey)
+
             header = survey[0]
 
             # Temp for debugging.

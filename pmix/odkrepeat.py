@@ -1,3 +1,4 @@
+from jinja2 import Environment, PackageLoader
 import textwrap
 
 
@@ -38,3 +39,8 @@ class Odkrepeat:
         """
         wrapped = 'Repeat (temporary placeholder)'
         return wrapped
+
+    def to_html(self, lang=None):
+        env = Environment(loader=PackageLoader('pmix'))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        return question

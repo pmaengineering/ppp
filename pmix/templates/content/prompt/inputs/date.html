@@ -1,0 +1,9 @@
+                            <!--suppress XmlDuplicatedId -->
+                            {% if question.simple_type == 'date' %}
+                            <input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>
+                              <!--<input type="date" class="input" name="{{ question.variable }}" id="{{ question.name }}" min="1979-12-31"/>-->
+                            {% endif %}
+                            {% if question.simple_type == 'dateTime' %}
+                              <input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>
+                              <!--<input type="datetime-local" class="input" name="{{ question.variable }}" id="{{ question.name }}" min="1979-12-31T22:22:55"/>-->
+                            {% endif %}

@@ -29,21 +29,8 @@ if __name__ == '__main__':
         s = odkform.to_text(args.language)
     elif args.format == 'html' or not args.format:
         s = odkform.to_html(args.language)
-        # Remove lines marked 'to-remove' this after using outpath instead. Try this example:
-        # python3 -m pmix.ppp .dev/forms/FQ.xlsx > FQ.html
-        d = odkform.to_dict(args.language)  # to-remove
-
-        # <Testing>
-        test = d['questions'][52]
-        print(test)
-        # odkform.render_html_output(test)
-        # </Testing>
-
-        odkform.render_html_output(d)  # to-remove
     if args.outpath:
-        # TODO: Need to re-instate this after and use instead of render_html_output.
         with open(args.outpath, mode='w', encoding='utf-8') as f:
             f.write(s)
-        pass
     else:
         print(s)

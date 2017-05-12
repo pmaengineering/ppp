@@ -1,3 +1,4 @@
+from jinja2 import Environment, PackageLoader
 import textwrap
 
 
@@ -171,16 +172,18 @@ class Odkprompt:
         :param lang: (str) The language.
         :return: (dict) The text from all parts of the prompt.
         """
-        # TODO: Audio, Image, Video, Relevant
         prompt = self.row
-        prompt['formatted_label'] = self.text_field('label', lang),
-        prompt['formatted_hint'] = self.text_field('hint', lang),
-        prompt['label'] = prompt['label::English']
-        prompt['hint'] = prompt['hint::English']
-        prompt['constraint_message'] = prompt['constraint_message::English']
-        media_types = ['image', 'audio', 'video']
-        for media in media_types:
-            if (media + '::English') in prompt:
-                prompt[media] = prompt.pop(media + '::English')
+        # TODO: Add 'Relevant'. Remove uneccessary commented out things that are not needed.
+        # prompt['formatted_label'] = self.text_field('label', lang),
+        # prompt['formatted_hint'] = self.text_field('hint', lang),
+        language_dependent_field = ['label', 'hint', 'constraint_message', 'image', 'audio', 'video']
+        for field in language_dependent_field:
+            if (field + '::English') in prompt:
+                prompt[field] = prompt.pop(field + '::English')
         prompt['input_field'] = self.to_html_input_field(lang),
         return prompt
+
+    def to_html(self, lang=None):
+        env = Environment(loader=PackageLoader('pmix'))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        return question

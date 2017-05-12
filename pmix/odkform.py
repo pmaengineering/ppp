@@ -43,7 +43,19 @@ class Odkform:
         return title_box + sep + result + sep
 
     def to_html(self, lang=None):
-        pass
+        env = Environment(loader=PackageLoader('pmix'))
+        html_questionnaire = ''
+        html_questionnaire_data = {
+            'title': self.title
+        }
+        header = env.get_template('header.html').render(data=html_questionnaire_data)
+        html_questionnaire += header
+        for q in self.questionnaire:
+            html_questionnaire += q.to_html(lang=lang)
+        footer = env.get_template('footer.html').render()
+        html_questionnaire += footer
+
+        return html_questionnaire
 
     def to_dict(self, lang=None):
         """Get the html representation of an entire XLSForm.
@@ -58,28 +70,6 @@ class Odkform:
         for q in self.questionnaire:
             html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
-
-    @staticmethod
-    def render_html_output(data):
-        output_file = 'html_rendering_in_development.html'
-        env = Environment(loader=PackageLoader('pmix'))
-        template = env.get_template('base.html')
-        # Note: To be removed.
-        # try:
-        #     # try: os.path.join(os.path.split(__file__)[0], 'file')
-        #     # Or try jinja2 package loader.
-        #     ENV = Environment(loader=FileSystemLoader('./templates'))
-        #     template = ENV.get_template('base.html')
-        # except:
-        #     ENV = Environment(loader=FileSystemLoader('./pmix/templates'))
-        #     template = ENV.get_template('base.html')
-
-        html = template.render(data=data)
-
-        # TODO: Remove this statement, as all that should be output should be the html.
-        print('Writing: ', output_file)
-        with open(output_file, 'w') as out_file:
-            out_file.write(html)
 
     def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects

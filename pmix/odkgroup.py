@@ -1,3 +1,4 @@
+from jinja2 import Environment, PackageLoader
 from pmix.odktable import Odktable
 
 
@@ -25,7 +26,7 @@ class Odkgroup:
 
         This method should only be called for rows from an ODK table
 
-        :param row: (dict) Row from XLSForm
+        :param odkprompt: (dict) Prompt ow from XLSForm.
         """
         if self.pending_table:
             self.pending_table.add(odkprompt)
@@ -58,3 +59,8 @@ class Odkgroup:
         """
         group_text = 'Group (temporary placeholder)'
         return group_text
+
+    def to_html(self, lang=None):
+        env = Environment(loader=PackageLoader('pmix'))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        return question

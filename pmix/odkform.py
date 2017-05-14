@@ -101,14 +101,7 @@ class Odkform:
         stack = []
         try:
             survey = wb['survey']
-
-            # DEBUGGING
-            print(enumerate(survey))
-
             header = survey[0]
-
-            # Temp for debugging.
-            # temp_count = 0
 
             for i, row in enumerate(survey):
                 if i == 0:
@@ -116,7 +109,6 @@ class Odkform:
                 dict_row = {k: v for k, v in zip(header, row)}
                 token = self.parse_type(dict_row)
 
-                # START HERE
                 if token['token_type'] == 'prompt':
                     dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
@@ -128,14 +120,6 @@ class Odkform:
                         stack[-1].add(this_prompt)
                     else:
                         result.append(this_prompt)
-                        # Debugging; Jut trying to learn
-                        # if temp_count < 1:
-                        #     print('Testing: ')
-                        #     print(this_prompt)
-                        #     print('')
-                        #     print(dict_row, '\n')
-                        #     temp_count += 1
-
                 elif token['token_type'] == 'begin group':
                     if not stack or isinstance(stack[-1], Odkrepeat):
                         group = Odkgroup(dict_row, )

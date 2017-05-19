@@ -1,13 +1,5 @@
                     {% if question.simple_type == 'note' and question.name.startswith('sect_') %}
-                      <tr>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <h2>{{ question.label }}</h2>
-                          <em>{{ question.hint }}</em>
-                        </td>
-                      </tr>
+                      {% include "content/section-header.html" %}
                     {% else %}
                     <tr>
                       {% include "content/prompt/prompt-left.html" %}

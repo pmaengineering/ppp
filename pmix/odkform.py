@@ -56,8 +56,9 @@ class Odkform:
         html_questionnaire += footer
 
         # TEMP DEBUGGING
-        # return html_questionnaire
-        return ''
+        # return ''
+        return html_questionnaire
+
 
     def to_dict(self, lang=None):
         """Get the dictionary representation of an entire XLSForm.

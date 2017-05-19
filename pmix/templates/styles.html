@@ -1,8 +1,9 @@
+        <!--suppress CssUnusedSymbol -->
         <style>
             /* Elements */
             body {
                 font-size: 14px;
-                font-family: Arial;
+                font-family: 'Arial', serif;
             }
             table {
                 width: 100%;
@@ -105,7 +106,28 @@
                 top: 3px;
                 margin-left: 10px;
             }
+            .section-spacing {
+                height: 35px;
+                max-height: 35px;
+                border-top: 1px solid black;
+            }
             /* Classes - Text */
+            .section-header {
+                font-family: 'Arial', serif;
+                background-color: #D9D9D9;
+                text-align: center;
+                border-top: 1px solid black;
+                border-right: 1px solid black;
+                border-left: 1px solid black;
+                padding: 10px 5px 10px 5px;
+            }
+            .section-header-label {
+                margin-bottom: 2px;
+                padding-bottom: 2px;
+            }
+            .section-header-hint {
+                font-style: italic;
+            }
             .variable {
                 font-family: monospace;
             }
@@ -134,25 +156,25 @@
                 /*float: left;*/
             }
             .label {
-                font-family: Arial;
+                font-family: 'Arial', serif;
                 font-size: 1em;
             }
             .hint {
-                font-family: Arial;
+                font-family: 'Arial', serif;
                 font-size: 0.8em;
                 font-style: italic;
             }
             .media {
-                font-family: Arial;
+                font-family: 'Arial', serif;
                 font-size: 0.8em;
             }
             .validation-message {
-                font-family: Arial;
+                font-family: 'Arial', serif;
                 font-size: 0.8em;
                 margin: 0;
             }
             .constraint-message {
-                font-family: Arial;
+                font-family: 'Arial', serif;
                 font-size: 0.8em;
                 margin: 0;
             }

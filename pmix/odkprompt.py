@@ -180,7 +180,9 @@ class Odkprompt:
         for field in language_dependent_field:
             if (field + '::English') in prompt:
                 prompt[field] = prompt.pop(field + '::English')
-        prompt['input_field'] = self.to_html_input_field(lang),
+        prompt['input_field'] = self.to_html_input_field(lang)
+
+
         return prompt
 
     def to_html(self, lang=None):

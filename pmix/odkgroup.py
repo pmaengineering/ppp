@@ -10,6 +10,8 @@ class Odkgroup:
         self.opener = opener
         self.data = []
         self.pending_table = None
+        self.header = self.set_header()
+        self.footer = self.set_footer()
 
     def add(self, row):
         """Add a row of data from XLSForm
@@ -40,6 +42,14 @@ class Odkgroup:
             self.data.append(self.pending_table)
             self.pending_table = None
 
+    def set_header(self):
+        data = self.opener
+        return OdkGroupHeader(data)
+
+    def set_footer(self):
+        data = self.opener
+        return OdkGroupFooter(data)
+
     def to_text(self, lang=None):
         """Get the text representation of the full group
 
@@ -59,6 +69,40 @@ class Odkgroup:
         """
         group_text = 'Group (temporary placeholder)'
         return group_text
+
+    def to_html(self, lang=None):
+        env = Environment(loader=PackageLoader('pmix'))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        return question
+
+
+class OdkGroupHeader:
+    """Class to represent a 'begin group' line of XLSForm, and a group header in paper form."""
+
+    def __init__(self, opener):
+        """Initialize a group header."""
+        self.data = opener
+
+    def to_dict(self, lang=None):
+        self.data['is_group_header'] = True
+        return self.data
+
+    def to_html(self, lang=None):
+        env = Environment(loader=PackageLoader('pmix'))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        return question
+
+
+class OdkGroupFooter:
+    """Class to represent a 'begin group' line of XLSForm, and a group header in paper form."""
+
+    def __init__(self, opener):
+        """Initialize a group header."""
+        self.data = opener
+
+    def to_dict(self, lang=None):
+        self.data['is_group_footer'] = True
+        return self.data
 
     def to_html(self, lang=None):
         env = Environment(loader=PackageLoader('pmix'))

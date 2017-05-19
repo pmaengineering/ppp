@@ -1,6 +1,11 @@
                         <!--IDE Error Suppressions-->
                         <!--suppress XmlDuplicatedId -->
-                        <td class="response-cell-borders align-top" style="flex-direction: row;">
+                        {% if question.in_group == True %}
+                            {% set group_styling = ' right-cell-in-group' %}
+                        {% else %}
+                            {% set group_styling = '' %}
+                        {% endif %}
+                        <td class="response-cell-borders align-top{{ group_styling }}" style="flex-direction: row;">
                           <div class="align-top align-text-top" style="display: flex; flex-direction: column;">
                           <!--<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
                             <div class="question-type" style="text-align: left; background-color: #e6ebf4">{{ question.type }}</div>

@@ -74,13 +74,20 @@ class Odkform:
             html_questionnaire['questions'].append(q.to_dict(lang=lang))
         return html_questionnaire
 
-    def to_json(self, lang=None):
+    def to_json(self, lang=None, pretty=False):
         """Get the JSON representation of an entire XLSForm.
 
         :param lang: The language.
         :return: A JSON formatted questionnaire.
         """
-        return str(self.to_dict(lang)).replace('\'', '\"')
+        import json
+        if pretty == True:
+            return json.dumps(self.to_dict(lang), indent=2)
+        else:
+            return json.dumps(self.to_dict(lang))
+        # DEBUGGING
+        # return str(self.to_dict(lang)).replace('\'', '\"')
+
 
     def convert_survey(self, wb):
         """Convert rows and strings of a workbook into better python objects
@@ -98,6 +105,11 @@ class Odkform:
         :param wb: Workbook object representing an XLSForm.
         :return: A list of better python objects
         """
+
+        # DEBUGGING
+        # import pdb
+        # pdb.set_trace()
+
         result = []
         stack = []
         try:
@@ -110,21 +122,39 @@ class Odkform:
                 dict_row = {k: v for k, v in zip(header, row)}
                 token = self.parse_type(dict_row)
 
+                # DEBUGGING
+                # print(dict_row)
+
                 if token['token_type'] == 'prompt':
                     dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
                         choices = token['choice_list']
                     else:
                         choices = None
+                    if stack:
+                        dict_row['in_group'] = True
+                    else:
+                        dict_row['in_group'] = False
                     this_prompt = Odkprompt(dict_row, choices)
                     if stack:
+                        # DEBUGGING
+                        # print('prompt in a group')
+                        # print('stack: ' + str(stack))
                         stack[-1].add(this_prompt)
-                    else:
-                        result.append(this_prompt)
+                        # print('new stack: ' + str(stack))
+                        # print('')
+                    result.append(this_prompt)
                 elif token['token_type'] == 'begin group':
                     if not stack or isinstance(stack[-1], Odkrepeat):
                         group = Odkgroup(dict_row, )
                         stack.append(group)
+                        # DEBUGGING
+                        # print('begin group: ' + str(group))
+                        # print('stack: ' + str(stack))
+                        # print('')
+                        # print("PRINTING BEGIN GROUP")
+                        # print(group)
+                        result.append(group.header)
                     else:
                         m = 'Unable to add group at row {}'.format(i+1)
                         raise OdkformError(m)
@@ -133,9 +163,18 @@ class Odkform:
                         group = stack.pop()
                         group.add_pending()
                         if stack:
+                            print('end group')
+                            print('stack: ' + str(stack))
                             stack[-1].add(group)
+                            print('new stack: ' + str(stack))
+                            print('')
                         else:
-                            result.append(group)
+                            # DEBUGGING
+                            # print("PRINTING END GROUP")
+                            # print(group)
+
+                            # group = Odkgroup(dict_row, )
+                            result.append(group.footer)
                     else:
                         m = 'Mismatched "end group" at row {}'.format(i+1)
                         raise OdkformError(m)
@@ -211,6 +250,7 @@ class Odkform:
                 'choice_list': choices
             }
 
+            # Table items.
             table_label = 'label' in row.get('appearance', '')
             table_list = 'list-nolabel' in row.get('appearance', '')
             if table_label or table_list:
@@ -225,15 +265,21 @@ class Odkform:
                 'choice_list': choices
             }
 
+            # Table items.
             table_label = 'label' in row.get('appearance', '')
+            # - Note: list-nolabel is like a table within a table. Whereas the field-list on its own is a table
+            # comprised primarily of rows, list-nolabel is comprised primarily of columns and a header.
             table_list = 'list-nolabel' in row.get('appearance', '')
             if table_label or table_list:
                 d['token_type'] = 'table'
             return d
+        # TODO: Work below this line as necessary to handle groups, repeats, and tables correctly.
         elif row_type == 'begin group':
             d = {'token_type': 'context group'}
             appearance = row.get('appearance', '')
             if 'field-list' in appearance:
+                # - Note: This returns "begin group" which will render visually since it is a 'field-list', and not just
+                #  a group that is there solely for context.
                 d['token_type'] = row_type
             return d
         elif row_type in ('end group', 'begin repeat', 'end repeat'):

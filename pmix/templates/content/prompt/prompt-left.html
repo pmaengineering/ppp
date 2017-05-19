@@ -1,4 +1,9 @@
-                        <td class="question-cell-borders align-top" style="flex-direction: row-reverse;">
+                        {% if question.in_group == True %}
+                            {% set group_styling = ' left-cell-in-group' %}
+                        {% else %}
+                            {% set group_styling = '' %}
+                        {% endif %}
+                            <td class="question-cell-borders align-top{{ group_styling }}" style="flex-direction: row-reverse;">
                             <div class="align-top align-text-top" style="background-color: #e6ebf4">
                             <!--<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
                                 <p class="variable">{{ question.name }}</p>

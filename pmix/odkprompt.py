@@ -145,6 +145,17 @@ class Odkprompt:
 
         return field
 
+    @staticmethod
+    def truncate_text(text):
+        """Truncate text and add an ellipsis when text is too long.
+
+        :param text: (str) The text.
+        :return: (str) Truncated text.
+        """
+        if len(text) > 100:
+            text = text[0:98] + ' …'
+        return text
+
     def to_text(self, lang=None):
         """Get the text representation of the full prompt
 
@@ -180,9 +191,11 @@ class Odkprompt:
         for field in language_dependent_field:
             if (field + '::English') in prompt:
                 prompt[field] = prompt.pop(field + '::English')
+        truncatable_fields = ['constraint', 'relevant']
+        for field in truncatable_fields:
+            prompt[field + '_original'] = prompt[field]
+            prompt[field] = self.truncate_text(prompt[field])
         prompt['input_field'] = self.to_html_input_field(lang)
-
-
         return prompt
 
     def to_html(self, lang=None):

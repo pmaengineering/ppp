@@ -1,5 +1,4 @@
 from jinja2 import Environment, PackageLoader
-from pmix.error import OdkformError
 import textwrap
 
 
@@ -40,13 +39,9 @@ class Odkprompt:
         :param row: (dict) XLSForm headers as keys, row entries as values.
         :param choices: An Odkchoices object, or None if not a select type.
         """
-        try:
-            self.row = row
-            self.choices = choices
-            self.odktype = self.row['simple_type']
-        except:
-            m = 'Error initializing Odkprompt object.'
-            raise OdkformError(m)
+        self.row = row
+        self.choices = choices
+        self.odktype = self.row['simple_type']
 
     def __repr__(self):
         s = "<Odkprompt {}>".format(self.row['name'])

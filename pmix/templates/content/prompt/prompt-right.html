@@ -2,18 +2,24 @@
                         <!--suppress XmlDuplicatedId -->
                         {% if question.in_group == True %}
                             {% set group_styling = ' right-cell-in-group' %}
+                            {% set side_letter_styling = 'side-letter-group-right' %}
                         {% else %}
                             {% set group_styling = '' %}
+                            {% set side_letter_styling = 'side-letter-right' %}
                         {% endif %}
                         <td class="response-cell-borders align-top{{ group_styling }}" style="flex-direction: row;">
                           <div class="align-top align-text-top" style="display: flex; flex-direction: column;">
                           <!--<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
                             <div class="question-type" style="text-align: left; background-color: #e6ebf4">{{ question.type }}</div>
-                            <div class="relevant" style="text-align: right; background-color: #e8f4e6">{{ question.relevant }}</div>
+                            {% if question.name %}
+                                <div class="relevant" style="text-align: right; background-color: #e8f4e6">
+                                  {{ question.relevant }}<span class="{{ side_letter_styling }}">R</span>
+                                </div>
+                            {% endif %}
                           </div>
                           <div class="align-bottom align-text-bottom" style="background-color: #f4e6ec">
                             {% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}
-                              <form>
+                              <!--<form>-->
                                 {% for option in question.input_field %}
                                   {% if question.simple_type == 'select_one' %}
                                     {% include "content/prompt/inputs/select-one.html" %}
@@ -23,9 +29,11 @@
                                   {% endif %}
                                   <!--suppress XmlInvalidId -->
                                   <label for="{{ question.name }}_{{ loop.index }}">{{ option }}</label>
+                                {% if loop.last == False %}
                                   <br/>
+                                {% endif %}
                                 {% endfor %}
-                              </form>
+                              <!--</form>-->
                             {% endif %}
                             {% if question.simple_type == 'text' or question.simple_type == 'integer' or question.simple_type == 'decimal' or question.simple_type == 'image' %}
                               {% include "content/prompt/inputs/single-value.html" %}
@@ -37,6 +45,14 @@
                               {% include "content/prompt/inputs/note.html" %}
                             {% endif %}
                           </div>
+                          {% if question.choice_filter %}
+                            <div class="" style="display: flex; flex-direction: column;">
+                                <div class="choice-filter" style="background-color: #e8f4e6">
+                                    {{ question.choice_filter }}
+                                  <span class="{{ side_letter_styling }}">F</span>
+                                </div>
+                            </div>
+                          {% endif %}
                         </td>
 
                     <!--<tr>-->

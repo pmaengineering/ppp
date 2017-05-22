@@ -1,4 +1,5 @@
 import os.path
+import datetime
 from jinja2 import Environment, PackageLoader
 from pmix.error import OdkformError
 from pmix.odkchoices import Odkchoices
@@ -21,6 +22,19 @@ class Odkform:
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
+        self.metadata = {  # TODO Finish filling this out.
+            'file_name': os.path.split(wb.file)[1],
+            'form_id': self.settings.get('form_id'),
+            'country': self.settings.get('form_id')[3:5],
+            'round': self.settings.get('form_id')[6:7],
+            'type_of_form': self.settings.get('form_id')[0:2],
+            'last_author': '',
+            'last_updated': '',
+            'last_converted': str(datetime.datetime.now().date()) + ' ' + str(datetime.datetime.now().time())[0:8],
+            'default_language:': self.settings.get('default_language'),
+            'changelog': '',
+            'info': ''
+        }
         self.conversion_settings = {
             'json_output_in_js_console': True
         }
@@ -115,10 +129,11 @@ class Odkform:
         """Get the JSON representation of an entire XLSForm.
 
         :param lang: The language.
+        :param pretty: Printing with whitespace for readability.
         :return: A JSON formatted questionnaire.
         """
         import json
-        if pretty == True:
+        if pretty:
             return json.dumps(self.to_dict(lang), indent=2)
         else:
             return json.dumps(self.to_dict(lang))
@@ -135,7 +150,7 @@ class Odkform:
             },
             'questionnaire': self.questionnaire
         }
-        if self.conversion_settings['json_output_in_js_console'] == True:
+        if self.conversion_settings['json_output_in_js_console']:
             data['footer']['data'] = self.to_json(lang, pretty=True)
         header = env.get_template('header.html').render(data=data['header'])
         html_questionnaire += header
@@ -248,6 +263,8 @@ class Odkform:
                 dict_row = {k: v for k, v in zip(header, row)}
                 token = self.parse_type(dict_row)
 
+                print(dict_row)
+
                 if token['token_type'] == 'prompt':
                     dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
@@ -272,7 +289,7 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'end group':
                     c = context_groups
-                    if c and c[-1]['name'] == dict_row['name'] and c[-1]['is_closed'] == False:
+                    if c and c[-1]['name'] == dict_row['name'] and c[-1]['is_closed'] is False:
                         c[-1]['is_closed'] = True
                     else:
                         if stack and isinstance(stack[-1], Odkgroup):

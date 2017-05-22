@@ -1,12 +1,16 @@
                         {% if question.in_group == True %}
                             {% set group_styling = ' left-cell-in-group' %}
+                            {% set side_letter_styling = 'side-letter-group-left' %}
                         {% else %}
                             {% set group_styling = '' %}
+                            {% set side_letter_styling = 'side-letter-left' %}
                         {% endif %}
-                            <td class="question-cell-borders align-top{{ group_styling }}" style="flex-direction: row-reverse;">
+                            <td class="question-cell-borders align-top{{ group_styling }}" style="flex-direction: row;">
                             <div class="align-top align-text-top" style="background-color: #e6ebf4">
                             <!--<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
-                                <p class="variable">{{ question.name }}</p>
+                                {% if question.name %}
+                                    <span class="{{ side_letter_styling }}">N</span><p class="variable">{{ question.name }}</p>
+                                {% endif %}
                             </div>
                             <div>
                                 <div class="align-text-top" style="background-color: #e8f4e6">
@@ -14,8 +18,12 @@
                                     <p class="hint">{{ question.hint }}</p>
                                 </div>
                                 <div class="align-bottom align-text-bottom" style="background-color: #f4e6ec">
-                                    <p class="constraint">{{ question.constraint }}</p>
-                                    <p class="constraint-message">{{ question.constraint_message }}</p>
+                                    {% if question.constraint %}
+                                        <span class="{{ side_letter_styling }}">C</span><p class="constraint">{{ question.constraint }}</p>
+                                    {% endif %}
+                                    {% if question.constraint_message %}
+                                        <span class="{{ side_letter_styling }}">M</span><p class="constraint-message">{{ question.constraint_message }}</p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </td>

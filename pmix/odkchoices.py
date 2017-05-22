@@ -36,11 +36,10 @@ class Odkchoices:
 
         if lang:
             lang_col = 'label::{}'.format(lang)
-            labels = [d[lang_col] for d in self.data]
         else:
-            first = langs[0]
-            lang_col = 'label::{}'.format(first) if first else 'label'
-            labels = [d[lang_col] for d in self.data]
+            default_language = 'English'
+            lang_col = 'label::{}'.format(default_language) if default_language else 'label'
+        labels = [d[lang_col] for d in self.data]
         return labels
 
     def langs(self):

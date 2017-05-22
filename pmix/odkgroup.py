@@ -13,6 +13,10 @@ class Odkgroup:
         self.header = self.set_header()
         self.footer = self.set_footer()
 
+    def __repr__(self):
+        s = "<Odkgroup {}: {}>".format(self.opener['name'], self.data)
+        return s
+
     def add(self, row):
         """Add a row of data from XLSForm
 

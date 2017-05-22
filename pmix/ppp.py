@@ -41,8 +41,3 @@ if __name__ == '__main__':
             f.write(s)
     else:
         print(s)
-        # DEBUGGING
-        # print(s)
-        # pass
-        # s2 = odkform.to_json(args.language, pretty=True)
-        # print(s2)

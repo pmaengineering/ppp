@@ -2,4 +2,25 @@
             </div>
         </div>
     </body>
+    <script>
+        data = JSON.stringify({{ data }}) // JSON.stringify auto-expands the whole object.
+        // TODO: Fix the below code so that dynamic output of info, warnings, or OK message works.
+        messages = {};
+        info = {{ info }}
+        warnings = {{ warnings }}
+        if (info.length != 0) {
+            messages.info = info
+        }
+        if (warnings.length != 0) {
+            messages.warnings = warnings
+        }
+        console.log('Data: ');
+        console.log(data);
+        if (messages.length === 0) {
+            console.log('Conversion OK!')
+        } else {
+            console.log('Conversion Messages: ');
+            console.log(messages);
+        }
+    </script>
 </html>

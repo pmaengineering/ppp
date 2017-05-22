@@ -43,17 +43,16 @@ class Odkchoices:
         return labels
 
     def langs(self):
-        """Discover all languages for these choices
+        """Discover all languages for these choices.
 
-        :return: Alphabetized list of languages
+        :return: Alphabetized list of languages.
         """
         langs = set()
         for d in self.data:
             these_langs = set()
             for k in d:
                 if k == 'label':
-                    # Default language
-                    these_langs.add('')
+                    these_langs.add('') # Default language
                 elif k.startswith('label::'):
                     lang = k[len('label::'):]
                     these_langs.add(lang)

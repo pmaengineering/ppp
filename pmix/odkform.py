@@ -294,7 +294,7 @@ class Odkform:
                         raise OdkformError(m)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], Odkrepeat):
-                        repeat = stack.pop()  # Stack guaranteed empty at this point
+                        repeat = stack.pop()  # Stack guaranteed empty at this point.
                         result.append(repeat)
                     else:
                         m = 'Mismatched "end repeat" at row {}'.format(i + 1)
@@ -328,7 +328,7 @@ class Odkform:
                         m = ('PPP does not allow a group nested in a '
                              'field-list group. See row {}').format(i + 1)
                         raise OdkformError(m)
-                elif token['token_type'] in self.unhandled_token_types:  # Intentionally no handling for these token types.
+                elif token['token_type'] in self.unhandled_token_types:  # Intentionally no handling for these types.
                     k = 'Unhandled Token Types'
                     if k not in self.conversion_info:
                         self.conversion_info[k] = []

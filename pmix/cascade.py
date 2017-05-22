@@ -235,6 +235,6 @@ if __name__ == '__main__':
     else:
         outpath = os.path.join(base, name) + "-cascade" + ext
 
-    c = Cascade(args.xlsxfile)
+    c = Cascade(args.xlsxfile, args.sheet)
     c.write_out(outpath)
     print("Successfully saved file to: {}".format(outpath))

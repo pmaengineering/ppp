@@ -24,25 +24,31 @@ class Odkform:
         self.survey_language = self.get_survey_language()
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
+        conversion_start = datetime.datetime.now()
         self.metadata = {  # TODO Finish filling this out.
             'file_name': os.path.split(wb.file)[1],
             'form_id': self.settings.get('form_id'),
             'country': self.settings.get('form_id')[3:5],
             'round': self.settings.get('form_id')[6:7],
             'type_of_form': self.settings.get('form_id')[0:2],
-            'last_author': '',
-            'last_updated': '',
-            'last_converted': str(datetime.datetime.now().date()) + ' ' + str(datetime.datetime.now().time())[0:8],
-            'changelog': '',
-            'info': ''
+            'last_author': None,
+            'last_updated': None,
+            'conversion_start': conversion_start,
+            'conversion_start_formatted': str(conversion_start.date()) + ' ' + str(conversion_start.time())[0:8],
+            'conversion_end': None,
+            'conversion_end_formatted': None,
+            'conversion_time': None,
+            'changelog': None,
+            'info': None
         }
         self.conversion_settings = {
-            'json_output_in_js_console': True
+            'json_output_in_js_console': None,
+            'highlighting': None
         }
         self.unhandled_token_types = ['calculate', 'start', 'end', 'deviceid', 'simserial', 'phonenumber', 'hidden',
                                       'hidden string', 'hidden int', 'hidden geopoint']
-        self.warnings = {}
-        self.conversion_info = {}
+        self.warnings = None
+        self.conversion_info = None
         self.questionnaire = self.convert_survey(wb)
 
     @staticmethod
@@ -112,6 +118,17 @@ class Odkform:
     def get_survey_language(self):
         return self.settings['default_language'] if 'default_language' in self.settings else self.languages[0]
 
+    def set_conversion_end(self):
+        self.metadata['conversion_end'] = datetime.datetime.now()
+        self.metadata['conversion_end_formatted'] = str(self.metadata['conversion_end'].date()) + ' ' + \
+                                                    str(self.metadata['conversion_end'].time())[0:8]
+
+    def get_running_conversion_time(self):
+        self.metadata['conversion_time'] = str(self.metadata['conversion_end'] -
+                                               self.metadata['conversion_start'])[5:10] + ' ' + 'seconds'
+
+        return self.metadata['conversion_time']
+
     def to_text(self, lang):
         """Get the text representation of an entire XLSForm
 
@@ -160,7 +177,7 @@ class Odkform:
         else:
             return json.dumps(self.to_dict(lang))
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, debugging):
         lang = lang if lang else self.survey_language
         env = Environment(loader=PackageLoader('pmix'))
         html_questionnaire = ''
@@ -169,17 +186,21 @@ class Odkform:
                 'title': self.title
             },
             'footer': {
-                'data': ''
+                'data': self.to_json(lang, pretty=True) if debugging else 'false'
             },
             'questionnaire': self.questionnaire
         }
-        if self.conversion_settings['json_output_in_js_console']:
-            data['footer']['data'] = self.to_json(lang, pretty=True)
         header = env.get_template('header.html').render(data=data['header'])
         html_questionnaire += header
         for q in data['questionnaire']:
             html_questionnaire += q.to_html(lang, highlighting)
-        footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=self.warnings,
+        self.set_conversion_end()
+        warnings = self.warnings if self.warnings is not None else 'false'
+        self.conversion_info = {} if self.conversion_info is 'false' else self.conversion_info
+        # self.conversion_info['Conversion Time'] = self.get_running_conversion_time()
+        self.get_running_conversion_time()
+        footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
+                                                        conversion_time = str(self.metadata['conversion_time']),
                                                         data=data['footer']['data'])
         html_questionnaire += footer
         return html_questionnaire
@@ -367,12 +388,14 @@ class Odkform:
                              'field-list group. See row {}').format(i + 1)
                         raise OdkformError(m)
                 elif token['token_type'] in self.unhandled_token_types:  # Intentionally no handling for these types.
+                    self.conversion_info = {} if self.conversion_info is None else self.conversion_info
                     k = 'Unhandled Token Types'
                     if k not in self.conversion_info:
                         self.conversion_info[k] = []
                     if token['token_type'] not in self.conversion_info[k]:
                         self.conversion_info[k].append(token['token_type'])
                 else:
+                    self.warnings = {} if self.warnings is None else self.warnings
                     k = 'Unknown Token Types'
                     if k not in self.warnings:
                         self.warnings[k] = []

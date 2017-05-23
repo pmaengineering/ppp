@@ -77,7 +77,7 @@ class Odkgroup:
 
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
                                                                               highlighting=highlighting)
         return question
 
@@ -95,7 +95,7 @@ class OdkGroupHeader:
 
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
                                                                               highlighting=highlighting)
         return question
 
@@ -114,6 +114,6 @@ class OdkGroupFooter:
     def to_html(self, lang, highlighting):
 
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
                                                                               highlighting=highlighting)
         return question

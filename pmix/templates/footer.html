@@ -3,23 +3,27 @@
         </div>
     </body>
     <script>
-        data = JSON.stringify({{ data }}) // JSON.stringify auto-expands the whole object.
-        // TODO: Fix the below code so that dynamic output of info, warnings, or OK message works.
-        messages = {};
-        info = {{ info }}
-        warnings = {{ warnings }}
-        if (info.length != 0) {
-            messages.info = info
-        }
-        if (warnings.length != 0) {
-            messages.warnings = warnings
-        }
-        console.log('Data: ');
-        console.log(data);
-        if (messages.length === 0) {
+        if ({{ info }} = false && {{ warnings }} = false) {
             console.log('Conversion OK!')
-        } else {
-            console.log('Conversion Messages: ');
+        }
+        console.log('Conversion took ' + '{{ conversion_time }}' + '.');
+
+        if ({{ data }} != false) {
+            data = JSON.stringify({{ data }}); // JSON.stringify auto-expands the whole object.
+            console.log('Data: ');
+            console.log(data);
+        }
+
+        messages = {};
+        if ({{ info }} != false) {
+            messages.info = {{ info }}
+        }
+        if ({{ warnings }} != false) {
+            messages.warnings = {{ warnings }}
+        }
+
+        if ({{ info }} != false || {{ warnings }} != false) {
+            console.log('Messages: ');
             console.log(messages);
         }
     </script>

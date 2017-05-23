@@ -20,6 +20,8 @@ class Odkform:
 
         self.settings = self.get_settings(wb)
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
+        self.languages = self.get_languages(wb)
+        self.survey_language = self.get_survey_language()
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
         self.metadata = {  # TODO Finish filling this out.
@@ -31,7 +33,6 @@ class Odkform:
             'last_author': '',
             'last_updated': '',
             'last_converted': str(datetime.datetime.now().date()) + ' ' + str(datetime.datetime.now().time())[0:8],
-            'default_language:': self.settings.get('default_language'),
             'changelog': '',
             'info': ''
         }
@@ -92,6 +93,24 @@ class Odkform:
         except KeyError:  # Worksheet does not exist.
             pass
         return d
+
+    @staticmethod
+    def get_languages(wb):
+        header = wb['survey'][0]
+        langs = set()
+        for field in header:
+            # TODO: Handle the following cases, both with cases of a presence of 'default_language', and not.
+            # 1. No 'label' or 'label::' fields at all, 2. A 'label' field by itself.
+            # 3. A 'label' field with 'label::' fields.
+            if field == 'label':
+                langs.add('')  # Default language.
+            elif field.startswith('label::'):
+                lang = field[len('label::'):]
+                langs.add(lang)
+        return sorted(list(langs))
+
+    def get_survey_language(self):
+        return self.settings['default_language'] if 'default_language' in self.settings else self.languages[0]
 
     def to_text(self, lang=None):
         """Get the text representation of an entire XLSForm
@@ -262,8 +281,6 @@ class Odkform:
                     continue
                 dict_row = {k: v for k, v in zip(header, row)}
                 token = self.parse_type(dict_row)
-
-                print(dict_row)
 
                 if token['token_type'] == 'prompt':
                     dict_row['simple_type'] = token['simple_type']

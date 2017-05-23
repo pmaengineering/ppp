@@ -1,5 +1,6 @@
 import argparse
 from pmix.odkform import Odkform
+from pmix.error import OdkformError
 
 
 if __name__ == '__main__':
@@ -9,7 +10,12 @@ if __name__ == '__main__':
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
 
-    language_help = 'Language to write the paper version in.'
+    highlighting_help = 'Adds highlighting to various portions of survey components.'
+    parser.add_argument('-hl', '--highlight', action='store_true', help=highlighting_help)
+
+    language_help = 'Language to write the paper version in. If not specified, the \'default_language\' in the ' \
+                    '\'settings\' worksheet is used. If that is not specified and more than one language is in the ' \
+                    'Xlsform, the language that comes first alphabetically will be used.'
     parser.add_argument('-l', '--language', help=language_help)
 
     format_help = ('Format to generate. Currently "text" and "html" are supported. Future '
@@ -23,6 +29,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.highlight and args.format and args.format not in ['html', 'pdf']:
+        m = 'Can only specify highlighting when using the following formats: \'html\', \'pdf\'.'
+        raise OdkformError(m)
+
     s = ''
     odkform = Odkform(f=args.xlsxfile)
     if args.format == 'text':
@@ -34,7 +44,7 @@ if __name__ == '__main__':
     elif args.format == 'json_pretty':
         s = odkform.to_json(args.language, pretty=True)
     elif args.format == 'html' or not args.format:
-        s = odkform.to_html(args.language)
+        s = odkform.to_html(args.language, args.highlight)
     if args.outpath:
         with open(args.outpath, mode='w', encoding='utf-8') as f:
             f.write(s)

@@ -48,12 +48,12 @@ class Odkprompt:
         return s
 
     @staticmethod
-    def text_relevant(self, lang=None):
+    def text_relevant(self, lang):
         # TODO: Create this method.
         """Find the relevant text for this row"""
         pass
 
-    def text_field(self, field, lang=None):
+    def text_field(self, field, lang):
         """Find a row value given a field and language
 
         An example of field and language might be "label" and "English".
@@ -77,7 +77,7 @@ class Odkprompt:
             pass
         return value
 
-    def to_text_relevant(self, lang=None):
+    def to_text_relevant(self, lang):
         """Get the relevant text for this prompt
 
         :param lang: (str) The language
@@ -89,7 +89,7 @@ class Odkprompt:
             s = '[{}]'.format(relevant_text).rjust(50)
         return s
 
-    def to_text_response(self, lang=None, numbered=False):
+    def to_text_response(self, lang, numbered=False):
         """Get the response field for this prompt
 
         This is a text representation of the area of a paper questionnaire
@@ -129,7 +129,7 @@ class Odkprompt:
 
         return s
 
-    def to_html_input_field(self, lang=None):
+    def to_html_input_field(self, lang):
         """Get the response field for this prompt
 
         This is a representation of the area of a paper questionnaire where the response is recorded.
@@ -160,7 +160,7 @@ class Odkprompt:
             text = text[0:98] + ' …'
         return text
 
-    def to_text(self, lang=None):
+    def to_text(self, lang):
         """Get the text representation of the full prompt
 
         :param lang: (str) The language
@@ -181,7 +181,7 @@ class Odkprompt:
         result = '\n\n'.join(text)
         return result
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         """Get the text representation of the full prompt
 
         :param lang: (str) The language.
@@ -193,8 +193,8 @@ class Odkprompt:
         # prompt['formatted_hint'] = self.text_field('hint', lang),
         language_dependent_field = ['label', 'hint', 'constraint_message', 'image', 'audio', 'video']
         for field in language_dependent_field:
-            if (field + '::English') in prompt:
-                prompt[field] = prompt.pop(field + '::English')
+            if (field + '::' + lang) in prompt:
+                prompt[field] = prompt[field + '::' + lang]
         truncatable_fields = ['constraint', 'relevant']
         for field in truncatable_fields:
             prompt[field + '_original'] = prompt[field]
@@ -202,7 +202,8 @@ class Odkprompt:
         prompt['input_field'] = self.to_html_input_field(lang)
         return prompt
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+                                                                              highlighting=highlighting)
         return question

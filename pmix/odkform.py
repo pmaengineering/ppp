@@ -112,12 +112,13 @@ class Odkform:
     def get_survey_language(self):
         return self.settings['default_language'] if 'default_language' in self.settings else self.languages[0]
 
-    def to_text(self, lang=None):
+    def to_text(self, lang):
         """Get the text representation of an entire XLSForm
 
         :param lang: The language
         :return: The full string of the XLSForm, ready to print or save
         """
+        lang = lang if lang else self.survey_language
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -125,26 +126,27 @@ class Odkform:
         )
         title_box = '\n'.join(title_lines)
 
-        q_text = (q.to_text(lang=lang) for q in self.questionnaire)
+        q_text = (q.to_text(lang) for q in self.questionnaire)
         sep = '\n\n' + '=' * 52 + '\n\n'
         result = sep.join(q_text)
         return title_box + sep + result + sep
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         """Get the dictionary representation of an entire XLSForm.
 
         :param lang: The language.
         :return: A dictionary formatted questionnaire.
         """
+        lang = lang if lang else self.survey_language
         html_questionnaire = {
             'title': self.title,
             'questions': []
         }
         for q in self.questionnaire:
-            html_questionnaire['questions'].append(q.to_dict(lang=lang))
+            html_questionnaire['questions'].append(q.to_dict(lang))
         return html_questionnaire
 
-    def to_json(self, lang=None, pretty=False):
+    def to_json(self, lang, pretty=False):
         """Get the JSON representation of an entire XLSForm.
 
         :param lang: The language.
@@ -152,12 +154,14 @@ class Odkform:
         :return: A JSON formatted questionnaire.
         """
         import json
+        lang = lang if lang else self.survey_language
         if pretty:
             return json.dumps(self.to_dict(lang), indent=2)
         else:
             return json.dumps(self.to_dict(lang))
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
+        lang = lang if lang else self.survey_language
         env = Environment(loader=PackageLoader('pmix'))
         html_questionnaire = ''
         data = {
@@ -174,7 +178,7 @@ class Odkform:
         header = env.get_template('header.html').render(data=data['header'])
         html_questionnaire += header
         for q in data['questionnaire']:
-            html_questionnaire += q.to_html(lang=lang)
+            html_questionnaire += q.to_html(lang, highlighting)
         footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=self.warnings,
                                                         data=data['footer']['data'])
         html_questionnaire += footer
@@ -366,16 +370,14 @@ class Odkform:
                     k = 'Unhandled Token Types'
                     if k not in self.conversion_info:
                         self.conversion_info[k] = []
-                    else:
-                        if token['token_type'] not in self.conversion_info[k]:
-                            self.conversion_info[k].append(token['token_type'])
+                    if token['token_type'] not in self.conversion_info[k]:
+                        self.conversion_info[k].append(token['token_type'])
                 else:
                     k = 'Unknown Token Types'
                     if k not in self.warnings:
                         self.warnings[k] = []
-                    else:
-                        if token['token_type'] not in self.warnings[k]:
-                            self.warnings[k].append(token['token_type'])
+                    if token['token_type'] not in self.warnings[k]:
+                        self.warnings[k].append(token['token_type'])
         except KeyError:  # No survey found.
             pass
         return result

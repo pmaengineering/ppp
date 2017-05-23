@@ -15,7 +15,7 @@ class Odktable:
         """
         self.data.append(odkprompt)
 
-    def to_text(self, lang=None):
+    def to_text(self, lang):
         """Get the text representation of the table
 
         :param lang: (str) The language

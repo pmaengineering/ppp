@@ -19,18 +19,18 @@ class Odkchoices:
         """
         self.data.append(choice)
 
-    def labels(self, lang=None):
+    def labels(self, lang):
         """Get the labels for this choice list in the desired language
 
         :param lang: (str) The language in which to return the choice labels
         :return: Correctly ordered list of choice labels
         """
-        langs = self.langs()
-        if lang and lang not in langs:
+        choice_langs = self.choice_langs()
+        if lang not in choice_langs:
             m = 'Language "{}" not found in choice list {}'
             m = m.format(lang, self.list_name)
             raise OdkformError(m)
-        elif not langs:
+        elif not choice_langs:
             m = 'No languages found in choice list {}'.format(self.list_name)
             raise OdkformError(m)
 
@@ -42,7 +42,7 @@ class Odkchoices:
         labels = [d[lang_col] for d in self.data]
         return labels
 
-    def langs(self):
+    def choice_langs(self):
         """Discover all languages for these choices.
 
         :return: Alphabetized list of languages.

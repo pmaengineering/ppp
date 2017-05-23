@@ -19,7 +19,7 @@ class Odkrepeat:
         """
         self.data.append(obj)
 
-    def to_text(self, lang=None):
+    def to_text(self, lang):
         """Get the text representation of the entire repeat group
 
         :param lang: (str) The language
@@ -31,7 +31,7 @@ class Odkrepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         """Get the text representation of the entire repeat group
 
         :param lang: (str) The language.
@@ -40,7 +40,8 @@ class Odkrepeat:
         wrapped = 'Repeat (temporary placeholder)'
         return wrapped
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+                                                                              highlighting=highlighting)
         return question

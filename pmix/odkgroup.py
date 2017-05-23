@@ -54,7 +54,7 @@ class Odkgroup:
         data = self.opener
         return OdkGroupFooter(data)
 
-    def to_text(self, lang=None):
+    def to_text(self, lang):
         """Get the text representation of the full group
 
         :param lang: (str) The language
@@ -65,7 +65,7 @@ class Odkgroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         """Get the text representation of the full group
 
         :param lang: (str) The language.
@@ -75,9 +75,10 @@ class Odkgroup:
         group_text = 'Group (temporary placeholder)'
         return group_text
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+                                                                              highlighting=highlighting)
         return question
 
 
@@ -88,13 +89,14 @@ class OdkGroupHeader:
         """Initialize a group header."""
         self.data = opener
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         self.data['is_group_header'] = True
         return self.data
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+                                                                              highlighting=highlighting)
         return question
 
 
@@ -105,11 +107,13 @@ class OdkGroupFooter:
         """Initialize a group header."""
         self.data = opener
 
-    def to_dict(self, lang=None):
+    def to_dict(self, lang):
         self.data['is_group_footer'] = True
         return self.data
 
-    def to_html(self, lang=None):
+    def to_html(self, lang, highlighting):
+
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang))
+        question = env.get_template('content/prompt/prompt-base.html').render(question=self.to_dict(lang=lang),
+                                                                              highlighting=highlighting)
         return question

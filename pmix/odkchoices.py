@@ -52,7 +52,7 @@ class Odkchoices:
             these_langs = set()
             for k in d:
                 if k == 'label':
-                    these_langs.add('') # Default language
+                    these_langs.add('')  # Default language
                 elif k.startswith('label::'):
                     lang = k[len('label::'):]
                     these_langs.add(lang)

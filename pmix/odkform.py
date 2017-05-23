@@ -39,7 +39,7 @@ class Odkform:
         self.conversion_settings = {
             'json_output_in_js_console': True
         }
-        self.unhandled_token_types = ['calculate', 'start', 'end', 'deviceid', 'simserial', 'phonenumber',
+        self.unhandled_token_types = ['calculate', 'start', 'end', 'deviceid', 'simserial', 'phonenumber', 'hidden',
                                       'hidden string', 'hidden int', 'hidden geopoint']
         self.warnings = {}
         self.conversion_info = {}

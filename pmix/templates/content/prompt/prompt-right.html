@@ -7,17 +7,23 @@
                             {% set group_styling = '' %}
                             {% set side_letter_styling = 'side-letter-right' %}
                         {% endif %}
+                        {% if highlighting %}
+                            {% set type_highlight = ' bg-light-blue' %}
+                            {% set relevant_highlight = ' bg-light-green' %}
+                            {% set input_highlight = ' bg-light-red' %}
+                            {% set filter_highlight = ' bg-light-green' %}
+                        {% endif %}
                         <td class="response-cell-borders align-top{{ group_styling }}" style="flex-direction: row;">
                           <div class="align-top align-text-top" style="display: flex; flex-direction: column;">
                           <!--<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
-                            <div class="question-type" style="text-align: left; background-color: #e6ebf4">{{ question.type }}</div>
+                            <div class="question-type{{ type_highlight }}" style="text-align: left;">{{ question.type }}</div>
                             {% if question.name %}
-                                <div class="relevant" style="text-align: right; background-color: #e8f4e6">
+                                <div class="relevant{{ relevant_highlight }}" style="text-align: right;">
                                   {{ question.relevant }}<span class="{{ side_letter_styling }}">R</span>
                                 </div>
                             {% endif %}
                           </div>
-                          <div class="align-bottom align-text-bottom" style="background-color: #f4e6ec">
+                          <div class="align-bottom align-text-bottom{{ input_highlight }}">
                             {% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}
                               <!--<form>-->
                                 {% for option in question.input_field %}
@@ -47,7 +53,7 @@
                           </div>
                           {% if question.choice_filter %}
                             <div class="" style="display: flex; flex-direction: column;">
-                                <div class="choice-filter" style="background-color: #e8f4e6">
+                                <div class="choice-filter{{ filter_highlight }}">
                                     {{ question.choice_filter }}
                                   <span class="{{ side_letter_styling }}">F</span>
                                 </div>

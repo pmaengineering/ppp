@@ -34,14 +34,7 @@ from pmix import constants
 from pmix import workbook
 
 
-def get_wb_outpath(wb):
-    orig = wb.file
-    base, ext = os.path.splitext(orig)
-    outpath = '{}{}{}'.format(base, '-borrow', ext)
-    return outpath
-
-
-if __name__ == '__main__':
+def borrow_cli():
     prog_desc = 'Grab translations from existing XLSForms'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -49,8 +42,8 @@ if __name__ == '__main__':
     parser.add_argument('xlsxfile', nargs='+', help=file_help)
 
     merge_help = ('An XLSForm that receives the translations from source '
-                  'files. If this argument is not supplied, then a translation '
-                  'file is created.')
+                  'files. If this argument is not supplied, then a '
+                  'translation file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
     add_help = ('Add a language to the resulting output. The translation file '
@@ -90,6 +83,14 @@ if __name__ == '__main__':
         xlsform = Xlsform(args.merge)
         # wb.add_language(add)
         xlsform.merge_translations(translation_dict, ignore, carry=args.carry)
-        outpath = get_wb_outpath(xlsform) if args.outpath is None else args.outpath
+        outpath = args.outpath
+        if outpath is None:
+            orig = xlsform.file
+            base, ext = os.path.splitext(orig)
+            outpath = ''.join((base, '-borrow', ext))
         xlsform.write_out(outpath)
         print('Merged translations into file: "{}"'.format(outpath))
+
+
+if __name__ == '__main__':
+    borrow_cli()

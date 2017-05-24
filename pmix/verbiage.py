@@ -34,7 +34,7 @@ class TranslationDict:
             '.', ':', or ')' and then possibly whitespace.
     """
 
-    number_re = r'^\s*([A-Z]|(\S*\d+[a-z]?))[\.:\)]\s*'
+    number_re = r'^\s*([A-Z]|(\S*\d+[.a-z]*))[.:)]\s+'
     number_prog = re.compile(number_re)
 
     def __init__(self, src=None, base='English'):

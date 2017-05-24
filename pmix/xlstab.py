@@ -103,7 +103,7 @@ class Xlstab(Worksheet):
                 self.append_col(header)
 
     def translation_pairs(self, ignore=None, base='English'):
-        """Iterate through translation pairs in this tab.
+        """DEPRECATED: Iterate through translation pairs in this tab.
 
         This function only works for 'survey', 'choices' and
         'external_choices'.
@@ -117,9 +117,7 @@ class Xlstab(Worksheet):
                 do not ignore any translatable columns.
 
         Yields:
-            A dictionary with the following names for both items in the pair:
-                'cell_data': The namedtuple from ``Worksheet.column_pairs``
-                'language': The language returned from `self.get_lang`
+            A dictionary.
         """
         if ignore is None:
             ignore = []
@@ -162,9 +160,8 @@ class Xlstab(Worksheet):
             base (str): The base language. The default is 'English'.
 
         Yields:
-            A dictionary with the following names for both items in the pair:
-                'cell_data': The namedtuple from ``Worksheet.column_pairs``
-                'language': The language returned from `self.get_lang`
+            A dictionary from `Worksheet.column_pairs` plus a new key of
+            'language', the language returned from `self.get_lang`.
         """
         if ignore is None:
             ignore = []
@@ -187,6 +184,22 @@ class Xlstab(Worksheet):
                 yield src, other
 
     def easy_translation_pairs(self, ignore=None, base='English'):
+        """Iterate through translation pairs in this tab.
+
+        This method is based on finding a column titled "English", and then
+        generating pairs with all other columns after it.
+
+        Args:
+            ignore (seq of str): If the header contains any of these
+                then that column is ignored for translations. It is intended
+                as a way to ignore certain languages. Default None indicates
+                do not ignore any translatable columns.
+            base (str): The base language. The default is 'English'.
+
+        Yields:
+            A dictionary from `Worksheet.column_pairs` plus new key of
+            'language' (equal to the header in this method).
+        """
         if ignore is None:
             ignore = []
         try:
@@ -223,6 +236,29 @@ class Xlstab(Worksheet):
 
     def merge_translations(self, translations, ignore=None, base='English',
                            carry=False):
+        """Merge translations from a TranslationDict.
+
+        By the end of this method call, this worksheet will have translations
+        filled in and colored appropriately. The highlighting rules are as
+        follows:
+
+        - Orange if the source and the translation are the same.
+        - Blue if the new translation changes the old translation.
+        - Green if the translation is not found in the TranslationDict, but
+            there is a pre-existing translation.
+        - Red if translation is not found and there is no pre-existing
+            translation.
+        - No highlight if the translation is the same as the pre-existing
+            translation.
+
+        Args:
+            translations (TranslationDict): The translation dictionary
+            ignore (list of str): The list of languages to ignore while
+                translating.
+            base (str): The base language. Should probably be left as English.
+            carry (bool): True if missing translations be filled in from the
+                base language.
+        """
         for src, other in self.lazy_translation_pairs(ignore, base):
             src_text = str(src['cell'])
             if src_text == '':
@@ -246,4 +282,3 @@ class Xlstab(Worksheet):
                         other['cell'].highlight = 'HL_RED'
                 else:
                     other['cell'].highlight = 'HL_GREEN'
-

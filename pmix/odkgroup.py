@@ -15,7 +15,7 @@ class OdkGroup:
         self.footer = self.set_footer()
 
     def __repr__(self):
-        s = "<Odkgroup {}: {}>".format(self.opener['name'], self.data)
+        s = "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
         return s
 
     def add(self, row):
@@ -91,6 +91,10 @@ class OdkGroupHeader(OdkComponent):
         OdkComponent.__init__(self)
         self.data = opener
 
+    def __repr__(self):
+        s = "<OdkGroupHeader: {}>".format(self.data)
+        return s
+
     def to_dict(self, lang):
         self.data = self.reformat_default_language_variable_names(self.data, lang)
         self.data = self.truncate_fields(self.data)
@@ -111,12 +115,16 @@ class OdkGroupFooter:
         """Initialize a group header."""
         self.data = opener
 
-    def to_dict(self):
+    def __repr__(self):
+        s = "<OdkGroupFooter: {}>".format(self.data)
+        return s
+
+    def to_dict(self, lang):
         self.data['is_group_footer'] = True
         return self.data
 
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(),
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang),
                                                                            highlighting=highlighting)
         return question

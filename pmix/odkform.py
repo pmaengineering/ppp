@@ -313,19 +313,31 @@ class OdkForm:
                         choices = token['choice_list']
                     else:
                         choices = None
+                    # TODO: Refactor next if/else and this_prompt declaration. Should only render group at 'end group'.
                     if stack:
-                        dict_row['in_group'] = True
-                    else:
-                        dict_row['in_group'] = False
+                        # DEBUG
+                        dict_row['in_group'] = True if any(isinstance(x, OdkGroup) for x in stack) else False
+                        dict_row['in_repeat'] = True if any(isinstance(x, OdkRepeat) for x in stack) else False
+                        # dict_row['in_group'] = True
+                        # DEBUG
+                        # if dict_row['name'] == 'not_usual_warn':
+                        #     print('hi')
+                    # else:
+                    #     dict_row['in_group'] = False
                     this_prompt = OdkPrompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
                     result.append(this_prompt)
+                # TODO: Refactor begin and end group handling.
                 elif token['token_type'] == 'begin group':
+                    # DEBUG
+                    # print(dict_row['name'])
                     if not stack or isinstance(stack[-1], OdkRepeat):
-                        group = OdkGroup(dict_row, )
+                        group = OdkGroup(dict_row)
                         stack.append(group)
                         result.append(group.header)
+                        # DEBUG
+                        # print(dict_row['name'])
                     else:
                         m = 'Unable to add group at row {}'.format(i + 1)
                         raise OdkformError(m)
@@ -339,22 +351,29 @@ class OdkForm:
                             group.add_pending()
                             if stack:
                                 stack[-1].add(group)
+                                # DEBUG
+                                # print(dict_row['name'])
+                                # print(stack)
                             else:
-                                result.append(group.footer)
+
+                                pass
+                            end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
+                            result.append(end_group.footer)
                         else:
                             m = 'Mismatched "end group" at row {}'.format(i + 1)
                             raise OdkformError(m)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
-                        repeat = OdkRepeat(dict_row, )
+                        repeat = OdkRepeat(dict_row)
                         stack.append(repeat)
                     else:
                         m = 'Unable to add repeat at row {}'.format(i + 1)
                         raise OdkformError(m)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], OdkRepeat):
-                        repeat = stack.pop()  # Stack guaranteed empty at this point.
-                        result.append(repeat)
+                        stack.pop()  # Stack guaranteed empty at this point.
+                        # TODO: Render repeat from here.
+                        # repeat = stack.pop()  # Stack guaranteed empty at this point.
                     else:
                         m = 'Mismatched "end repeat" at row {}'.format(i + 1)
                         raise OdkformError(m)

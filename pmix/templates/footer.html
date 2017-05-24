@@ -11,7 +11,8 @@
         if ({{ data }} != false) {
             data = JSON.stringify({{ data }}); // JSON.stringify auto-expands the whole object.
             console.log('Data: ');
-            console.log(data);
+            console.log({{ data }});
+            // console.log(data);
         }
 
         messages = {};

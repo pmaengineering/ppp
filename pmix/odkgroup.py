@@ -1,9 +1,9 @@
 from jinja2 import Environment, PackageLoader
 from pmix.odkprompt import OdkComponent
-from pmix.odktable import Odktable
+from pmix.odktable import OdkTable
 
 
-class Odkgroup:
+class OdkGroup:
     """Class to represent a field-list group in XLSForm"""
 
     def __init__(self, opener):
@@ -38,7 +38,7 @@ class Odkgroup:
         if self.pending_table:
             self.pending_table.add(odkprompt)
         else:
-            self.pending_table = Odktable()
+            self.pending_table = OdkTable()
             self.pending_table.add(odkprompt)
 
     def add_pending(self):

@@ -1,7 +1,7 @@
 from pmix.error import OdkformError
 
 
-class Odktable:
+class OdkTable:
     """Class to represent a single ODK table from an XLSForm"""
 
     def __init__(self):

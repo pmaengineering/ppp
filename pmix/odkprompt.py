@@ -41,7 +41,7 @@ class OdkComponent:
                 d[field] = d[field + '::' + lang]
         return d
 
-class Odkprompt(OdkComponent):
+class OdkPrompt(OdkComponent):
     """
     Class to represent a single ODK prompt from an XLSForm.
 
@@ -152,7 +152,7 @@ class Odkprompt(OdkComponent):
                 choices = ['{}. {}'.format(i+1, c) for i, c in
                            enumerate(choices)]
             s = '\n'.join(('* {}'.format(i) for i in choices))
-        elif self.odktype in Odkprompt.response_types:
+        elif self.odktype in OdkPrompt.response_types:
             s = '_'*30 + '({})'.format(self.odktype)
 
         # try:
@@ -184,7 +184,7 @@ class Odkprompt(OdkComponent):
         elif self.odktype == 'select_one':
             choices = self.choices.labels(lang=lang)
             field = choices
-        elif self.odktype in Odkprompt.response_types:
+        elif self.odktype in OdkPrompt.response_types:
             field = '_'*30 + '({})'.format(self.odktype)
 
         return field

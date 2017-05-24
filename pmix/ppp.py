@@ -1,5 +1,5 @@
 import argparse
-from pmix.odkform import Odkform
+from pmix.odkform import OdkForm
 from pmix.error import OdkformError
 
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         raise OdkformError(m)
 
     s = ''
-    odkform = Odkform(f=args.xlsxfile)
+    odkform = OdkForm(f=args.xlsxfile)
     if args.format == 'text':
         s = odkform.to_text(args.language)
     elif args.format == 'dict':

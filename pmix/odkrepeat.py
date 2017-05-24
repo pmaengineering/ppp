@@ -2,7 +2,7 @@ from jinja2 import Environment, PackageLoader
 import textwrap
 
 
-class Odkrepeat:
+class OdkRepeat:
     """Class to represent repeat construct from XLSForm"""
 
     def __init__(self, opener):

@@ -3,13 +3,13 @@ import datetime
 from jinja2 import Environment, PackageLoader
 from pmix.error import OdkformError
 from pmix.odkchoices import Odkchoices
-from pmix.odkgroup import Odkgroup
-from pmix.odkprompt import Odkprompt
-from pmix.odkrepeat import Odkrepeat
+from pmix.odkgroup import OdkGroup
+from pmix.odkprompt import OdkPrompt
+from pmix.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
 
 
-class Odkform:
+class OdkForm:
     """Class to represent an entire XLSForm"""
 
     def __init__(self, *, f=None, wb=None):
@@ -121,7 +121,7 @@ class Odkform:
     def set_conversion_end(self):
         self.metadata['conversion_end'] = datetime.datetime.now()
         self.metadata['conversion_end_formatted'] = str(self.metadata['conversion_end'].date()) + ' ' + \
-                                                    str(self.metadata['conversion_end'].time())[0:8]
+            str(self.metadata['conversion_end'].time())[0:8]
 
     def get_running_conversion_time(self):
         self.metadata['conversion_time'] = str(self.metadata['conversion_end'] -
@@ -200,7 +200,7 @@ class Odkform:
         # self.conversion_info['Conversion Time'] = self.get_running_conversion_time()
         self.get_running_conversion_time()
         footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
-                                                        conversion_time = str(self.metadata['conversion_time']),
+                                                        conversion_time=str(self.metadata['conversion_time']),
                                                         data=data['footer']['data'])
         html_questionnaire += footer
         return html_questionnaire
@@ -212,7 +212,7 @@ class Odkform:
         :return: (dict) Info from parsing
         """
         row_type = row['type']
-        if row_type in Odkprompt.response_types + Odkprompt.non_response_types:
+        if row_type in OdkPrompt.response_types + OdkPrompt.non_response_types:
             d = {
                 'token_type': 'prompt',
                 'simple_type': row_type
@@ -317,13 +317,13 @@ class Odkform:
                         dict_row['in_group'] = True
                     else:
                         dict_row['in_group'] = False
-                    this_prompt = Odkprompt(dict_row, choices)
+                    this_prompt = OdkPrompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
                     result.append(this_prompt)
                 elif token['token_type'] == 'begin group':
-                    if not stack or isinstance(stack[-1], Odkrepeat):
-                        group = Odkgroup(dict_row, )
+                    if not stack or isinstance(stack[-1], OdkRepeat):
+                        group = OdkGroup(dict_row, )
                         stack.append(group)
                         result.append(group.header)
                     else:
@@ -334,7 +334,7 @@ class Odkform:
                     if c and c[-1]['name'] == dict_row['name'] and c[-1]['is_closed'] is False:
                         c[-1]['is_closed'] = True
                     else:
-                        if stack and isinstance(stack[-1], Odkgroup):
+                        if stack and isinstance(stack[-1], OdkGroup):
                             group = stack.pop()
                             group.add_pending()
                             if stack:
@@ -346,13 +346,13 @@ class Odkform:
                             raise OdkformError(m)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
-                        repeat = Odkrepeat(dict_row, )
+                        repeat = OdkRepeat(dict_row, )
                         stack.append(repeat)
                     else:
                         m = 'Unable to add repeat at row {}'.format(i + 1)
                         raise OdkformError(m)
                 elif token['token_type'] == 'end repeat':
-                    if stack and isinstance(stack[-1], Odkrepeat):
+                    if stack and isinstance(stack[-1], OdkRepeat):
                         repeat = stack.pop()  # Stack guaranteed empty at this point.
                         result.append(repeat)
                     else:
@@ -364,8 +364,8 @@ class Odkform:
                         choices = token['choice_list']
                     else:
                         choices = None
-                    if stack and isinstance(stack[-1], Odkgroup):
-                        this_prompt = Odkprompt(dict_row, choices)
+                    if stack and isinstance(stack[-1], OdkGroup):
+                        this_prompt = OdkPrompt(dict_row, choices)
                         stack[-1].add_table(this_prompt)
                         result.append(this_prompt)
                     else:
@@ -383,7 +383,7 @@ class Odkform:
                             'data': dict_row
                         }
                         context_groups.append(this_context_group)
-                    if stack and isinstance(stack[-1], Odkgroup):
+                    if stack and isinstance(stack[-1], OdkGroup):
                         m = ('PPP does not allow a group nested in a '
                              'field-list group. See row {}').format(i + 1)
                         raise OdkformError(m)

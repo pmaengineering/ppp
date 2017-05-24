@@ -66,13 +66,14 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
+    # TODO: Work on rendering from here.
     def to_dict(self, lang):
         """Get the text representation of the full group
 
         :param lang: (str) The language.
         :return: (dict) The text for this group.
         """
-        # TODO: Determine if to_dict and _to_Html methods are useful at all.
+
         group_text = 'Group (temporary placeholder)'
         return group_text
 

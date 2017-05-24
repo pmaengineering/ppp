@@ -10,6 +10,10 @@ class OdkRepeat:
         self.opener = opener
         self.data = []
 
+    def __repr__(self):
+        s = "<OdkRepeat {}: {}>".format(self.opener['name'], self.data)
+        return s
+
     def add(self, obj):
         """Add XLSForm object to repeat
 
@@ -31,6 +35,7 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
+    # TODO: Work on rendering from here.
     def to_dict(self, lang):
         """Get the text representation of the entire repeat group
 
@@ -43,5 +48,5 @@ class OdkRepeat:
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
         question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-                                                                              highlighting=highlighting)
+                                                                           highlighting=highlighting)
         return question

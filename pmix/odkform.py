@@ -315,29 +315,23 @@ class OdkForm:
                         choices = None
                     # TODO: Refactor next if/else and this_prompt declaration. Should only render group at 'end group'.
                     if stack:
-                        # DEBUG
+                        # These two lines below temporary.
                         dict_row['in_group'] = True if any(isinstance(x, OdkGroup) for x in stack) else False
                         dict_row['in_repeat'] = True if any(isinstance(x, OdkRepeat) for x in stack) else False
-                        # dict_row['in_group'] = True
-                        # DEBUG
-                        # if dict_row['name'] == 'not_usual_warn':
-                        #     print('hi')
-                    # else:
-                    #     dict_row['in_group'] = False
                     this_prompt = OdkPrompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
-                    result.append(this_prompt)
+                    else:
+                        result.append(this_prompt)
+                    # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
+                    # result.append(this_prompt)
                 # TODO: Refactor begin and end group handling.
                 elif token['token_type'] == 'begin group':
-                    # DEBUG
-                    # print(dict_row['name'])
                     if not stack or isinstance(stack[-1], OdkRepeat):
                         group = OdkGroup(dict_row)
                         stack.append(group)
-                        result.append(group.header)
-                        # DEBUG
-                        # print(dict_row['name'])
+                        # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
+                        # result.append(group.header)
                     else:
                         m = 'Unable to add group at row {}'.format(i + 1)
                         raise OdkformError(m)
@@ -351,14 +345,13 @@ class OdkForm:
                             group.add_pending()
                             if stack:
                                 stack[-1].add(group)
-                                # DEBUG
-                                # print(dict_row['name'])
-                                # print(stack)
                             else:
-
+                                # - New rendering. Disable this if needed as errors occur.
+                                result.append(group)
                                 pass
-                            end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
-                            result.append(end_group.footer)
+                            # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
+                            # end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
+                            # result.append(end_group.footer)
                         else:
                             m = 'Mismatched "end group" at row {}'.format(i + 1)
                             raise OdkformError(m)
@@ -371,9 +364,12 @@ class OdkForm:
                         raise OdkformError(m)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], OdkRepeat):
-                        stack.pop()  # Stack guaranteed empty at this point.
+                        # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
+                        # stack.pop()  # Stack guaranteed empty at this point.
                         # TODO: Render repeat from here.
-                        # repeat = stack.pop()  # Stack guaranteed empty at this point.
+                        # - New rendering. Disable this if needed as errors occur.
+                        repeat = stack.pop()  # Stack guaranteed empty at this point.
+                        result.append(repeat)
                     else:
                         m = 'Mismatched "end repeat" at row {}'.format(i + 1)
                         raise OdkformError(m)

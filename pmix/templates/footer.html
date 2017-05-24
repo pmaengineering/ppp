@@ -3,7 +3,7 @@
         </div>
     </body>
     <script>
-        if ({{ info }} = false && {{ warnings }} = false) {
+        if ({{ info }} === false && {{ warnings }} === false) {
             console.log('Conversion OK!')
         }
         console.log('Conversion took ' + '{{ conversion_time }}' + '.');

@@ -1,5 +1,3 @@
-                        <!--IDE Error Suppressions-->
-                        <!--suppress XmlDuplicatedId -->
                         {% if question.in_group == True %}
                             {% set group_styling = ' right-cell-in-group' %}
                             {% set side_letter_styling = 'side-letter-group-right' %}
@@ -20,13 +18,14 @@
                             <div class="question-type{{ type_highlight }}" style="text-align: left;">{{ question.type }}</div>
                             {% if question.relevant %}
                                 <div class="relevant{{ relevant_highlight }}" style="text-align: right;">
-                                  {{ question.relevant }}<span class="{{ side_letter_styling }}">R</span>
+                                  {{ question.relevant }}
+                                  <span class="{{ side_letter_styling }}">R</span>
                                 </div>
                             {% endif %}
                           </div>
                           <div class="align-bottom align-text-bottom{{ input_highlight }}">
                             {% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}
-                              <!--<form>-->
+                              <p><!--<form>-->
                                 {% for option in question.input_field %}
                                   {% if question.simple_type == 'select_one' %}
                                     {% include "content/prompt/inputs/select-one.html" %}
@@ -40,7 +39,7 @@
                                   <br/>
                                 {% endif %}
                                 {% endfor %}
-                              <!--</form>-->
+                              </p><!--</form>-->
                             {% endif %}
                             {% if question.simple_type == 'text' or question.simple_type == 'integer' or question.simple_type == 'decimal' or question.simple_type == 'image' %}
                               {% include "content/prompt/inputs/single-value.html" %}
@@ -53,85 +52,12 @@
                             {% endif %}
                           </div>
                           {% if question.choice_filter %}
-                            <div class="" style="display: flex; flex-direction: column;">
+                            <!--<div class="" style="display: flex; flex-direction: column;">-->
+                            <!--<div>-->
                                 <div class="choice-filter{{ filter_highlight }}">
-                                    {{ question.choice_filter }}
+                                  {{ question.choice_filter }}
                                   <span class="{{ side_letter_styling }}">F</span>
                                 </div>
-                            </div>
+                            <!--</div>-->
                           {% endif %}
                         </td>
-
-                    <!--<tr>-->
-                        <!--<td class="upper-border align-top">-->
-                            <!--<div style="height: 5%; overflow: hidden;">-->
-                                <!--<p class="variable">{{ question.name }}</p>-->
-                            <!--</div>-->
-                        <!--</td>-->
-                        <!--<td class="upper-border left-border align-top">-->
-                            <!--<div style="height: 5%; overflow: hidden;">-->
-                                <!--&lt;!&ndash;<span class="question-type">{{ question.type }}</span>&ndash;&gt;-->
-                                <!--<span class="relevant">{{ question.relevant }}</span>-->
-                            <!--</div>-->
-                        <!--</td>-->
-                    <!--</tr>-->
-
-
-                    <!--<tr>-->
-                        <!--<td class="upper-border align-top">-->
-                            <!--<div style="height: 10%; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
-                            <!--&lt;!&ndash;<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">&ndash;&gt;-->
-                                <!--<p class="variable">{{ question.name }}</p>-->
-                            <!--</div>-->
-                            <!--<div style="height: 90%;">-->
-                                <!--<div class="align-top">-->
-                                    <!--<p class="label">{{ question.label }}</p>-->
-                                    <!--<p class="hint">{{ question.hint }}</p>-->
-                                <!--</div>-->
-                            <!--<div style="vertical-align: bottom;">-->
-                                <!--<p class="constraint"></p>-->
-                                <!--<p class="constraint-message"></p>-->
-                            <!--</div>-->
-                            <!--</div>-->
-                        <!--</td>-->
-                        <!--<td class="upper-border response-cell align-top">-->
-                            <!--<div style="height: 10%; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">-->
-                            <!--&lt;!&ndash;<div style="height: 10%; display: inline-block; margin: 0 0 0 0; padding: 0 0 0 0;" class="align-top">&ndash;&gt;-->
-                                <!--<span class="question-type">{{ question.type }}</span>-->
-                                <!--<span class="relevant">{{ question.relevant }}</span>-->
-                            <!--</div>-->
-                            <!--<div style="height: 90%; display: inline-block;">-->
-                                <!--{% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}-->
-                                    <!--{% for option in question.input_field[0] %}-->
-                                        <!--{# {{ option }} #}-->
-                                        <!--{% if question.simple_type == 'select_one' %}<input type="radio" class="" name="{{ option }}" id="{{ question.name }}_Option_{{ loop.index }}" />{% endif %}-->
-                                        <!--{% if question.simple_type == 'select_multiple' %}<input type="checkbox" class="" name="{{ option }}" id="{{ question.name }}_Option_{{ loop.index }}" />{% endif %}-->
-                                        <!--<label for="{{ question.name }}_Option_{{ loop.index }}">{{ option }}</label>-->
-                                        <!--<br/>-->
-                                    <!--{% endfor %}-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'text' %}-->
-                                <!--<input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'integer' %}-->
-                                <!--<input type="number" class="input" title="" name="hh_num" id="{{ question.name }}" min="0" />-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'decimal' %}-->
-                                <!--<input type="number" class="input" title="" name="hh_num" id="{{ question.name }}" min="0" />-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'date' %}-->
-                                <!--<input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>-->
-                                <!--&lt;!&ndash;<input type="date" class="input" name="{{ question.variable }}" id="{{ question.name }}" min="1979-12-31"/>&ndash;&gt;-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'dateTime' %}-->
-                                <!--<input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>-->
-                                <!--&lt;!&ndash;<input type="datetime-local" class="input" name="{{ question.variable }}" id="{{ question.name }}" min="1979-12-31T22:22:55"/>&ndash;&gt;-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'image'%}-->
-                                <!--<input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>-->
-                                <!--{% endif %}-->
-                                <!--{% if question.simple_type == 'note' %}-->
-                                <!--{% endif %}-->
-                            <!--</div>-->
-                        <!--</td>-->
-                    <!--</tr>-->

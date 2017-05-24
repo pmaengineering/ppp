@@ -1,4 +1,5 @@
 from jinja2 import Environment, PackageLoader
+from pmix.odkprompt import OdkComponent
 from pmix.odktable import Odktable
 
 
@@ -78,25 +79,28 @@ class Odkgroup:
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
         question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-                                                                              highlighting=highlighting)
+                                                                           highlighting=highlighting)
         return question
 
 
-class OdkGroupHeader:
+class OdkGroupHeader(OdkComponent):
     """Class to represent a 'begin group' line of XLSForm, and a group header in paper form."""
 
     def __init__(self, opener):
         """Initialize a group header."""
+        OdkComponent.__init__(self)
         self.data = opener
 
     def to_dict(self, lang):
+        self.data = self.reformat_default_language_variable_names(self.data, lang)
+        self.data = self.truncate_fields(self.data)
         self.data['is_group_header'] = True
         return self.data
 
     def to_html(self, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
         question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-                                                                              highlighting=highlighting)
+                                                                           highlighting=highlighting)
         return question
 
 
@@ -107,13 +111,12 @@ class OdkGroupFooter:
         """Initialize a group header."""
         self.data = opener
 
-    def to_dict(self, lang):
+    def to_dict(self):
         self.data['is_group_footer'] = True
         return self.data
 
     def to_html(self, lang, highlighting):
-
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-                                                                              highlighting=highlighting)
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(),
+                                                                           highlighting=highlighting)
         return question

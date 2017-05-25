@@ -1,5 +1,5 @@
 from jinja2 import Environment, PackageLoader
-from pmix.odkprompt import OdkComponent
+from pmix.odkprompt import OdkComponent, OdkPrompt
 from pmix.odktable import OdkTable
 
 
@@ -66,22 +66,46 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    # TODO: Work on rendering from here.
-    def to_dict(self, lang):
-        """Get the text representation of the full group
+    def render_header(self, input, lang, highlighting):
+        input['simple_type'] = input['type']
+        input['is_group_header'] = True
+        return OdkPrompt(input).to_html(lang, highlighting)
+
+    def render_footer(self, input, lang, highlighting):
+        input.row['in_group'] = True
+        input.row['is_group_footer'] = True
+        return input.to_html(lang, highlighting)
+
+    def render_prompt(self, input, lang, highlighting):
+        input.row['in_group'] = True
+        return input.to_html(lang, highlighting)
+
+    def to_dict(self, lang, highlighting):
+        """Get the dict representation of the full group
 
         :param lang: (str) The language.
+        :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
-
-        group_text = 'Group (temporary placeholder)'
-        return group_text
+        pass
 
     def to_html(self, lang, highlighting):
-        env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-                                                                           highlighting=highlighting)
-        return question
+        """Get the html representation of the full group.
+
+        :param lang: (str) The language.
+        :param highlighting: (bool) Highlighting on/off.
+        :return: (dict) The text for this group.
+        """
+        # env = Environment(loader=PackageLoader('pmix'))
+        # question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang, highlighting),
+        #                                          highlighting=highlighting)
+        # return question
+        s = ''
+        s += self.render_header(self.opener, lang, highlighting)
+        for i in self.data[0:-1]:
+            s += (self.render_prompt(i, lang, highlighting))
+        s += self.render_footer(self.data[-1], lang, highlighting)
+        return s
 
 
 class OdkGroupHeader(OdkComponent):

@@ -5,6 +5,9 @@
                             {% set group_styling = '' %}
                             {% set side_letter_styling = 'side-letter-right' %}
                         {% endif %}
+                        {% if question.is_group_footer == True %}
+                            {% set group_footer_styling = ' group-footer' %}
+                        {% endif %}
                         {% if highlighting %}
                             {% set type_highlight = ' bg-light-blue' %}
                             {% set relevant_highlight = ' bg-light-green' %}
@@ -12,7 +15,7 @@
                             {% set filter_highlight = ' bg-light-green' %}
                         {% endif %}
                         <!--<td class="response-cell{{ group_styling }}">-->
-                        <td class="response-cell align-top{{ group_styling }}">
+                        <td class="response-cell align-top{{ group_styling }}{{ group_footer_styling }}">
 
                           <!--<div>-->
                           <div class="" style="display: flex; justify-content: space-between; flex-direction: column;">

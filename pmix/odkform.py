@@ -315,9 +315,10 @@ class OdkForm:
                         choices = None
                     # TODO: Refactor next if/else and this_prompt declaration. Should only render group at 'end group'.
                     if stack:
-                        # These two lines below temporary.
-                        dict_row['in_group'] = True if any(isinstance(x, OdkGroup) for x in stack) else False
-                        dict_row['in_repeat'] = True if any(isinstance(x, OdkRepeat) for x in stack) else False
+                        # This is de-activated. Will need to add group/repeat render_prompt to get it to work.
+                        # dict_row['in_group'] = True if any(isinstance(x, OdkGroup) for x in stack) else False
+                        # dict_row['in_repeat'] = True if any(isinstance(x, OdkRepeat) for x in stack) else False
+                        pass
                     this_prompt = OdkPrompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
@@ -348,7 +349,7 @@ class OdkForm:
                             else:
                                 # - New rendering. Disable this if needed as errors occur.
                                 result.append(group)
-                                pass
+                                # pass
                             # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
                             # end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
                             # result.append(end_group.footer)

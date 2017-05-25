@@ -1,4 +1,7 @@
 from pmix.error import OdkformError
+from collections import namedtuple
+
+NameLabel = namedtuple('NameLabel', ['name', 'label'])
 
 
 class Odkchoices:
@@ -42,6 +45,9 @@ class Odkchoices:
         labels = [d[lang_col] for d in self.data]
         return labels
 
+    def name_labels(self, lang):
+        return [NameLabel(x['name'], x['label::{}'.format(lang)]) for x in self.data]
+
     def choice_langs(self):
         """Discover all languages for these choices.
 
@@ -66,7 +72,7 @@ class Odkchoices:
         return lang_list
 
     def __str__(self):
-        s = '{}: {}'.format(self.list_name, self.labels())
+        s = '{}: {}'.format(self.list_name, self.labels(lang='English'))
         return s
 
     def __repr__(self):

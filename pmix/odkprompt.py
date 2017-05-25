@@ -189,17 +189,6 @@ class OdkPrompt(OdkComponent):
 
         return field
 
-    # @staticmethod
-    # def truncate_text(text):
-    #     """Truncate text and add an ellipsis when text is too long.
-    #
-    #     :param text: (str) The text.
-    #     :return: (str) Truncated text.
-    #     """
-    #     if len(text) > 100:
-    #         text = text[0:98] + ' …'
-    #     return text
-
     def to_text(self, lang):
         """Get the text representation of the full prompt
 
@@ -220,18 +209,6 @@ class OdkPrompt(OdkComponent):
         text = filter(None, fields)
         result = '\n\n'.join(text)
         return result
-    #
-    # def reformat_default_language_variable_names(self, d, lang):
-    #     language_dependent_field = ['label', 'hint', 'constraint_message', 'image', 'audio', 'video']
-    #     for field in language_dependent_field:
-    #         if (field + '::' + lang) in d:
-    #             d[field] = d[field + '::' + lang]
-    #     truncatable_fields = ['constraint', 'relevant']
-    #     for field in truncatable_fields:
-    #         d[field + '_original'] = d[field]
-    #         d[field] = self.truncate_text(d[field])
-    #     d['input_field'] = self.to_html_input_field(lang)
-    #     return d
 
     def to_dict(self, lang):
         """Get the text representation of the full prompt

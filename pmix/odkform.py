@@ -383,7 +383,6 @@ class OdkForm:
                     if stack and isinstance(stack[-1], OdkGroup):
                         this_prompt = OdkPrompt(dict_row, choices)
                         stack[-1].add_table(this_prompt)
-                        result.append(this_prompt)
                     else:
                         m = 'Table found outside of field-list group at row {}'
                         m = m.format(i + 1)

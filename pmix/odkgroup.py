@@ -96,15 +96,15 @@ class OdkGroup:
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
-        # env = Environment(loader=PackageLoader('pmix'))
-        # question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang, highlighting),
-        #                                          highlighting=highlighting)
-        # return question
         s = ''
         s += self.render_header(self.opener, lang, highlighting)
+        if isinstance(self.data[-1], OdkTable) is True:
+            self.data[-1].is_group_footer = True
         for i in self.data[0:-1]:
-            s += (self.render_prompt(i, lang, highlighting))
-        s += self.render_footer(self.data[-1], lang, highlighting)
+            s += (self.render_prompt(i, lang, highlighting)) if isinstance(i, OdkPrompt) else \
+                i.to_html(lang, highlighting) if isinstance(i, OdkTable) else ''
+        s += self.render_footer(self.data[-1], lang, highlighting) if isinstance(self.data[-1], OdkPrompt) else \
+            self.data[-1].to_html(lang, highlighting) if isinstance(self.data[-1], OdkTable) else ''
         return s
 
 

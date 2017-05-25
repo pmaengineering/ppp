@@ -1,4 +1,5 @@
-from pmix.error import OdkformError
+from jinja2 import Environment, PackageLoader
+# from pmix.error import OdkformError
 
 
 class OdkTable:
@@ -7,6 +8,13 @@ class OdkTable:
     def __init__(self):
         """Initialize table object with empty data bin"""
         self.data = []
+        self.header = None
+        self.contents = None
+        self.is_group_footer = False
+
+    def __repr__(self):
+        s = '<OdkTable w/ Header \'{}\': {}>'.format(self.data[0].row['name'], self.data)
+        return s
 
     def add(self, odkprompt):
         """Add a row of data from XLSForm
@@ -14,6 +22,13 @@ class OdkTable:
         :param odkprompt: (Odkprompt) ODK table row
         """
         self.data.append(odkprompt)
+
+    def set_header_and_contents(self, lang):
+        for i in self.data:
+            i.row['in_group'] = True
+            i.to_dict(lang)
+        self.header = self.data[0]
+        self.contents = self.data[1:]
 
     def to_text(self, lang):
         """Get the text representation of the table
@@ -51,3 +66,13 @@ class OdkTable:
         # result = '\n'.join((choice_row, body))
         result = 'ODK TABLE TEXT'
         return result
+
+    def to_html(self, lang, highlighting):
+        self.set_header_and_contents(lang)
+        table = []
+        table.append(self.header.row)
+        for i in self.contents:
+            table.append(i.row)
+        env = Environment(loader=PackageLoader('pmix'))
+        return env.get_template('content/table.html').render(table=table, lang=lang, highlighting=highlighting,
+                                                             is_group_footer=self.is_group_footer)

@@ -42,7 +42,7 @@
                                       {% include "content/prompt/inputs/select-multiple.html" %}
                                     {% endif %}
                                     <!--suppress XmlInvalidId -->
-                                    <label for="{{ question.name }}_{{ loop.index }}">{{ option }}</label>
+                                  <label for="{{ question.name }}_{{ loop.index }}">{{ option.label }} <span class="choice-name">{{ option.name }}</span></label>
                                   {% if loop.last == False %}
                                     <br/>
                                   {% endif %}

@@ -5,7 +5,7 @@
                             <td class="odk-table-item-label-cell"></td><!--<th>--><!--</th>-->
                             {% for field in table[0].input_field %}
                               <td class="odk-table-response odk-table-response-header"><!--<th>-->
-                                <span class="variable">{{ field }}</span> <span class="label">{{ field }}</span>
+                                <span class="label">{{ field.label }}</span> <span class="choice-name">{{ field.name }}</span>
                               </td><!--</th>-->
                             {% endfor %}
                           </tr>

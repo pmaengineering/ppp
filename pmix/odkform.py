@@ -2,7 +2,7 @@ import os.path
 import datetime
 from jinja2 import Environment, PackageLoader
 from pmix.error import OdkformError
-from pmix.odkchoices import Odkchoices
+from pmix.odkchoices import OdkChoices
 from pmix.odkgroup import OdkGroup
 from pmix.odkprompt import OdkPrompt
 from pmix.odkrepeat import OdkRepeat
@@ -93,7 +93,7 @@ class OdkForm:
                 if list_name in d:
                     d[list_name].add(json_row)
                 elif list_name:  # Not "else:" because possibly blank rows.
-                    odkchoices = Odkchoices(list_name)
+                    odkchoices = OdkChoices(list_name)
                     odkchoices.add(json_row)
                     d[list_name] = odkchoices
         except KeyError:  # Worksheet does not exist.
@@ -192,8 +192,15 @@ class OdkForm:
         }
         header = env.get_template('header.html').render(data=data['header'])
         html_questionnaire += header
+        prev_item = None
         for q in data['questionnaire']:
+            if prev_item is not None and isinstance(q, OdkGroup):
+                html_questionnaire += '<tr><td style="height: 5px;"></td></tr>'
+            elif isinstance(prev_item, OdkGroup) and not isinstance(q, OdkGroup):
+                html_questionnaire += '<tr><td style="height: 5px;"></td></tr>'
             html_questionnaire += q.to_html(lang, highlighting)
+            prev_item = q
+
         self.set_conversion_end()
         warnings = self.warnings if self.warnings is not None else 'false'
         self.conversion_info = {} if self.conversion_info is 'false' else self.conversion_info
@@ -262,7 +269,6 @@ class OdkForm:
             if table_label or table_list:
                 d['token_type'] = 'table'
             return d
-        # TODO: Work below this line as necessary to handle groups, repeats, and tables correctly.
         elif row_type == 'begin group':
             d = {'token_type': 'context group'}
             appearance = row.get('appearance', '')

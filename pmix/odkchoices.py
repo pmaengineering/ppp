@@ -1,10 +1,7 @@
 from pmix.error import OdkformError
-from collections import namedtuple
-
-NameLabel = namedtuple('NameLabel', ['name', 'label'])
 
 
-class Odkchoices:
+class OdkChoices:
     """A class to represent a choice list defined in an XLSForm"""
 
     def __init__(self, list_name):
@@ -46,7 +43,7 @@ class Odkchoices:
         return labels
 
     def name_labels(self, lang):
-        return [NameLabel(x['name'], x['label::{}'.format(lang)]) for x in self.data]
+        return [{'name': x['name'], 'label': x['label::{}'.format(lang)]} for x in self.data]
 
     def choice_langs(self):
         """Discover all languages for these choices.

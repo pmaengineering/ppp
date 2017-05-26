@@ -1,5 +1,6 @@
-from jinja2 import Environment, PackageLoader
 import textwrap
+from jinja2 import Environment, PackageLoader
+from pmix.odkchoices import OdkChoices
 
 
 class OdkComponent:
@@ -178,15 +179,10 @@ class OdkPrompt(OdkComponent):
         :return: (str or dict) The representation of the entry field
         """
         field = None
-        if self.odktype == 'select_multiple':
-            choices = self.choices.labels(lang=lang)
-            field = choices
-        elif self.odktype == 'select_one':
-            choices = self.choices.labels(lang=lang)
-            field = choices
+        if self.odktype in ['select_multiple', 'select_one']:
+            field = self.choices.name_labels(lang=lang)
         elif self.odktype in OdkPrompt.response_types:
-            field = '_'*30 + '({})'.format(self.odktype)
-
+            field = '_' * 30 + '({})'.format(self.odktype)
         return field
 
     def to_text(self, lang):

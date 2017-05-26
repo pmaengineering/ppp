@@ -90,7 +90,7 @@ class OdkRepeat:
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
-        print(self.data)  # DEBUG
+        # print(self.data)  # DEBUG
         s = ''  # TODO: Below this line.
         s += self.render_header(self.opener, lang, highlighting)
         # if isinstance(self.data[-1], OdkTable) is True:

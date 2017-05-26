@@ -97,6 +97,7 @@ class OdkGroup:
         :return: (dict) The text for this group.
         """
         s = ''
+        s += '<tr><td colspan="2"><table style="border: 3px double;"><tbody>'
         s += self.render_header(self.opener, lang, highlighting)
         if isinstance(self.data[-1], OdkTable) is True:
             self.data[-1].is_group_footer = True
@@ -105,6 +106,7 @@ class OdkGroup:
                 i.to_html(lang, highlighting) if isinstance(i, OdkTable) else ''
         s += self.render_footer(self.data[-1], lang, highlighting) if isinstance(self.data[-1], OdkPrompt) else \
             self.data[-1].to_html(lang, highlighting) if isinstance(self.data[-1], OdkTable) else ''
+        s += '</tbody></table></td></tr>'
         return s
 
 

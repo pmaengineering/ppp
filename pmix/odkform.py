@@ -195,9 +195,9 @@ class OdkForm:
         prev_item = None
         for q in data['questionnaire']:
             if prev_item is not None and isinstance(q, OdkGroup):
-                html_questionnaire += '<tr><td style="height: 5px;"></td></tr>'
+                html_questionnaire += '<tr><td style="height: 5px;" colspan="2"></td></tr>'
             elif isinstance(prev_item, OdkGroup) and not isinstance(q, OdkGroup):
-                html_questionnaire += '<tr><td style="height: 5px;"></td></tr>'
+                html_questionnaire += '<tr><td style="height: 5px;" colspan="2"></td></tr>'
             html_questionnaire += q.to_html(lang, highlighting)
             prev_item = q
 

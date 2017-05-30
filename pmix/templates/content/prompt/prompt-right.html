@@ -40,7 +40,7 @@
 
                             <!--<div class="{ input_highlight }}" style="display: flex;">-->
                             <div class="{{ input_highlight }}{{ input_margins }}">
-                              {% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}
+                              {% if question.simple_type in ['select_one', 'select_multiple'] %}
                                 <p><!--<form>-->
                                   {% for option in question.input_field %}
                                     {% if question.simple_type == 'select_one' %}
@@ -57,10 +57,10 @@
                                   {% endfor %}
                                 </p><!--</form>-->
                               {% endif %}
-                              {% if question.simple_type == 'text' or question.simple_type == 'integer' or question.simple_type == 'decimal' or question.simple_type == 'image' %}
+                              {% if question.simple_type in ['text', 'integer', 'decimal', 'image'] %}
                                 {% include "content/prompt/inputs/single-value.html" %}
                               {% endif %}
-                              {% if question.simple_type == 'date' or question.simple_type == 'dateTime'%}
+                              {% if question.simple_type in ['date', 'dateTime'] %}
                                 {% include "content/prompt/inputs/date.html" %}
                               {% endif %}
                               {% if question.simple_type == 'note' %}

@@ -53,8 +53,9 @@ class OdkRepeat:
 
     def render_header(self, input, lang, highlighting):
         env = Environment(loader=PackageLoader('pmix'))
-        s = env.get_template('content/repeat-opener.html').render()
+        s = env.get_template('content/repeat/repeat-opener.html').render()
         input['simple_type'] = input['type']
+        input['in_repeat'] = True
         input['is_repeat_header'] = True
         s += OdkPrompt(input).to_html(lang, highlighting)
         return s
@@ -71,10 +72,10 @@ class OdkRepeat:
         # input.row['is_repeat_footer'] = True
         # return input.to_html(lang, highlighting)
         env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/repeat-closer.html').render()
+        return env.get_template('content/repeat/repeat-closer.html').render()
 
     def render_prompt(self, input, lang, highlighting):
-        # input.row['in_repeat'] = True
+        input.row['in_repeat'] = True
         return input.to_html(lang, highlighting)
 
     # def render_group(self, input, lang, highlighting):
@@ -98,11 +99,15 @@ class OdkRepeat:
         # for i in self.data[0:-1]:
         for i in self.data:
             if isinstance(i, OdkPrompt):
-                s += (self.render_prompt(i, lang, highlighting))
+                i.row['in_repeat'] = True
+                s += i.to_html(lang, highlighting)
+                # s += (self.render_prompt(i, lang, highlighting))
             elif isinstance(i, OdkGroup):
-                i.to_html(lang, highlighting)
+                i.in_repeat = True
+                s += i.to_html(lang, highlighting)
             elif isinstance(i, OdkTable):
-                i.to_html(lang, highlighting)
+                i.in_repeat = True
+                s += i.to_html(lang, highlighting)
         s += self.render_footer()
         # s += self.render_footer(self.data[-1], lang, highlighting) if isinstance(self.data[-1], OdkPrompt) else \
         #     self.data[-1].to_html(lang, highlighting) if isinstance(self.data[-1], OdkTable) else ''

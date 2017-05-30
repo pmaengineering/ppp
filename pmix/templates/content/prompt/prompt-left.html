@@ -1,3 +1,6 @@
+                        {% if question.in_repeat == True %}
+                            {% set side_letter_styling = 'side-letter-repeat-left' %}
+                        {% endif %}
                         {% if question.in_group == True %}
                             {% set group_styling = ' left-cell-in-group' %}
                             {% set side_letter_styling = 'side-letter-group-left' %}

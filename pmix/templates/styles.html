@@ -8,6 +8,7 @@
             table {
                 width: 100%;
                 border-spacing: 0;
+                table-layout: fixed;
             }
             td {
                 /*width: 50%;*/
@@ -50,6 +51,9 @@
                 position: relative;
                 bottom: -250px;
             }
+            .bottom-border {
+                border-bottom: 1px black solid;
+            }
             .height-fix {
                 height:100%;
             }
@@ -83,6 +87,9 @@
                 border-top: 1px black solid;
                 padding: 5px 5px 5px 5px
             }
+            .border-top {
+                border-top: 1px black solid;
+            }
             .upper-border-bolder {
                 border-top: 2px solid black;
             }
@@ -98,8 +105,9 @@
             }
             .odk-table {
                 border-top: 1px solid;
-                border-left: 3px double;
-                border-right: 3px double;
+                padding: 0;
+                /*border-left: 3px double;*/
+                /*border-right: 3px double;*/
             }
             .odk-table-response-header {
                 border-bottom: 1px solid;
@@ -156,6 +164,12 @@
                 top: 3px;
                 margin-left: 10px;
             }
+            .input-margins {
+                margin-top: 20px;
+            }
+            .group-table {
+                border: 3px double;
+            }
             .group-header-hat {
                 /*border-top: 1px solid;*/
                 /*border-left: 3px double;*/
@@ -163,6 +177,9 @@
                 /*border-bottom: 1px solid;*/
                 /*padding-left: 0;*/
                 /*padding-right: 0;*/
+            }
+            .group-spacing {
+                height: 5px;
             }
             .group-header {
                 /*height: 1px;*/
@@ -200,8 +217,9 @@
                 background-color: white;
             }
             .repeat-header {
-                padding: 5px 5px 5px 5px;
+                padding: 5px 5px 10px 5px;
                 vertical-align: top;
+                text-align: center;
             }
             .section-spacing {
                 height: 35px;
@@ -307,7 +325,17 @@
                 font-family: 'Arial', serif;
                 /*font-size: 13px;*/
                 font-size: 0.8em;
-                margin-left: -28px;
+                margin-left: -29px;
+                float: left;
+                /* margin-top: 1px; */
+                text-align: right;
+                width: 15px;
+            }
+            .side-letter-repeat-left {
+                font-family: 'Arial', serif;
+                /*font-size: 13px;*/
+                font-size: 0.8em;
+                margin-left: -50px;
                 float: left;
                 /* margin-top: 1px; */
                 text-align: right;
@@ -322,7 +350,15 @@
                 width: 15px;
             }
             .side-letter-group-right {
-                margin-right: -28px;
+                margin-right: -29px;
+                float: right;
+                font-size: 13px;
+                /* margin-top: 1px; */
+                text-align: left;
+                width: 15px;
+            }
+            .side-letter-repeat-right {
+                margin-right: -50px;
                 float: right;
                 font-size: 13px;
                 /* margin-top: 1px; */

@@ -1,3 +1,6 @@
+                        {% if question.in_repeat == True %}
+                            {% set side_letter_styling = 'side-letter-repeat-right' %}
+                        {% endif %}
                         {% if question.in_group == True %}
                             {% set group_styling = ' right-cell-in-group' %}
                             {% set side_letter_styling = 'side-letter-group-right' %}
@@ -13,6 +16,11 @@
                             {% set relevant_highlight = ' bg-light-green' %}
                             {% set input_highlight = ' bg-light-red' %}
                             {% set filter_highlight = ' bg-light-green' %}
+                        {% endif %}
+                        {% if question.simple_type in ['text', 'integer', 'decimal', 'image', 'date', 'dateTime'] %}
+                          {% set input_margins = ' input-margins' %}
+                        {% else %}
+                          {% set input_margins = '' %}
                         {% endif %}
                         <!--<td class="response-cell{{ group_styling }}">-->
                         <td class="response-cell align-top{{ group_styling }}{{ group_footer_styling }}">
@@ -31,7 +39,7 @@
                             </div>
 
                             <!--<div class="{ input_highlight }}" style="display: flex;">-->
-                            <div class="{{ input_highlight }}">
+                            <div class="{{ input_highlight }}{{ input_margins }}">
                               {% if question.simple_type == 'select_one' or question.simple_type == 'select_multiple' %}
                                 <p><!--<form>-->
                                   {% for option in question.input_field %}

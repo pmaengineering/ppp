@@ -11,6 +11,7 @@ class OdkTable:
         self.header = None
         self.contents = None
         self.is_group_footer = False
+        self.in_repeat = False
 
     def __repr__(self):
         s = '<OdkTable w/ Header \'{}\': {}>'.format(self.data[0].row['name'], self.data)
@@ -74,5 +75,5 @@ class OdkTable:
         for i in self.contents:
             table.append(i.row)
         env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/table.html').render(table=table, lang=lang, highlighting=highlighting,
+        return env.get_template('content/table/table.html').render(table=table, lang=lang, highlighting=highlighting,
                                                              is_group_footer=self.is_group_footer)

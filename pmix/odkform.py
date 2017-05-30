@@ -191,20 +191,22 @@ class OdkForm:
             'questionnaire': self.questionnaire
         }
         header = env.get_template('header.html').render(data=data['header'])
+        gs = env.get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
         prev_item = None
-        for q in data['questionnaire']:
+        for index, q in enumerate(data['questionnaire']):
             if prev_item is not None and isinstance(q, OdkGroup):
-                html_questionnaire += '<tr><td style="height: 5px;" colspan="2"></td></tr>'
+                html_questionnaire += gs
             elif isinstance(prev_item, OdkGroup) and not isinstance(q, OdkGroup):
-                html_questionnaire += '<tr><td style="height: 5px;" colspan="2"></td></tr>'
-            html_questionnaire += q.to_html(lang, highlighting)
+                html_questionnaire += gs
+            if isinstance(q, OdkPrompt) and q.is_section_header and isinstance(data['questionnaire'][index+1], OdkGroup):
+                html_questionnaire += q.to_html(lang, highlighting, bottom_border=True)
+            else:
+                html_questionnaire += q.to_html(lang, highlighting)
             prev_item = q
-
         self.set_conversion_end()
         warnings = self.warnings if self.warnings is not None else 'false'
         self.conversion_info = {} if self.conversion_info is 'false' else self.conversion_info
-        # self.conversion_info['Conversion Time'] = self.get_running_conversion_time()
         self.get_running_conversion_time()
         footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
                                                         conversion_time=str(self.metadata['conversion_time']),
@@ -356,8 +358,8 @@ class OdkForm:
                                 # - New rendering. Disable this if needed as errors occur.
                                 result.append(group)
                                 # pass
-                            # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
-                            # end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
+                            # This is temporarily de-activated. Will need to add group/repeat rendering to get it to
+                            # work. end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
                             # result.append(end_group.footer)
                         else:
                             m = 'Mismatched "end group" at row {}'.format(i + 1)

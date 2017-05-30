@@ -13,6 +13,7 @@ class OdkGroup:
         self.pending_table = None
         self.header = self.set_header()
         self.footer = self.set_footer()
+        self.in_repeat = False
 
     def __repr__(self):
         s = "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
@@ -67,13 +68,14 @@ class OdkGroup:
         return group_text
 
     def render_header(self, input, lang, highlighting):
+        input['in_group'] = True
         input['simple_type'] = input['type']
         input['is_group_header'] = True
         return OdkPrompt(input).to_html(lang, highlighting)
 
     def render_footer(self, input, lang, highlighting):
         input.row['in_group'] = True
-        input.row['is_group_footer'] = True
+        # input.row['is_group_footer'] = True
         return input.to_html(lang, highlighting)
 
     def render_prompt(self, input, lang, highlighting):
@@ -96,17 +98,26 @@ class OdkGroup:
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
+        env = Environment(loader=PackageLoader('pmix'))
         s = ''
-        s += '<tr><td colspan="2"><table style="border: 3px double;"><tbody>'
+        s += env.get_template('content/group/group-opener.html').render()
         s += self.render_header(self.opener, lang, highlighting)
-        if isinstance(self.data[-1], OdkTable) is True:
-            self.data[-1].is_group_footer = True
+        # self.data[0].row['is_group_header'] = True
         for i in self.data[0:-1]:
-            s += (self.render_prompt(i, lang, highlighting)) if isinstance(i, OdkPrompt) else \
-                i.to_html(lang, highlighting) if isinstance(i, OdkTable) else ''
-        s += self.render_footer(self.data[-1], lang, highlighting) if isinstance(self.data[-1], OdkPrompt) else \
-            self.data[-1].to_html(lang, highlighting) if isinstance(self.data[-1], OdkTable) else ''
-        s += '</tbody></table></td></tr>'
+            if isinstance(i, OdkPrompt):
+                i.row['in_repeat'] = self.in_repeat
+                s += self.render_prompt(i, lang, highlighting)
+            elif isinstance(i, OdkTable):
+                i.in_repeat = self.in_repeat
+                s += i.to_html(lang, highlighting)
+        if isinstance(self.data[-1], OdkPrompt):
+            self.data[-1].row['in_repeat'] = self.in_repeat
+            s += self.render_footer(self.data[-1], lang, highlighting)
+        if isinstance(self.data[-1], OdkTable):
+            # self.data[-1].is_group_footer = True
+            self.data[-1].in_repeat = self.in_repeat
+            s += self.data[-1].to_html(lang, highlighting)
+        s += env.get_template('content/group/group-closer.html').render()
         return s
 
 

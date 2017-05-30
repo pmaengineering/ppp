@@ -1,6 +1,6 @@
 import textwrap
 from jinja2 import Environment, PackageLoader
-from pmix.odkchoices import OdkChoices
+# from pmix.odkchoices import OdkChoices
 
 
 class OdkComponent:
@@ -41,6 +41,7 @@ class OdkComponent:
             if (field + '::' + lang) in d:
                 d[field] = d[field + '::' + lang]
         return d
+
 
 class OdkPrompt(OdkComponent):
     """
@@ -83,9 +84,10 @@ class OdkPrompt(OdkComponent):
         self.row = row
         self.choices = choices
         self.odktype = self.row['simple_type']
+        self.is_section_header = True if self.row['name'].startswith('sect_') else False
 
     def __repr__(self):
-        s = "<Odkprompt {}>".format(self.row['name'])
+        s = "<OdkPrompt {}>".format(self.row['name'])
         return s
 
     @staticmethod
@@ -206,7 +208,7 @@ class OdkPrompt(OdkComponent):
         result = '\n\n'.join(text)
         return result
 
-    def to_dict(self, lang):
+    def to_dict(self, lang, **kwargs):
         """Get the text representation of the full prompt
 
         :param lang: (str) The language.
@@ -215,10 +217,14 @@ class OdkPrompt(OdkComponent):
         d = self.reformat_default_language_variable_names(self.row, lang)
         d = self.truncate_fields(d)
         d['input_field'] = self.to_html_input_field(lang)
+        if self.is_section_header:
+            d['is_section_header'] = True
+        if 'bottom_border' in kwargs:
+            d['bottom_border'] = True
         return d
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
+        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang, **kwargs),
                                                                            highlighting=highlighting)
         return question

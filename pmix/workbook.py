@@ -59,7 +59,7 @@ class Workbook:
             that can look up formats based on what is stored in the Cell obj.
         """
         formats = {}
-        for k, v in wbformat.hl_colors.items():
+        for k, v in wbformat.HL_COLORS.items():
             this_format = wb.add_format({'bg_color': v})
             formats[k] = this_format
         return formats

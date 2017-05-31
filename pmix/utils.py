@@ -85,21 +85,6 @@ def format_header(s):
     return section_header.format(inner_header.format(s))
 
 
-# important for switching between google docs and xlsx
-def newline_space_fix(s):
-    newline_space = '\n '
-    fix = '\n'
-    while newline_space in s:
-        s = s.replace(newline_space, fix)
-    return s
-
-
-def space_newline_fix(s):
-    space_newline = ' \n'
-    fix = '\n'
-    while space_newline in s:
-        s = s.replace(space_newline, fix)
-    return s
 
 if __name__ == '__main__':
     text_rules = """

@@ -6,8 +6,6 @@ import xlsxwriter
 
 from pmix.workbook import Workbook
 from pmix.xlsform import Xlsform
-from pmix import constants
-from pmix import utils
 
 
 class TranslationDict:
@@ -52,6 +50,7 @@ class TranslationDict:
                 [.:)]               # Always end with '.' ':' ')' and
                 \s+                 # whitespace
                 """
+    # pylint: disable=no-member
     number_prog = re.compile(number_re, re.VERBOSE)
 
     def __init__(self, src=None, base='English'):
@@ -186,10 +185,10 @@ class TranslationDict:
         if len(unique_all_found) > 1:
             msg = '"{}" has {} translations {}'
             msg = msg.format(src, len(unique_all_found), unique_all_found)
-            logging.warn(msg)
+            logging.warning(msg)
         max_count = max((all_found.count(s) for s in unique_all_found))
         first_max = next((s for s in all_found if all_found.count(s) ==
-                         max_count))
+                          max_count))
         return first_max
 
     def get_numbered_translation(self, src, lang):
@@ -214,7 +213,7 @@ class TranslationDict:
         return numbered_translation
 
     def update(self, other):
-        """Merge another TranslationDict into this one
+        """Merge another TranslationDict into this one.
 
         Args:
             other: TranslationDict to consume
@@ -223,7 +222,6 @@ class TranslationDict:
             TypeError: If `other` is not a TranslationDict
         """
         if isinstance(other, TranslationDict):
-            self.languages |= other.languages
             for k in other:
                 try:
                     this_dict = self.data[k]
@@ -250,14 +248,15 @@ class TranslationDict:
                 all_languages.add(language)
         return all_languages
 
-    def write_excel(self, path):
-        """Write data to an Excel spreadsheet
+    def write_excel(self, path, others=None):
+        """Write data to an Excel spreadsheet.
 
         An MS-Excel spreadsheet can easily handle unicode and entries with
         newlines. It also supports coloring to highlight missing data.
 
         Args:
-            path: String path to write the MS-Excel file
+            path (str): String path to write the MS-Excel file
+            others (list): Other languages to add to the output.
         """
         wb = xlsxwriter.Workbook(path)
         red_background = wb.add_format()
@@ -265,6 +264,10 @@ class TranslationDict:
         ws = wb.add_worksheet('translations')
         other_languages = sorted(list(self.get_languages()))
         all_languages = [self.base] + other_languages
+        if others:
+            for other in others:
+                if other not in all_languages:
+                    all_languages.append(other)
         ws.write_row(0, 0, all_languages)
         for i, k in enumerate(self.data):
             ws.write(i + 1, 0, k)
@@ -278,7 +281,7 @@ class TranslationDict:
 
     @staticmethod
     def split_text(text):
-        """Split text into a number and the rest
+        """Split text into a number and the rest.
 
         This splitting is done using the regex attribute `number_prog`.
 
@@ -301,7 +304,7 @@ class TranslationDict:
 
     @staticmethod
     def clean_string(text):
-        """Clean a string for addition into the translation dictionary
+        """Clean a string for addition into the translation dictionary.
 
         Leading and trailing whitespace is removed. Newlines are converted to
         the UNIX style. Opening number is removed if found by `split_text`.
@@ -315,9 +318,44 @@ class TranslationDict:
         text = text.strip()
         text = text.replace('\r\n', '\n')
         text = text.replace('\r', '\n')
-        text = utils.space_newline_fix(text)
-        text = utils.newline_space_fix(text)
+        text = TranslationDict.space_newline_fix(text)
+        text = TranslationDict.newline_space_fix(text)
         _, text = TranslationDict.split_text(text)
+        return text
+
+    @staticmethod
+    def newline_space_fix(text):
+        """Replace "newline-space" with "newline".
+
+        This function was particularly useful when converting between Google
+        Sheets and .xlsx format.
+
+        Args:
+            text (str): The string to work with
+
+        Returns:
+            The text with the appropriate fix.
+        """
+        newline_space = '\n '
+        fix = '\n'
+        while newline_space in text:
+            text = text.replace(newline_space, fix)
+        return text
+
+    @staticmethod
+    def space_newline_fix(text):
+        """Replace "space-newline" with "newline".
+
+        Args:
+            text (str): The string to work with
+
+        Returns:
+            The text with the appropriate fix.
+        """
+        space_newline = ' \n'
+        fix = '\n'
+        while space_newline in text:
+            text = text.replace(space_newline, fix)
         return text
 
     def __str__(self):

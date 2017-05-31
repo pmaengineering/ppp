@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Build a translation file and use it
+"""Build a translation file and use it.
 
 Supply source XLSForm(s) to build a translation file. Optionally supply an
 XLSForm into which to merge translations. This file is a command-line tool.
@@ -30,11 +30,10 @@ import os.path
 
 from pmix.verbiage import TranslationDict
 from pmix.xlsform import Xlsform
-from pmix import constants
-from pmix import workbook
 
 
-def borrow_cli():
+def borrow_cli():  # pylint: disable=too-many-locals
+    """Run the CLI for this module."""
     prog_desc = 'Grab translations from existing XLSForms'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -67,7 +66,7 @@ def borrow_cli():
 
     args = parser.parse_args()
     ignore = set(args.ignore) if args.ignore else None
-    add = set(args.add) if args.add else None
+    add = sorted(list(set(args.add))) if args.add else None
 
     translation_dict = TranslationDict()
     for path in set(args.xlsxfile):
@@ -76,8 +75,7 @@ def borrow_cli():
 
     if args.merge is None:
         outpath = 'translations.xlsx' if args.outpath is None else args.outpath
-        # translation_dict.add_language(add)
-        translation_dict.write_excel(outpath)
+        translation_dict.write_excel(outpath, add)
         print('Created translation file: "{}"'.format(outpath))
     else:
         xlsform = Xlsform(args.merge)

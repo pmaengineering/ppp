@@ -312,7 +312,7 @@ class OdkForm:
             for i, row in enumerate(survey):
                 if i == 0:
                     continue
-                dict_row = {k: v for k, v in zip(header, row)}
+                dict_row = {str(k): str(v) for k, v in zip(header, row)}
                 token = self.parse_type(dict_row)
 
                 if token['token_type'] == 'prompt':

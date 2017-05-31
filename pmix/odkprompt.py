@@ -1,11 +1,12 @@
 import textwrap
 from jinja2 import Environment, PackageLoader
-# from pmix.odkchoices import OdkChoices
 
 
 class OdkComponent:
     def __init__(self):
-        self.language_dependent_fields = ['label', 'hint', 'constraint_message', 'image', 'audio', 'video']
+        self.media_fields = ['image', 'media::image', 'audio', 'media::audio', 'video', 'media::video']
+        self.non_duplicated_media_fields = self.set_non_duplicated_media_fields(self.media_fields)
+        self.language_dependent_fields = ['label', 'hint', 'constraint_message'] + self.media_fields
         self.truncatable_fields = ['constraint', 'relevant']
 
     @staticmethod
@@ -40,6 +41,64 @@ class OdkComponent:
         for field in self.language_dependent_fields:
             if (field + '::' + lang) in d:
                 d[field] = d[field + '::' + lang]
+        return d
+
+    def set_non_duplicated_media_fields(self, media_fields):
+        non_duplicated_media_fields = []
+        for field in media_fields:
+            if '::' not in media_fields:
+                non_duplicated_media_fields.append(field)
+        return non_duplicated_media_fields
+
+    def format_media_labels(self, d):
+        arbitrary_media_prefix = 'media::'
+
+        fields_to_add = []
+        for key, val in d.items():
+            for mf in self.media_fields:
+                if key.startswith(mf) and len(val) > 0:
+                    if mf not in d:
+                        fields_to_add.append(mf)
+                    if mf.startswith(arbitrary_media_prefix):
+                        non_prefixed_mf = mf.replace(arbitrary_media_prefix, '')
+                        if non_prefixed_mf not in d:
+                            fields_to_add.append(non_prefixed_mf)
+
+        for field in fields_to_add:
+            d[field] = ''
+        if len(fields_to_add) > 0:
+            d['media'] = ''
+
+        for key, val in d.items():
+            for mf in self.media_fields:
+                if key.startswith(mf) and len(val) > 0:
+                    if val[0] is not '[' and val[-1] is not ']':
+                        formatted_media_label = '[' + val + ']'
+                    d[mf] = formatted_media_label
+                    d[key] = formatted_media_label
+                    if mf.startswith(arbitrary_media_prefix):
+                        non_prefixed_mf = mf.replace(arbitrary_media_prefix, '')
+                        d[non_prefixed_mf] = formatted_media_label
+        return d
+
+    def set_grouped_media_field(self, d, lang):
+        """Format the text representing any media to be enclosed in brackets.
+
+        :param d: (str) The dictionary row of the component.
+        :return: (str) Dictionary row of the component, reformatted.
+        """
+        for key, val in d.items():
+            for field in self.media_fields:
+                if key.startswith(field + '::' + lang) and len(val) > 0:
+                    if len(d['media']) == 0:
+                        d['media'] += '['
+                    if len(d['media']) > 1:
+                        d['media'] += ' / '
+                    d['media'] += 'Image: ' if key.startswith('image' or 'media::image') \
+                        else 'Audio: ' if key.endswith('audio' or 'media::audio') \
+                        else 'Video: ' if key.endswith('video' or 'media::video') else ''
+                    d['media'] += val
+                    d['media'] += ']'
         return d
 
 
@@ -214,7 +273,10 @@ class OdkPrompt(OdkComponent):
         :param lang: (str) The language.
         :return: (dict) The text from all parts of the prompt.
         """
-        d = self.reformat_default_language_variable_names(self.row, lang)
+        # TODO: Refactor so that the dict row is only looped through once to make all of the changes below.
+        d = self.format_media_labels(self.row)
+        d = self.set_grouped_media_field(d, lang)
+        d = self.reformat_default_language_variable_names(d, lang)
         d = self.truncate_fields(d)
         d['input_field'] = self.to_html_input_field(lang)
         if self.is_section_header:

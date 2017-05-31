@@ -1,12 +1,12 @@
                         {% if question.in_repeat == True %}
-                            {% set side_letter_styling = 'side-letter-repeat-right' %}
+                            {% set side_letter_styling = ' side-letter-repeat-right' %}
                         {% endif %}
                         {% if question.in_group == True %}
                             {% set group_styling = ' right-cell-in-group' %}
-                            {% set side_letter_styling = 'side-letter-group-right' %}
+                            {% set side_letter_styling = ' side-letter-group-right' %}
                         {% else %}
                             {% set group_styling = '' %}
-                            {% set side_letter_styling = 'side-letter-right' %}
+                            {% set side_letter_styling = ' side-letter-right' %}
                         {% endif %}
                         {% if question.is_group_footer == True %}
                             {% set group_footer_styling = ' group-footer' %}
@@ -33,7 +33,7 @@
                               {% if question.relevant %}
                                   <div class="relevant{{ relevant_highlight }}" style="text-align: right;">
                                     {{ question.relevant }}
-                                    <span class="{{ side_letter_styling }}">R</span>
+                                    <span class="side-letter-relevant{{ side_letter_styling }}">R</span>
                                   </div>
                               {% endif %}
                             </div>
@@ -72,7 +72,7 @@
                               <!--<div class="choice-filter{{ filter_highlight }}" style="display: flex;">-->
                               <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
                                 {{ question.choice_filter }}
-                                <span class="{{ side_letter_styling }}">F</span>
+                                <span class="side-letter-choice-filter{{ side_letter_styling }}">F</span>
                               </div>
                             {% endif %}
                           </div>

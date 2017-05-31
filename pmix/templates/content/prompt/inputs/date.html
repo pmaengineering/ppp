@@ -1,16 +1,24 @@
-                            {% if question.simple_type == 'date' or question.simple_type == 'dateTime' %}
+                            {% if question.simple_type in ['date', 'dateTime'] %}
                               <table>
                                 <tr>
-                                  {% set fields = ['Month', 'Year'] %}
-                                    {% for field in fields %}
-                                    <td>
-                                      <div class="form-group date-form">
-                                        <!--suppress XmlInvalidId -->
-                                        <label for="{{ question.name }}_{{ loop.index }}" class="input-label">{{ field }}: </label>
-                                        <input type="text" class="date-input" title="" name="{{ question.name }}_{{ loop.index }}" id="{{ question.name }}_{{ loop.index }}"/>
-                                      </div>
-                                    </td>
-                                    {% endfor %}
+                                  {% if question.appearance == 'year' %}
+                                    {% set fields = ['Year'] %}
+                                  {% elif question.appearance == 'month-year' %}
+                                    {% set fields = ['Month', 'Year'] %}
+                                  {% elif question.appearance == 'no-calendar' %}
+                                    {% set fields = ['Day', 'Month', 'Year'] %}
+                                  {% else %}
+                                    {% set fields = ['Day', 'Month', 'Year'] %}
+                                  {% endif %}
+                                  {% for field in fields %}
+                                  <td>
+                                    <div class="form-group date-form">
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="{{ question.name }}_{{ loop.index }}" class="input-label">{{ field }}: </label>
+                                      <input type="text" class="date-input" title="" name="{{ question.name }}_{{ loop.index }}" id="{{ question.name }}_{{ loop.index }}"/>
+                                    </div>
+                                  </td>
+                                  {% endfor %}
                                 </tr>
                               </table>
                             {% endif %}

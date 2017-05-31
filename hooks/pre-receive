@@ -1,0 +1,8 @@
+#!/bin/bash
+while read oldrev newrev refname
+do
+    echo "hello"
+done
+
+# Everything went OK so we can exit with a zero
+exit 0

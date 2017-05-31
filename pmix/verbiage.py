@@ -27,6 +27,9 @@ class TranslationDict:
     key and all found translations in that language as values. The found
     translations are objects that store extra information.
 
+    This class is essentially a wrapper around a dictionary with insert and
+    lookup functions depending on a key and a language.
+
     Class attributes:
         number_prog (regex): A regex program to detect numbering schemes at the
             beginning of a string. Examples are 'HQ1. ', 'Q. ', '401a. ', and
@@ -35,7 +38,21 @@ class TranslationDict:
     """
 
     number_re = r'^\s*([A-Z]|(\S*\d+[.a-z]*))[.:)]\s+'
-    number_prog = re.compile(number_re)
+    number_re = r"""
+                ^\s*                # Begin with possible whitespace.
+                (
+                    [A-Z]           # Start with a capital letter
+                |
+                    (
+                        \S*         # or start with non-whitespace and
+                        \d+         # one or more numbers, then possibly
+                        [.a-z]*     # dots (.) and lower-case letters
+                    )
+                )
+                [.:)]               # Always end with '.' ':' ')' and
+                \s+                 # whitespace
+                """
+    number_prog = re.compile(number_re, re.VERBOSE)
 
     def __init__(self, src=None, base='English'):
         """Initialize a translation dictionary.
@@ -54,12 +71,27 @@ class TranslationDict:
             self.extract_translations(src)
 
     def extract_translations(self, obj):
+        """Get translations from an object.
+
+        This method determines the type that the object is, and then
+        dispatches to other sub-methods.
+
+        Args:
+            obj: A source object, either Xlsform or Workbook
+        """
         if isinstance(obj, Xlsform):
             self.translations_from_xlsform(obj)
         elif isinstance(obj, Workbook):
             self.translations_from_workbook(obj)
 
     def translations_from_xlsform(self, xlsform):
+        """Get translations from an Xlsform object.
+
+        This uses the Xlsform's lazy_translation_pairs method.
+
+        Args:
+            xlsform (Xlsform): The Xlsform object to get translations from.
+        """
         for xlstab in xlsform:
             for pair in xlstab.lazy_translation_pairs(base=self.base):
                 first, second = pair
@@ -74,6 +106,16 @@ class TranslationDict:
                 self.add_translation(src, second, language)
 
     def translations_from_workbook(self, workbook):
+        """Get translations from a workbook object.
+
+        Probably should not be used; it is considered deprecated.
+
+        It looks for the base language as a column header then considers
+        what follows to be translations.
+
+        Args:
+            workbook (Workbook): The Workbook object to get translations from.
+        """
         for worksheet in workbook:
             try:
                 base = worksheet.column_headers().index(self.base)
@@ -197,6 +239,11 @@ class TranslationDict:
             raise TypeError(other)
 
     def get_languages(self):
+        """Get all non-base languages used in this translation dict.
+
+        Returns:
+            A set with the strings for all languages
+        """
         all_languages = set()
         for value in self.data.values():
             for language in value:
@@ -274,13 +321,17 @@ class TranslationDict:
         return text
 
     def __str__(self):
+        """Return a string representation of the data."""
         return str(self.data)
 
     def __iter__(self):
+        """Return an iterator over the translated strings."""
         return iter(self.data)
 
     def __len__(self):
+        """Get the number of base strings translated."""
         return len(self.data)
 
     def __getitem__(self, key):
+        """Get the data associated with the key in the underlying data."""
         return self.data[key]

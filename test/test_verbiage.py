@@ -23,8 +23,8 @@ import unittest
 from pmix.verbiage import TranslationDict
 
 
-class TranslationDictTest(unittest.TestCase):
-    """Unit tests for the TranslationDict class"""
+class TranslationDictNumberSplitTest(unittest.TestCase):
+    """Unit tests for the TranslationDict number splitting."""
 
     def test_yes_split_text(self):
         yes_split = (
@@ -63,6 +63,7 @@ class TranslationDictTest(unittest.TestCase):
             'Section 3 - Bilharzia History',
             'ERROR: Start of filtration is before the collection time. ',
             '',
+            'sayana_150x300.jpg'
         )
         td = TranslationDict()
         for s in no_split:

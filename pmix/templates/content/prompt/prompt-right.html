@@ -68,13 +68,13 @@
                               {% endif %}
                             </div>
 
-                            {% if question.choice_filter %}
-                              <!--<div class="choice-filter{{ filter_highlight }}" style="display: flex;">-->
-                              <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
+                            <!--<div class="choice-filter{{ filter_highlight }}" style="display: flex;">-->
+                            <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
+                              {% if question.choice_filter %}
                                 {{ question.choice_filter }}
                                 <span class="side-letter-choice-filter{{ side_letter_styling }}">F</span>
-                              </div>
-                            {% endif %}
+                              {% endif %}
+                            </div>
                           </div>
 
                         </td>

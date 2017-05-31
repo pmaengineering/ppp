@@ -110,6 +110,7 @@ class OdkFormQuestionnaireTest(unittest.TestCase):
     def test_questionnaire(self):
         forms = {}
         for i, expected_output in self.data:
+            #
             if i['file'] not in forms:
                 forms[i['file']] = OdkForm(f=test_forms_directory + '/' + i['file'])
             output = forms[i['file']].questionnaire[i['position']]

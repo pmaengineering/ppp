@@ -77,22 +77,15 @@ class OdkComponent:
         """Format the text representing any media to be enclosed in brackets.
 
         :param d: (str) The dictionary row of the component.
+        :param lang: (str) The language.
         :return: (str) Dictionary row of the component, reformatted.
         """
         for key, val in d.items():
             for field in self.media_fields:
                 if key.startswith(field + '::' + lang) and len(val) > 0:
-                    # if len(d['media']) == 0:
-                    #     d['media'] += '['
                     if len(d['media']) > 1:
-                        # d['media'] += ' / '
                         d['media'] += '\n'
-                    # d['media'] += 'Image: ' if key.startswith('image' or 'media::image') \
-                    #     else 'Audio: ' if key.endswith('audio' or 'media::audio') \
-                    #     else 'Video: ' if key.endswith('video' or 'media::video') else ''
-                    # d['media'] += val[1:-1] if val.startswith('[') else val
                     d['media'] += val
-                    # d['media'] += ']'
         return d
 
 

@@ -12,9 +12,13 @@
                                   {% endif %}
                                   {% for field in fields %}
                                   <td>
+                                    <!--<div class="form-group date-form" style="display: flex; flex-direction: column;">-->
                                     <div class="form-group date-form">
                                       <!--suppress XmlInvalidId -->
-                                      <label for="{{ question.name }}_{{ loop.index }}" class="input-label">{{ field }}: </label>
+                                      <label for="{{ question.name }}_{{ loop.index }}" class="input-label">
+                                        {{ field }}:
+                                      </label>
+                                      <br/>
                                       <input type="text" class="date-input" title="" name="{{ question.name }}_{{ loop.index }}" id="{{ question.name }}_{{ loop.index }}"/>
                                     </div>
                                   </td>

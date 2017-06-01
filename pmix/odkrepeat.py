@@ -1,5 +1,5 @@
-from jinja2 import Environment, PackageLoader
 import textwrap
+from pmix.ppp_config import template_env
 from pmix.odkprompt import OdkPrompt
 from pmix.odkgroup import OdkGroup
 from pmix.odktable import OdkTable
@@ -46,14 +46,14 @@ class OdkRepeat:
         pass
 
     # def to_html(self, lang, highlighting):
-    #     env = Environment(loader=PackageLoader('pmix'))
-    #     question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
+    #
+    #     question = template_env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
     #                                                                        highlighting=highlighting)
     #     return question
 
     def render_header(self, input, lang, highlighting):
-        env = Environment(loader=PackageLoader('pmix'))
-        s = env.get_template('content/repeat/repeat-opener.html').render()
+
+        s = template_env.get_template('content/repeat/repeat-opener.html').render()
         input['simple_type'] = input['type']
         input['in_repeat'] = True
         input['is_repeat_header'] = True
@@ -71,8 +71,8 @@ class OdkRepeat:
         # input.row['in_repeat'] = True
         # input.row['is_repeat_footer'] = True
         # return input.to_html(lang, highlighting)
-        env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/repeat/repeat-closer.html').render()
+
+        return template_env.get_template('content/repeat/repeat-closer.html').render()
 
     def render_prompt(self, input, lang, highlighting):
         input.row['in_repeat'] = True

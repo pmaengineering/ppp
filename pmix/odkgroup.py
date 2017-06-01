@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader
+from pmix.ppp_config import template_env
 from pmix.odkprompt import OdkComponent, OdkPrompt
 from pmix.odktable import OdkTable
 
@@ -98,9 +98,9 @@ class OdkGroup:
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
-        env = Environment(loader=PackageLoader('pmix'))
+
         s = ''
-        s += env.get_template('content/group/group-opener.html').render()
+        s += template_env.get_template('content/group/group-opener.html').render()
         s += self.render_header(self.opener, lang, highlighting)
         # self.data[0].row['is_group_header'] = True
         for i in self.data[0:-1]:
@@ -117,7 +117,7 @@ class OdkGroup:
             # self.data[-1].is_group_footer = True
             self.data[-1].in_repeat = self.in_repeat
             s += self.data[-1].to_html(lang, highlighting)
-        s += env.get_template('content/group/group-closer.html').render()
+        s += template_env.get_template('content/group/group-closer.html').render()
         return s
 
 
@@ -140,8 +140,8 @@ class OdkGroupHeader(OdkComponent):
         return self.data
 
     def to_html(self, lang, highlighting):
-        env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
+
+        return template_env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
                                                                        highlighting=highlighting)
 
 
@@ -161,6 +161,5 @@ class OdkGroupFooter:
         return self.data
 
     def to_html(self, lang, highlighting):
-        env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang),
+        return template_env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang),
                                                                        highlighting=highlighting)

@@ -1,6 +1,6 @@
 import os.path
 import datetime
-from jinja2 import Environment, PackageLoader
+from pmix.ppp_config import template_env
 from pmix.error import OdkformError
 from pmix.odkchoices import OdkChoices
 from pmix.odkgroup import OdkGroup
@@ -179,7 +179,6 @@ class OdkForm:
 
     def to_html(self, lang, highlighting, debugging):
         lang = lang if lang else self.survey_language
-        env = Environment(loader=PackageLoader('pmix'))
         html_questionnaire = ''
         data = {
             'header': {
@@ -190,8 +189,8 @@ class OdkForm:
             },
             'questionnaire': self.questionnaire
         }
-        header = env.get_template('header.html').render(data=data['header'])
-        gs = env.get_template('content/group/group-spacing.html').render()
+        header = template_env.get_template('header.html').render(data=data['header'])
+        gs = template_env.get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
         prev_item = None
         for index, q in enumerate(data['questionnaire']):
@@ -208,7 +207,7 @@ class OdkForm:
         warnings = self.warnings if self.warnings is not None else 'false'
         self.conversion_info = {} if self.conversion_info is 'false' else self.conversion_info
         self.get_running_conversion_time()
-        footer = env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
+        footer = template_env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
                                                         conversion_time=str(self.metadata['conversion_time']),
                                                         data=data['footer']['data'])
         html_questionnaire += footer

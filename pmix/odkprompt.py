@@ -1,11 +1,10 @@
 import textwrap
-from jinja2 import Environment, PackageLoader
+from pmix.ppp_config import template_env
 
 
 class OdkComponent:
     def __init__(self):
         self.media_fields = ['image', 'media::image', 'audio', 'media::audio', 'video', 'media::video']
-        self.non_duplicated_media_fields = self.set_non_duplicated_media_fields(self.media_fields)
         self.language_dependent_fields = ['label', 'hint', 'constraint_message'] + self.media_fields
         self.truncatable_fields = ['constraint', 'relevant']
 
@@ -42,13 +41,6 @@ class OdkComponent:
             if (field + '::' + lang) in d:
                 d[field] = d[field + '::' + lang]
         return d
-
-    def set_non_duplicated_media_fields(self, media_fields):
-        non_duplicated_media_fields = []
-        for field in media_fields:
-            if '::' not in media_fields:
-                non_duplicated_media_fields.append(field)
-        return non_duplicated_media_fields
 
     def format_media_labels(self, d):
         arbitrary_media_prefix = 'media::'
@@ -90,15 +82,17 @@ class OdkComponent:
         for key, val in d.items():
             for field in self.media_fields:
                 if key.startswith(field + '::' + lang) and len(val) > 0:
-                    if len(d['media']) == 0:
-                        d['media'] += '['
+                    # if len(d['media']) == 0:
+                    #     d['media'] += '['
                     if len(d['media']) > 1:
-                        d['media'] += ' / '
-                    d['media'] += 'Image: ' if key.startswith('image' or 'media::image') \
-                        else 'Audio: ' if key.endswith('audio' or 'media::audio') \
-                        else 'Video: ' if key.endswith('video' or 'media::video') else ''
+                        # d['media'] += ' / '
+                        d['media'] += '\n'
+                    # d['media'] += 'Image: ' if key.startswith('image' or 'media::image') \
+                    #     else 'Audio: ' if key.endswith('audio' or 'media::audio') \
+                    #     else 'Video: ' if key.endswith('video' or 'media::video') else ''
+                    # d['media'] += val[1:-1] if val.startswith('[') else val
                     d['media'] += val
-                    d['media'] += ']'
+                    # d['media'] += ']'
         return d
 
 
@@ -286,7 +280,7 @@ class OdkPrompt(OdkComponent):
         return d
 
     def to_html(self, lang, highlighting, **kwargs):
-        env = Environment(loader=PackageLoader('pmix'))
-        question = env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang, **kwargs),
+
+        question = template_env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang, **kwargs),
                                                                            highlighting=highlighting)
         return question

@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader
+from pmix.ppp_config import template_env
 # from pmix.error import OdkformError
 
 
@@ -74,6 +74,5 @@ class OdkTable:
         table.append(self.header.row)
         for i in self.contents:
             table.append(i.row)
-        env = Environment(loader=PackageLoader('pmix'))
-        return env.get_template('content/table/table.html').render(table=table, lang=lang, highlighting=highlighting,
+        return template_env.get_template('content/table/table.html').render(table=table, lang=lang, highlighting=highlighting,
                                                              is_group_footer=self.is_group_footer)

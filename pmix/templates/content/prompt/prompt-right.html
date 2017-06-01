@@ -26,12 +26,12 @@
                         <td class="response-cell align-top{{ group_styling }}{{ group_footer_styling }}">
 
                           <!--<div>-->
-                          <div class="" style="display: flex; justify-content: space-between; flex-direction: column;">
+                          <div class="response-cell-container">
                             <!--<div class="align-top align-text-top" style="display: flex; justify-content: space-between; flex-direction: row;">-->
-                            <div class="" style="display: flex; justify-content: space-between; flex-direction: row;">
-                              <div class="question-type{{ type_highlight }}" style="text-align: left;">{{ question.type }}</div>
+                            <div class="response-cell-container-top">
+                              <div class="question-type{{ type_highlight }}">{{ question.type }}</div>
                               {% if question.relevant %}
-                                  <div class="relevant{{ relevant_highlight }}" style="text-align: right;">
+                                  <div class="relevant{{ relevant_highlight }}">
                                     {{ question.relevant }}
                                     <span class="side-letter-relevant{{ side_letter_styling }}">R</span>
                                   </div>

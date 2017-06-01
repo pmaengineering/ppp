@@ -23,8 +23,8 @@ import unittest
 from pmix.verbiage import TranslationDict
 
 
-class TranslationDictTest(unittest.TestCase):
-    """Unit tests for the TranslationDict class"""
+class TranslationDictNumberSplitTest(unittest.TestCase):
+    """Unit tests for the TranslationDict number splitting."""
 
     def test_yes_split_text(self):
         yes_split = (
@@ -38,7 +38,10 @@ class TranslationDictTest(unittest.TestCase):
             ('P.  Questionnaire result', 'P.  '),
             ('M. Résultat du Questionnaire', 'M. '),
             ('QF24a. Vous avez dit que vous n’utilisez pas...', 'QF24a. '),
-            ('QF1.Quel âge aviez-vous à votre dernier anniversaire?', 'QF1.'),
+            ('QF1. Quel âge aviez-vous à votre dernier...?', 'QF1. '),
+            ('114c.1. My nutrition question', '114c.1. '),
+            ('114c.d.i. My falsified question', '114c.d.i. '),
+            ('411i. Post pregnancy usage', '411i. ')
         )
         td = TranslationDict()
         for s, n in yes_split:
@@ -60,6 +63,7 @@ class TranslationDictTest(unittest.TestCase):
             'Section 3 - Bilharzia History',
             'ERROR: Start of filtration is before the collection time. ',
             '',
+            'sayana_150x300.jpg'
         )
         td = TranslationDict()
         for s in no_split:

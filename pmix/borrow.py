@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Build a translation file and use it
+"""Build a translation file and use it.
 
 Supply source XLSForm(s) to build a translation file. Optionally supply an
 XLSForm into which to merge translations. This file is a command-line tool.
@@ -29,27 +29,11 @@ import argparse
 import os.path
 
 from pmix.verbiage import TranslationDict
-from pmix import constants
-from pmix import workbook
+from pmix.xlsform import Xlsform
 
 
-def translation_dict_from_files(files, ignore=None):
-    result = TranslationDict()
-    workbooks = [workbook.Workbook(f) for f in files]
-    for wb in workbooks:
-        this_dict = wb.create_translation_dict(ignore)
-        result.update(this_dict)
-    return result
-
-
-def get_wb_outpath(wb):
-    orig = wb.file
-    base, ext = os.path.splitext(orig)
-    outpath = '{}{}{}'.format(base, constants.BORROW_SUFFIX, ext)
-    return outpath
-
-
-if __name__ == '__main__':
+def borrow_cli():  # pylint: disable=too-many-locals
+    """Run the CLI for this module."""
     prog_desc = 'Grab translations from existing XLSForms'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -57,8 +41,8 @@ if __name__ == '__main__':
     parser.add_argument('xlsxfile', nargs='+', help=file_help)
 
     merge_help = ('An XLSForm that receives the translations from source '
-                  'files. If this argument is not supplied, then a translation '
-                  'file is created.')
+                  'files. If this argument is not supplied, then a '
+                  'translation file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
     add_help = ('Add a language to the resulting output. The translation file '
@@ -72,25 +56,39 @@ if __name__ == '__main__':
                    'translations. This option can be supplied multiple times')
     parser.add_argument('-i', '--ignore', action='append', help=ignore_help)
 
+    carry_help = ('If translations are missing, carry over the same text from '
+                  'the source language. The default is to leave missing.')
+    parser.add_argument('-c', '--carry', action='store_true', help=carry_help)
+
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'defaults are used.')
     parser.add_argument('-o', '--outpath', help=out_help)
 
     args = parser.parse_args()
     ignore = set(args.ignore) if args.ignore else None
-    add = set(args.add) if args.add else None
+    add = sorted(list(set(args.add))) if args.add else None
 
-    translation_dict = translation_dict_from_files(set(args.xlsxfile), ignore)
+    translation_dict = TranslationDict()
+    for path in set(args.xlsxfile):
+        xlsform = Xlsform(path)
+        translation_dict.extract_translations(xlsform)
 
     if args.merge is None:
-        outpath = constants.BORROW_OUT if args.outpath is None else args.outpath
-        translation_dict.add_language(add)
-        translation_dict.write_excel(outpath)
+        outpath = 'translations.xlsx' if args.outpath is None else args.outpath
+        translation_dict.write_excel(outpath, add)
         print('Created translation file: "{}"'.format(outpath))
     else:
-        wb = workbook.Workbook(args.merge)
-        wb.add_language(add)
-        wb.merge_translations(translation_dict, ignore)
-        outpath = get_wb_outpath(wb) if args.outpath is None else args.outpath
-        wb.write_out(outpath)
+        xlsform = Xlsform(args.merge)
+        # wb.add_language(add)
+        xlsform.merge_translations(translation_dict, ignore, carry=args.carry)
+        outpath = args.outpath
+        if outpath is None:
+            orig = xlsform.file
+            base, ext = os.path.splitext(orig)
+            outpath = ''.join((base, '-borrow', ext))
+        xlsform.write_out(outpath)
         print('Merged translations into file: "{}"'.format(outpath))
+
+
+if __name__ == '__main__':
+    borrow_cli()

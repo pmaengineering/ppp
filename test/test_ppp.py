@@ -133,18 +133,16 @@ class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
              {'class': OdkGroup, 'repr': '<OdkGroup FQA: [<OdkPrompt age_warn>, <OdkPrompt age_diff>, '
                                          '<OdkPrompt age_same>, <OdkPrompt age>]>'}),
             ({'file': 'FQ-nut.xlsx', 'position': 50},
-             {'class': OdkPrompt, 'repr': '<OdkPrompt nb_age>'}),
+             {'class': OdkPrompt, 'repr': '<OdkPrompt nb_age_youngest>'}),
             ({'file': 'FQ-nut.xlsx', 'position': 75},
-             {'class': OdkGroup, 'repr': '<OdkGroup ac_in_grp: [<OdkPrompt ac_iron_obtained>, '
-                                         '<OdkPrompt ac_iron_tabs_img>]>'}),
+             {'class': OdkPrompt, 'repr': '<OdkPrompt ac_bp_check>'}),
             ({'file': 'FQ-nut.xlsx', 'position': 100},
-             {'class': OdkPrompt, 'repr': '<OdkPrompt ar_book>'}),
+             {'class': OdkPrompt, 'repr': '<OdkPrompt over_2yr_warning>'}),
         )
 
     def test_questionnaire(self):
         forms = self.get_forms(self.data)
         for i, expected_output in self.data:
-            print(forms[i['file']].questionnaire)
             output = forms[i['file']].questionnaire[i['position']]
             self.assertTrue(str(output) == expected_output['repr'])
             self.assertTrue(isinstance(output, expected_output['class']))

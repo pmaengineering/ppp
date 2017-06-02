@@ -23,10 +23,10 @@ class PppTest:
     def get_forms(data):
         """Convert specified forms from form name strings to objects."""
         forms = {}
-        for i in data:
-            if i['file'] not in forms:
-                forms[i['file']] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + i[
-                    'file'])
+        for datum in data:
+            file = datum[0]['file']
+            if file not in forms:
+                forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + file)
         return forms
 
 

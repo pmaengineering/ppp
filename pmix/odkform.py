@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""OdkForm."""
 import os.path
 import datetime
-from pmix.ppp_config import template_env
+from pmix.ppp_config import TEMPLATE_ENV
 from pmix.error import OdkformError
 from pmix.odkchoices import OdkChoices
 from pmix.odkgroup import OdkGroup
@@ -10,18 +13,19 @@ from pmix.workbook import Workbook
 
 
 class OdkForm:
-    """Class to represent an entire XLSForm"""
+    """Class to represent an entire XLSForm."""
 
-    def __init__(self, *, f=None, wb=None):
-        if f is None and wb is None:
+    def __init__(self, *, file=None, wb=None):
+        """Initialize."""
+        if file is None and wb is None:
             raise OdkformError()
-        elif f is not None:
-            wb = Workbook(f)
+        elif file is not None:
+            wb = Workbook(file)
 
-        self.settings = {str(k): str(v) for k, v in self.get_settings(wb).items()}
+        self.settings = {str(k): str(v) for k, v in
+                         self.get_settings(wb).items()}
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.languages = self.get_languages(wb)
-        self.survey_language = self.get_survey_language()
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -33,80 +37,85 @@ class OdkForm:
             'type_of_form': self.settings.get('form_id')[0:2],
             'last_author': None,
             'last_updated': None,
+            'survey_language': self.get_survey_language(),
             'conversion_start': conversion_start,
-            'conversion_start_formatted': str(conversion_start.date()) + ' ' + str(conversion_start.time())[0:8],
+            'conversion_start_formatted':
+                str(conversion_start.date()) +
+                ' ' + str(conversion_start.time())[0:8],
             'conversion_end': None,
             'conversion_end_formatted': None,
             'conversion_time': None,
             'changelog': None,
             'info': None
         }
-        self.conversion_settings = {
-            'json_output_in_js_console': None,
-            'highlighting': None
-        }
-        self.unhandled_token_types = ['calculate', 'start', 'end', 'deviceid', 'simserial', 'phonenumber', 'hidden',
-                                      'hidden string', 'hidden int', 'hidden geopoint']
-        self.warnings = None
-        self.conversion_info = None
         self.questionnaire = self.convert_survey(wb)
+
+    unhandled_token_types = \
+        ['calculate', 'start', 'end', 'deviceid', 'simserial',
+         'phonenumber', 'hidden', 'hidden string', 'hidden int',
+         'hidden geopoint']
+    warnings = None
+    conversion_info = None
 
     @staticmethod
     def get_settings(wb):
-        """Get the XLSForm settings as a dict
+        """Get the XLSForm settings as a settings_dict.
 
-        :param wb: Source workbook
-        :return: (dict) Form settings
+        :param wb: Source workbook.
+        :return: (settings_dict) Form settings.
         """
-        d = {}
+        settings_dict = {}
         try:
             settings = wb['settings']
             header = settings[0]
             details = settings[1]
-            d = {k: v for k, v in zip(header, details)}
+            settings_dict = {k: v for k, v in zip(header, details)}
         except (KeyError, IndexError):
-            # KeyError: worksheet does not exist
-            # IndexError: does not have the correct rows
+            # KeyError: Worksheet does not exist.
+            # IndexError: Does not have the correct rows.
             pass
-        return d
+        return settings_dict
 
     @staticmethod
     def get_choices(wb, ws):
-        """Extract choices from an XLSForm
+        """Extract choices from an XLSForm.
 
-        :param wb: Source workbook
-        :param ws: One of 'choices' or 'external_choices'
-        :return: Dict with keys as list names
+        :param wb: Source workbook.
+        :param ws: One of 'choices' or 'external_choices'.
+        :return: Dict with keys as list names.
         """
-        d = {}
+        formatted_choices = {}
         try:
             choices = wb[ws]
             header = [str(x) for x in choices[0]]
             if 'list_name' not in header:
-                m = 'Column "list_name" not found in {} tab'.format(ws)
-                raise OdkformError(m)
+                msg = 'Column "list_name" not found in {} tab'.format(ws)
+                raise OdkformError(msg)
             for i, row in enumerate(choices):
                 if i == 0:
                     continue
                 dict_row = {str(k): str(v) for k, v in zip(header, row)}
                 list_name = dict_row['list_name']
-                if list_name in d:
-                    d[list_name].add(dict_row)
+                if list_name in formatted_choices:
+                    formatted_choices[list_name].add(dict_row)
                 elif list_name:  # Not "else:" because possibly blank rows.
                     odkchoices = OdkChoices(list_name)
                     odkchoices.add(dict_row)
-                    d[list_name] = odkchoices
+                    formatted_choices[list_name] = odkchoices
         except KeyError:  # Worksheet does not exist.
             pass
-        return d
+        return formatted_choices
 
     @staticmethod
     def get_languages(wb):
+        """Get survey languages."""
         header = wb['survey'][0]
         langs = set()
         for field in header:
-            # TODO: Handle the following cases, both with cases of a presence of 'default_language', and not.
-            # 1. No 'label' or 'label::' fields at all, 2. A 'label' field by itself.
+            # TODO: Handle the following cases, both with cases of a presence
+            # of 'default_language', and not.
+            # 1. No 'label' or 'label::' fields at all,
+            # 2. A 'label' field by itself.
             # 3. A 'label' field with 'label::' fields.
             if field == 'label':
                 langs.add('')  # Default language.
@@ -116,26 +125,32 @@ class OdkForm:
         return sorted(list(langs))
 
     def get_survey_language(self):
-        return self.settings['default_language'] if 'default_language' in self.settings else self.languages[0]
+        """Get default survey language if specified."""
+        return self.settings['default_language'] \
+            if 'default_language' in self.settings else self.languages[0]
 
     def set_conversion_end(self):
+        """Set conversion end time."""
         self.metadata['conversion_end'] = datetime.datetime.now()
-        self.metadata['conversion_end_formatted'] = str(self.metadata['conversion_end'].date()) + ' ' + \
+        self.metadata['conversion_end_formatted'] = \
+            str(self.metadata['conversion_end'].date()) + ' ' + \
             str(self.metadata['conversion_end'].time())[0:8]
 
     def get_running_conversion_time(self):
-        self.metadata['conversion_time'] = str(self.metadata['conversion_end'] -
-                                               self.metadata['conversion_start'])[5:10] + ' ' + 'seconds'
+        """Get running conversion time at this point in time."""
+        self.metadata['conversion_time'] = \
+            str(self.metadata['conversion_end'] - self.metadata[
+                'conversion_start'])[5:10] + ' ' + 'seconds'
 
         return self.metadata['conversion_time']
 
     def to_text(self, lang):
-        """Get the text representation of an entire XLSForm
+        """Get the text representation of an entire XLSForm.
 
-        :param lang: The language
-        :return: The full string of the XLSForm, ready to print or save
+        :param lang: The language.
+        :return: The full string of the XLSForm, ready to print or save.
         """
-        lang = lang if lang else self.survey_language
+        lang = lang if lang else self.metadata['survey_language']
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -154,13 +169,13 @@ class OdkForm:
         :param lang: The language.
         :return: A dictionary formatted questionnaire.
         """
-        lang = lang if lang else self.survey_language
+        lang = lang if lang else self.metadata['survey_language']
         html_questionnaire = {
             'title': self.title,
             'questions': []
         }
-        for q in self.questionnaire:
-            html_questionnaire['questions'].append(q.to_dict(lang))
+        for item in self.questionnaire:
+            html_questionnaire['questions'].append(item.to_dict(lang))
         return html_questionnaire
 
     def to_json(self, lang, pretty=False):
@@ -171,81 +186,95 @@ class OdkForm:
         :return: A JSON formatted questionnaire.
         """
         import json
-        lang = lang if lang else self.survey_language
+        lang = lang if lang else self.metadata['survey_language']
         if pretty:
             return json.dumps(self.to_dict(lang), indent=2)
         else:
             return json.dumps(self.to_dict(lang))
 
     def to_html(self, lang, highlighting, debugging):
-        lang = lang if lang else self.survey_language
+        """Render html representation of form."""
+        lang = lang if lang else self.metadata['survey_language']
         html_questionnaire = ''
         data = {
             'header': {
                 'title': self.title
             },
             'footer': {
-                'data': self.to_json(lang, pretty=True) if debugging else 'false'
+                'data':
+                    self.to_json(lang, pretty=True) if debugging else 'false'
             },
             'questionnaire': self.questionnaire
         }
-        header = template_env.get_template('header.html').render(data=data['header'])
-        gs = template_env.get_template('content/group/group-spacing.html').render()
+        # pylint: disable=no-member
+        header = TEMPLATE_ENV.get_template('header.html')\
+            .render(data=data['header'])
+        # pylint: disable=no-member
+        grp_spc = TEMPLATE_ENV\
+            .get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
         prev_item = None
-        for index, q in enumerate(data['questionnaire']):
-            if prev_item is not None and isinstance(q, OdkGroup):
-                html_questionnaire += gs
-            elif isinstance(prev_item, OdkGroup) and not isinstance(q, OdkGroup):
-                html_questionnaire += gs
-            if isinstance(q, OdkPrompt) and q.is_section_header and isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += q.to_html(lang, highlighting, bottom_border=True)
+        for index, item in enumerate(data['questionnaire']):
+            if prev_item is not None and isinstance(item, OdkGroup):
+                html_questionnaire += grp_spc
+            elif isinstance(prev_item, OdkGroup) \
+                    and not isinstance(item, OdkGroup):
+                html_questionnaire += grp_spc
+            if isinstance(item, OdkPrompt) and item.is_section_header and \
+                    isinstance(data['questionnaire'][index+1], OdkGroup):
+                html_questionnaire += item.to_html(lang, highlighting,
+                                                   bottom_border=True)
             else:
-                html_questionnaire += q.to_html(lang, highlighting)
-            prev_item = q
+                html_questionnaire += item.to_html(lang, highlighting)
+            prev_item = item
         self.set_conversion_end()
-        warnings = self.warnings if self.warnings is not None else 'false'
-        self.conversion_info = {} if self.conversion_info is 'false' else self.conversion_info
+        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
+            else 'false'
+        OdkForm.conversion_info = {} if OdkForm.conversion_info is 'false' \
+            else OdkForm.conversion_info
         self.get_running_conversion_time()
-        footer = template_env.get_template('footer.html').render(info=self.conversion_info, warnings=warnings,
-                                                        conversion_time=str(self.metadata['conversion_time']),
-                                                        data=data['footer']['data'])
+        # pylint: disable=no-member
+        footer = TEMPLATE_ENV.get_template('footer.html')\
+            .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,
+                    conversion_time=str(self.metadata['conversion_time']),
+                    data=data['footer']['data'])
         html_questionnaire += footer
         return html_questionnaire
 
     def parse_type(self, row):
-        """Describe with JSON the 'type' column of a row XLSForm
+        """Describe with JSON the 'type' column of a row XLSForm.
 
-        :param row: (dict) A row as a dictionary
-        :return: (dict) Info from parsing
+        :param row: (row_type) A row as a dictionary.
+        :return: (row_type) Info from parsing.
         """
-        row_type = row['type']
-        if row_type in OdkPrompt.response_types + OdkPrompt.non_response_types:
-            d = {
+        original_row_type = row['type']
+        if original_row_type in OdkPrompt.response_types + \
+                OdkPrompt.non_response_types:
+            row_type = {
                 'token_type': 'prompt',
-                'simple_type': row_type
+                'simple_type': original_row_type
             }
-            return d
-        elif row_type.startswith('select_one_external '):
-            choice_list = row_type.split(maxsplit=1)[1]
+        elif original_row_type.startswith('select_one_external '):
+            choice_list = original_row_type.split(maxsplit=1)[1]
             choices = self.external_choices[choice_list]
-            return {
+            row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_one',
                 'choice_list': choices
             }
-        elif row_type.startswith('select_multiple_external '):
-            choice_list = row_type.split(maxsplit=1)[1]
+        elif original_row_type.startswith('select_multiple_external '):
+            choice_list = original_row_type.split(maxsplit=1)[1]
             choices = self.external_choices[choice_list]
-            return {
+            row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_multiple',
                 'choice_list': choices
             }
-        elif row_type.startswith('select_one '):
-            choice_list = row_type.split(maxsplit=1)[1]
-            choices = self.choices[choice_list]  # Breaks on this line. nothing seems to happen after.
-            d = {
+        elif original_row_type.startswith('select_one '):
+            choice_list = original_row_type.split(maxsplit=1)[1]
+            choices = self.choices[choice_list]  # Breaks on this line. nothing
+            #  seems to happen after.
+            row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_one',
                 'choice_list': choices
@@ -253,42 +282,51 @@ class OdkForm:
             table_label = 'label' in row.get('appearance', '')
             table_list = 'list-nolabel' in row.get('appearance', '')
             if table_label or table_list:
-                d['token_type'] = 'table'
-            return d
-        elif row_type.startswith('select_multiple '):
-            choice_list = row_type.split(maxsplit=1)[1]
+                row_type['token_type'] = 'table'
+            return row_type
+        elif original_row_type.startswith('select_multiple '):
+            choice_list = original_row_type.split(maxsplit=1)[1]
             choices = self.choices[choice_list]
-            d = {
+            row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_multiple',
                 'choice_list': choices
             }
             table_label = 'label' in row.get('appearance', '')
-            # - Note: list-nolabel is like a table within a table. Whereas the field-list on its own is a table
-            # comprised primarily of rows, list-nolabel is comprised primarily of columns and a header.
+            # - Note: list-nolabel is like a table within a table. Whereas the
+            # field-list on its own is a table
+            # comprised primarily of rows, list-nolabel is comprised primarily
+            # of columns and a header.
             table_list = 'list-nolabel' in row.get('appearance', '')
             if table_label or table_list:
-                d['token_type'] = 'table'
-            return d
-        elif row_type == 'begin group':
-            d = {'token_type': 'context group'}
+                row_type['token_type'] = 'table'
+            return row_type
+        elif original_row_type == 'begin group':
+            row_type = {'token_type': 'context group'}
             appearance = row.get('appearance', '')
             if 'field-list' in appearance:
-                # - Note: This returns "begin group" which will render visually since it is a 'field-list', and not just
+                # - Note: This returns "begin group" which will render visually
+                #  since it is a 'field-list', and not just
                 #  a group that is there solely for context.
-                d['token_type'] = row_type
-            return d
-        elif row_type in ('end group', 'begin repeat', 'end repeat'):
-            return {
-                'token_type': row_type
+                row_type['token_type'] = original_row_type
+            return row_type
+        elif original_row_type in ('end group', 'begin repeat', 'end repeat'):
+            row_type = {
+                'token_type': original_row_type
             }
         else:  # Note - Some unhandled token types remain.
-            return{'token_type': row_type}
+            row_type = {'token_type': original_row_type}
+        return row_type
 
+    # TODO: Resolve the following 4 pylint violations:
+    #  1. too-many-branches
+    #  2. too-many-nested-blocks
+    #  3. too-many-statements
+    #  4. too-many-locals
     def convert_survey(self, wb):
-        """Convert rows and strings of a workbook into better python objects
+        """Convert rows and strings of a workbook into better python objects.
 
-        Main types are
+        Main types are:
 
         - prompt
         - begin group
@@ -299,7 +337,7 @@ class OdkForm:
         - context group (group without field-list appearance)
 
         :param wb: Workbook object representing an XLSForm.
-        :return: A list of better python objects
+        :return: A list of better python objects.
         """
         result = []
         stack = []
@@ -330,12 +368,13 @@ class OdkForm:
                         group = OdkGroup(dict_row)
                         stack.append(group)
                     else:
-                        m = 'Unable to add group at row {}'.format(i + 1)
-                        raise OdkformError(m)
+                        msg = 'Unable to add group at row {}'.format(i + 1)
+                        raise OdkformError(msg)
                 elif token['token_type'] == 'end group':
-                    c = context_groups
-                    if c and c[-1]['name'] == dict_row['name'] and c[-1]['is_closed'] is False:
-                        c[-1]['is_closed'] = True
+                    if context_groups and context_groups[-1]['name'] == \
+                            dict_row['name'] \
+                            and context_groups[-1]['is_closed'] is False:
+                        context_groups[-1]['is_closed'] = True
                     else:
                         if stack and isinstance(stack[-1], OdkGroup):
                             group = stack.pop()
@@ -345,22 +384,23 @@ class OdkForm:
                             else:
                                 result.append(group)
                         else:
-                            m = 'Mismatched "end group" at row {}'.format(i + 1)
-                            raise OdkformError(m)
+                            msg = 'Mismatched "end group" at row {}'\
+                                .format(i + 1)
+                            raise OdkformError(msg)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
                         repeat = OdkRepeat(dict_row)
                         stack.append(repeat)
                     else:
-                        m = 'Unable to add repeat at row {}'.format(i + 1)
-                        raise OdkformError(m)
+                        msg = 'Unable to add repeat at row {}'.format(i + 1)
+                        raise OdkformError(msg)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], OdkRepeat):
-                        repeat = stack.pop()  # Stack guaranteed empty at this point.
+                        repeat = stack.pop()  # Stack guaranteed empty now.
                         result.append(repeat)
                     else:
-                        m = 'Mismatched "end repeat" at row {}'.format(i + 1)
-                        raise OdkformError(m)
+                        msg = 'Mismatched "end repeat" at row {}'.format(i + 1)
+                        raise OdkformError(msg)
                 elif token['token_type'] == 'table':
                     dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
@@ -371,13 +411,16 @@ class OdkForm:
                         this_prompt = OdkPrompt(dict_row, choices)
                         stack[-1].add_table(this_prompt)
                     else:
-                        m = 'Table found outside of field-list group at row {}'
-                        m = m.format(i + 1)
-                        raise OdkformError(m)
+                        msg = 'Table found outside of field-list group at' \
+                              ' row {}'
+                        msg = msg.format(i + 1)
+                        raise OdkformError(msg)
                 elif token['token_type'] == 'context group':
-                    if any(d['name'] == dict_row['name'] for d in context_groups):
-                        m = 'A context group with this name already exists in survey.'
-                        raise OdkformError(m)
+                    if any(d['name'] == dict_row['name']
+                           for d in context_groups):
+                        msg = 'A context group with this name already exists' \
+                              ' in survey.'
+                        raise OdkformError(msg)
                     else:
                         this_context_group = {
                             'name': dict_row['name'],
@@ -386,23 +429,27 @@ class OdkForm:
                         }
                         context_groups.append(this_context_group)
                     if stack and isinstance(stack[-1], OdkGroup):
-                        m = ('PPP does not allow a group nested in a '
-                             'field-list group. See row {}').format(i + 1)
-                        raise OdkformError(m)
-                elif token['token_type'] in self.unhandled_token_types:  # Intentionally no handling for these types.
-                    self.conversion_info = {} if self.conversion_info is None else self.conversion_info
+                        msg = ('PPP does not allow a group nested in a '
+                               'field-list group. See row {}').format(i + 1)
+                        raise OdkformError(msg)
+                # Intentionally no handling for these types.
+                elif token['token_type'] in OdkForm.unhandled_token_types:
+                    OdkForm.conversion_info = {} \
+                        if OdkForm.conversion_info is None \
+                        else OdkForm.conversion_info
                     k = 'Unhandled Token Types'
-                    if k not in self.conversion_info:
-                        self.conversion_info[k] = []
-                    if token['token_type'] not in self.conversion_info[k]:
-                        self.conversion_info[k].append(token['token_type'])
+                    if k not in OdkForm.conversion_info:
+                        OdkForm.conversion_info[k] = []
+                    if token['token_type'] not in OdkForm.conversion_info[k]:
+                        OdkForm.conversion_info[k].append(token['token_type'])
                 else:
-                    self.warnings = {} if self.warnings is None else self.warnings
+                    OdkForm.warnings = {} if OdkForm.warnings is None \
+                        else OdkForm.warnings
                     k = 'Unknown Token Types'
-                    if k not in self.warnings:
-                        self.warnings[k] = []
-                    if token['token_type'] not in self.warnings[k]:
-                        self.warnings[k].append(token['token_type'])
+                    if k not in OdkForm.warnings:
+                        OdkForm.warnings[k] = []
+                    if token['token_type'] not in OdkForm.warnings[k]:
+                        OdkForm.warnings[k].append(token['token_type'])
         except KeyError:  # No survey found.
             pass
         return result

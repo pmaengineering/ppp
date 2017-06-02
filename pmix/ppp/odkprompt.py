@@ -115,13 +115,8 @@ class OdkComponent:
         """
         for key, val in row.items():
             for field in self.media_fields:
-                if key.startswith(field + '::' + lang) and len(val) > 0:
-                    # if len(row['media']) > 1:
-                    #     row['media'] += '\n'
-                    # row['media'] += val
+                if val and key.startswith(field) and val not in row['media']:
                     row['media'].append(val)
-        # if 'media' in row:
-        #     row['media_list'] = row['media'].split(' ')
         return row
 
 

@@ -66,5 +66,3 @@ if __name__ == '__main__':
             f.write(S)
     else:
         print(S)
-        # #DEBUG
-        # pass

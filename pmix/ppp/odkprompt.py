@@ -28,7 +28,7 @@ class OdkComponent:
         return text
 
     @staticmethod
-    def convert_labels_and_hints_to_lists(prompt):
+    def reformat_double_line_breaks(prompt):
         """Convert labels and hints from strings to lists.
 
         This conversion process allows for line breaks to be rendered properly
@@ -305,7 +305,7 @@ class OdkPrompt(OdkComponent):
         prompt = self.set_grouped_media_field(prompt, lang)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
-        prompt = self.convert_labels_and_hints_to_lists(prompt)
+        prompt = self.reformat_double_line_breaks(prompt)
         prompt['input_field'] = self.to_html_input_field(lang)
         if self.is_section_header:
             prompt['is_section_header'] = True

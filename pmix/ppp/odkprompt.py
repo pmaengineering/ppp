@@ -106,11 +106,10 @@ class OdkComponent:
                         row[non_prefixed_mf] = formatted_media_label
         return row
 
-    def set_grouped_media_field(self, row, lang):
+    def set_grouped_media_field(self, row):
         """Format the text representing any media to be enclosed in brackets.
 
         :param row: (str) The dictionary row of the component.
-        :param lang: (str) The language.
         :return: (str) Dictionary row of the component, reformatted.
         """
         for key, val in row.items():
@@ -297,7 +296,7 @@ class OdkPrompt(OdkComponent):
         # TODO: Refactor so that the dict row is only looped through once
         # to make all of the changes below.
         prompt = self.format_media_labels(self.row)
-        prompt = self.set_grouped_media_field(prompt, lang)
+        prompt = self.set_grouped_media_field(prompt)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)

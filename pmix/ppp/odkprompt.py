@@ -27,6 +27,20 @@ class OdkComponent:
             text = text[0:98] + ' …'
         return text
 
+    @staticmethod
+    def convert_labels_and_hints_to_lists(prompt):
+        """Converts labels and hints from strings to lists.
+
+        This conversion process allows for line breaks to be rendered properly
+        in html.
+        """
+        for k, v in prompt.items():
+            # if k.startswith('label' or 'hint' or 'constraint_message'):
+            if k.startswith('label') or k.startswith('hint') \
+                    or k.startswith('constraint_message'):
+                prompt[k] = v.split('\n\n')
+        return prompt
+
     def truncate_fields(self, row):
         """Call truncate_text() method for all truncatable fields in component.
 
@@ -71,7 +85,7 @@ class OdkComponent:
         for field in fields_to_add:
             row[field] = ''
         if len(fields_to_add) > 0:
-            row['media'] = ''
+            row['media'] = []
         return row
 
     def format_media_labels(self, input_row):
@@ -102,9 +116,12 @@ class OdkComponent:
         for key, val in row.items():
             for field in self.media_fields:
                 if key.startswith(field + '::' + lang) and len(val) > 0:
-                    if len(row['media']) > 1:
-                        row['media'] += '\n'
-                    row['media'] += val
+                    # if len(row['media']) > 1:
+                    #     row['media'] += '\n'
+                    # row['media'] += val
+                    row['media'].append(val)
+        # if 'media' in row:
+        #     row['media_list'] = row['media'].split(' ')
         return row
 
 
@@ -288,6 +305,7 @@ class OdkPrompt(OdkComponent):
         prompt = self.set_grouped_media_field(prompt, lang)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
+        prompt = self.convert_labels_and_hints_to_lists(prompt)
         prompt['input_field'] = self.to_html_input_field(lang)
         if self.is_section_header:
             prompt['is_section_header'] = True

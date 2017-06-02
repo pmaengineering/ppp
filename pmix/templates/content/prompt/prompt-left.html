@@ -33,7 +33,9 @@
                                     {% endif %}
                                     {% if question.constraint_message %}
                                         <span class="{{ side_letter_styling }}">M</span>
-                                        <p class="constraint-message">{{ question.constraint_message }}</p>
+                                        {% for p in question.constraint_message %}
+                                          <p class="constraint-message">{{ p }}</p>
+                                        {% endfor %}
                                     {% endif %}
                                 </div>
                             </div>

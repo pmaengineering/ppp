@@ -82,15 +82,6 @@ class OdkGroup:
         input.row['in_group'] = True
         return input.to_html(lang, highlighting)
 
-    def to_dict(self, lang, highlighting):
-        """Get the dict representation of the full group
-
-        :param lang: (str) The language.
-        :param highlighting: (bool) Highlighting on/off.
-        :return: (dict) The text for this group.
-        """
-        pass
-
     def to_html(self, lang, highlighting):
         """Get the html representation of the full group.
 
@@ -102,7 +93,6 @@ class OdkGroup:
         s = ''
         s += template_env.get_template('content/group/group-opener.html').render()
         s += self.render_header(self.opener, lang, highlighting)
-        # self.data[0].row['is_group_header'] = True
         for i in self.data[0:-1]:
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat
@@ -114,7 +104,6 @@ class OdkGroup:
             self.data[-1].row['in_repeat'] = self.in_repeat
             s += self.render_footer(self.data[-1], lang, highlighting)
         if isinstance(self.data[-1], OdkTable):
-            # self.data[-1].is_group_footer = True
             self.data[-1].in_repeat = self.in_repeat
             s += self.data[-1].to_html(lang, highlighting)
         s += template_env.get_template('content/group/group-closer.html').render()

@@ -37,20 +37,6 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    def to_dict(self, lang):
-        """Get the text representation of the entire repeat group
-
-        :param lang: (str) The language.
-        :return: (dict) The text for this repeat.
-        """
-        pass
-
-    # def to_html(self, lang, highlighting):
-    #
-    #     question = template_env.get_template('content/content-tr-base.html').render(question=self.to_dict(lang=lang),
-    #                                                                        highlighting=highlighting)
-    #     return question
-
     def render_header(self, input, lang, highlighting):
 
         s = template_env.get_template('content/repeat/repeat-opener.html').render()
@@ -91,17 +77,12 @@ class OdkRepeat:
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
         """
-        # print(self.data)  # DEBUG
-        s = ''  # TODO: Below this line.
+        s = ''
         s += self.render_header(self.opener, lang, highlighting)
-        # if isinstance(self.data[-1], OdkTable) is True:
-        #     self.data[-1].is_repeat_footer = True
-        # for i in self.data[0:-1]:
         for i in self.data:
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = True
                 s += i.to_html(lang, highlighting)
-                # s += (self.render_prompt(i, lang, highlighting))
             elif isinstance(i, OdkGroup):
                 i.in_repeat = True
                 s += i.to_html(lang, highlighting)
@@ -109,6 +90,4 @@ class OdkRepeat:
                 i.in_repeat = True
                 s += i.to_html(lang, highlighting)
         s += self.render_footer()
-        # s += self.render_footer(self.data[-1], lang, highlighting) if isinstance(self.data[-1], OdkPrompt) else \
-        #     self.data[-1].to_html(lang, highlighting) if isinstance(self.data[-1], OdkTable) else ''
         return s

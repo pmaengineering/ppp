@@ -18,7 +18,7 @@ class OdkForm:
         elif f is not None:
             wb = Workbook(f)
 
-        self.settings = self.get_settings(wb)
+        self.settings = {str(k): str(v) for k, v in self.get_settings(wb).items()}
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.languages = self.get_languages(wb)
         self.survey_language = self.get_survey_language()
@@ -81,20 +81,20 @@ class OdkForm:
         d = {}
         try:
             choices = wb[ws]
-            header = choices[0]
+            header = [str(x) for x in choices[0]]
             if 'list_name' not in header:
                 m = 'Column "list_name" not found in {} tab'.format(ws)
                 raise OdkformError(m)
             for i, row in enumerate(choices):
                 if i == 0:
                     continue
-                json_row = {k: v for k, v in zip(header, row)}
-                list_name = json_row['list_name']
+                dict_row = {str(k): str(v) for k, v in zip(header, row)}
+                list_name = dict_row['list_name']
                 if list_name in d:
-                    d[list_name].add(json_row)
+                    d[list_name].add(dict_row)
                 elif list_name:  # Not "else:" because possibly blank rows.
                     odkchoices = OdkChoices(list_name)
-                    odkchoices.add(json_row)
+                    odkchoices.add(dict_row)
                     d[list_name] = odkchoices
         except KeyError:  # Worksheet does not exist.
             pass
@@ -110,8 +110,8 @@ class OdkForm:
             # 3. A 'label' field with 'label::' fields.
             if field == 'label':
                 langs.add('')  # Default language.
-            elif field.startswith('label::'):
-                lang = field[len('label::'):]
+            elif str(field).startswith('label::'):
+                lang = str(field)[len('label::'):]
                 langs.add(lang)
         return sorted(list(langs))
 
@@ -244,7 +244,7 @@ class OdkForm:
             }
         elif row_type.startswith('select_one '):
             choice_list = row_type.split(maxsplit=1)[1]
-            choices = self.choices[choice_list]
+            choices = self.choices[choice_list]  # Breaks on this line. nothing seems to happen after.
             d = {
                 'token_type': 'prompt',
                 'simple_type': 'select_one',
@@ -320,26 +320,15 @@ class OdkForm:
                         choices = token['choice_list']
                     else:
                         choices = None
-                    # TODO: Refactor next if/else and this_prompt declaration. Should only render group at 'end group'.
-                    if stack:
-                        # This is de-activated. Will need to add group/repeat render_prompt to get it to work.
-                        # dict_row['in_group'] = True if any(isinstance(x, OdkGroup) for x in stack) else False
-                        # dict_row['in_repeat'] = True if any(isinstance(x, OdkRepeat) for x in stack) else False
-                        pass
                     this_prompt = OdkPrompt(dict_row, choices)
                     if stack:
                         stack[-1].add(this_prompt)
                     else:
                         result.append(this_prompt)
-                    # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
-                    # result.append(this_prompt)
-                # TODO: Refactor begin and end group handling.
                 elif token['token_type'] == 'begin group':
                     if not stack or isinstance(stack[-1], OdkRepeat):
                         group = OdkGroup(dict_row)
                         stack.append(group)
-                        # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
-                        # result.append(group.header)
                     else:
                         m = 'Unable to add group at row {}'.format(i + 1)
                         raise OdkformError(m)
@@ -354,12 +343,7 @@ class OdkForm:
                             if stack:
                                 stack[-1].add(group)
                             else:
-                                # - New rendering. Disable this if needed as errors occur.
                                 result.append(group)
-                                # pass
-                            # This is temporarily de-activated. Will need to add group/repeat rendering to get it to
-                            # work. end_group = OdkGroup(dict_row)  # This is a band-aid for replacement in refactoring.
-                            # result.append(end_group.footer)
                         else:
                             m = 'Mismatched "end group" at row {}'.format(i + 1)
                             raise OdkformError(m)
@@ -372,10 +356,6 @@ class OdkForm:
                         raise OdkformError(m)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], OdkRepeat):
-                        # This is temporarily de-activated. Will need to add group/repeat rendering to get it to work.
-                        # stack.pop()  # Stack guaranteed empty at this point.
-                        # TODO: Render repeat from here.
-                        # - New rendering. Disable this if needed as errors occur.
                         repeat = stack.pop()  # Stack guaranteed empty at this point.
                         result.append(repeat)
                     else:

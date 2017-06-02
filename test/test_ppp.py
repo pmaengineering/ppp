@@ -4,10 +4,11 @@
 
 import unittest
 from os import path as os_path
-from pmix.odkform import OdkForm
-from pmix.odkprompt import OdkPrompt
+from pmix.ppp.odkform import OdkForm
 # from pmix.odkchoices import OdkChoices
-from pmix.odkgroup import OdkGroup
+from pmix.ppp.odkgroup import OdkGroup
+from pmix.ppp.odkprompt import OdkPrompt
+
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 

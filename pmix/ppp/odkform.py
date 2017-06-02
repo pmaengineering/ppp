@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """OdkForm."""
-import os.path
 import datetime
-from pmix.ppp_config import TEMPLATE_ENV
+import os.path
+from pmix.ppp.odkchoices import OdkChoices
+from pmix.ppp.odkgroup import OdkGroup
+from pmix.ppp.odkprompt import OdkPrompt
+from pmix.ppp.ppp_config import TEMPLATE_ENV
 from pmix.error import OdkformError
-from pmix.odkchoices import OdkChoices
-from pmix.odkgroup import OdkGroup
-from pmix.odkprompt import OdkPrompt
-from pmix.odkrepeat import OdkRepeat
+from pmix.ppp.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
 
 

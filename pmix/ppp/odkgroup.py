@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """OdkGroup."""
 
-from pmix.ppp_config import TEMPLATE_ENV
-from pmix.odkprompt import OdkComponent, OdkPrompt
-from pmix.odktable import OdkTable
+from pmix.ppp.odkprompt import OdkComponent, OdkPrompt
+from pmix.ppp.ppp_config import TEMPLATE_ENV
+from pmix.ppp.odktable import OdkTable
 
 
 class OdkGroup:

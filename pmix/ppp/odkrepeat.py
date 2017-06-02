@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """OdkRepeat."""
 import textwrap
-from pmix.ppp_config import TEMPLATE_ENV
-from pmix.odkprompt import OdkPrompt
-from pmix.odkgroup import OdkGroup
-from pmix.odktable import OdkTable
+
+from pmix.ppp.odkgroup import OdkGroup
+from pmix.ppp.odkprompt import OdkPrompt
+from pmix.ppp.ppp_config import TEMPLATE_ENV
+from pmix.ppp.odktable import OdkTable
 
 
 class OdkRepeat:

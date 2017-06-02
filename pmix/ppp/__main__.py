@@ -1,8 +1,8 @@
 """CLI for PPP package."""
 import argparse
-from pmix.odkform import OdkForm
-from pmix.error import OdkformError
 
+from pmix.error import OdkformError
+from pmix.ppp.odkform import OdkForm
 
 if __name__ == '__main__':
     PROG_DESC = 'Convert XLSForm to Paper version.'

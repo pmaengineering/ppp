@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """OdkPrompt."""
 import textwrap
-from pmix.ppp_config import TEMPLATE_ENV
+from pmix.ppp.ppp_config import TEMPLATE_ENV
 
 
 class OdkComponent:

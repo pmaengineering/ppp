@@ -29,7 +29,7 @@ class OdkComponent:
 
     @staticmethod
     def convert_labels_and_hints_to_lists(prompt):
-        """Converts labels and hints from strings to lists.
+        """Convert labels and hints from strings to lists.
 
         This conversion process allows for line breaks to be rendered properly
         in html.

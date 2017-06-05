@@ -5,23 +5,17 @@
                       {% endif %}
                       <tr>
                         <td class="repeat-header" colspan="2">
-                          <div class="align-top align-text-top" style="display: flex; justify-content: space-between; flex-direction: row;">
-                            <div class="align-top align-text-top{{ name_highlight }}" style="text-align: left;
-                                 align-content: left;
-                                 align-self: left;
-                                 alignment: left;
-                              ">
+                          <div class="header-container flex-container-row">
+                            <div class="align-left {{ name_highlight }}">
                               {% if question.name %}
                                 <span class="side-letter-left">N</span>
-                                <div class="variable" style="text-align: left;">{{ question.name }}</div>
+                                <div class="variable">{{ question.name }}</div>
                               {% endif %}
                             </div>
 
                             {% if question.relevant %}
-                              <div class="align-top align-text-top" style="text-align: right;">
-                                <div class="relevant{{ relevant_highlight }}" style="text-align: right;">
-                                  {{ question.relevant }}<span class="side-letter-repeat-right">R</span>
-                                </div>
+                              <div class="relevant{{ relevant_highlight }} align-right">
+                                {{ question.relevant }}<span class="side-letter-right">R</span>
                               </div>
                             {% endif %}
                           </div>

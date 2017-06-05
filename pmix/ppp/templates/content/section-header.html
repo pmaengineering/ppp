@@ -8,7 +8,11 @@
                       </tr>
                       <tr>
                         <td class="section-header{{ bottom_border }}" colspan="2">
-                          <h3 class="section-header-label">{{ question.label }}</h3>
-                          <span class="section-header-hint">{{ question.hint }}</span>
+                          {% for label in question.label %}
+                            <h3 class="section-header-label">{{ label }}</h3>
+                          {% endfor %}
+                          {% for p in question.hint %}
+                            <p class="section-header-hint">{{ p }}</p>
+                          {% endfor %}
                         </td>
                       </tr>

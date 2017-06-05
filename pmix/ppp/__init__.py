@@ -5,8 +5,7 @@ from pmix.ppp.odkform import OdkForm
 
 
 def run(inpath, language, output_format, outfile, **kwargs):
-    """Runs ODK form conversion."""
-
+    """Run ODK form conversion."""
     survey = None
     form = OdkForm(file=inpath)
     if output_format == 'text':
@@ -22,7 +21,7 @@ def run(inpath, language, output_format, outfile, **kwargs):
         survey = form.to_html(language, kwargs['highlight'],
                               kwargs['debug'])
     if outfile:
-        with open(outfile, mode='w', encoding='utf-8') as f:
-            f.write(survey)
+        with open(outfile, mode='w', encoding='utf-8') as file:
+            file.write(survey)
     else:
         print(survey)

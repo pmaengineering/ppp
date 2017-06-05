@@ -8,7 +8,6 @@ from pmix.ppp import run
 
 def cli():
     """Command line interface for package."""
-
     prog_desc = 'Convert XLSForm to Paper version.'
     parser = argparse.ArgumentParser(description=prog_desc)
 
@@ -52,8 +51,10 @@ def cli():
               'formats: \'html\', \'pdf\'.'
         raise OdkformError(msg)
 
-    run(inpath=args.xlsxfile, language=args.language, output_format=args.format,
-        outfile=args.outpath, debug=args.debug, highlight=args.highlight)
+    run(inpath=args.xlsxfile, language=args.language,
+        output_format=args.format, outfile=args.outpath,
+        debug=args.debug, highlight=args.highlight)
+
 
 if __name__ == '__main__':
     cli()

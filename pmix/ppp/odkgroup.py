@@ -6,10 +6,23 @@ from pmix.ppp.odktable import OdkTable
 
 
 class OdkGroup:
-    """Class to represent a field-list group in XLSForm."""
+    """Class to represent a field-list group in XLSForm.
+
+    Attributes:
+        opener (dict): A dictionary row representing first row of group.
+        data (list): A list of group components.
+        pending_table (OdkTable): A variable for storing an OdkTable object as
+            it is being constructed.
+        in_repeat (bool): Is this group part of a repeat group?
+    """
 
     def __init__(self, opener):
-        """Initialize a group."""
+        """Initialize a group.
+
+        Args:
+            opener (dict): A dictionary row representing first row of group.
+                In ODK Specification, this would be of 'begin group' type.
+        """
         self.opener = opener
         self.data = []
         self.pending_table = None
@@ -19,12 +32,33 @@ class OdkGroup:
         """Printed representation."""
         return "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
 
+    @staticmethod
+    def render_header(i, lang, highlighting):
+        """Render group header.
+
+        A group header is an OdkPrompt with a few extra attributes.
+
+        Args:
+            i (dict): A dictionary row representing first row of group.
+            lang (str): The language.
+            highlighting (bool): For color highlighting of various components
+                of html template.
+
+        Returns:
+            str: A rendered html template of an OdkPrompt object.
+        """
+        i['in_group'] = True
+        i['simple_type'] = i['type']
+        i['is_group_header'] = True
+        return OdkPrompt(i).to_html(lang, highlighting)
+
     def add(self, row):
         """Add a row of data from XLSForm.
 
         This method should not be called if row comes from an ODK table.
 
-        :param row: (dict) Row from XLSForm.
+        Args:
+            row (dict): Row from XLSForm.
         """
         self.add_pending()
         self.data.append(row)
@@ -34,7 +68,8 @@ class OdkGroup:
 
         This method should only be called for rows from an ODK table.
 
-        :param odkprompt: (dict) Prompt ow from XLSForm.
+        Args:
+            odkprompt (OdkPrompt): Row from XLSForm.
         """
         if self.pending_table:
             self.pending_table.add(odkprompt)
@@ -51,28 +86,27 @@ class OdkGroup:
     def to_text(self, lang):
         """Get the text representation of the full group.
 
-        :param lang: (str) The language.
-        :return: (str) The text for this group.
+        Args:
+            lang (str): The language.
+
+        Returns:
+            str: The text for this group.
         """
         obj_texts = (d.to_text(lang) for d in self.data)
         sep = '\n\n{}\n\n'.format(' -' * 25)
         group_text = sep.join(obj_texts)
         return group_text
 
-    @staticmethod
-    def render_header(i, lang, highlighting):
-        """Render header."""
-        i['in_group'] = True
-        i['simple_type'] = i['type']
-        i['is_group_header'] = True
-        return OdkPrompt(i).to_html(lang, highlighting)
-
     def to_html(self, lang, highlighting):
-        """Get the html representation of the full group.
+        """Convert group components to html and return concatenation.
 
-        :param lang: (str) The language.
-        :param highlighting: (bool) Highlighting on/off.
-        :return: (dict) The text for this group.
+        Args:
+            lang (str): The language.
+            highlighting (bool): For color highlighting of various components
+                of html template.
+
+        Returns:
+            str: A rendered html concatenation of component templates.
         """
         html = ''
         # pylint: disable=no-member

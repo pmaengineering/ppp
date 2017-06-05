@@ -15,8 +15,6 @@ class OdkGroup:
         self.opener = opener
         self.data = []
         self.pending_table = None
-        self.header = self.set_header()
-        self.footer = self.set_footer()
         self.in_repeat = False
 
     def __repr__(self):
@@ -51,16 +49,6 @@ class OdkGroup:
         if self.pending_table:
             self.data.append(self.pending_table)
             self.pending_table = None
-
-    def set_header(self):
-        """Set header."""
-        data = self.opener
-        return OdkGroupHeader(data)
-
-    def set_footer(self):
-        """Set footer."""
-        data = self.opener
-        return OdkGroupFooter(data)
 
     def to_text(self, lang):
         """Get the text representation of the full group.
@@ -122,60 +110,3 @@ class OdkGroup:
         html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
             .render()
         return html
-
-
-class OdkGroupHeader(OdkComponent):
-    """OdkGroupHeader.
-
-    Class to represent a 'begin group' line of XLSForm,
-    and a group header in paper form.
-    """
-
-    def __init__(self, opener):
-        """Initialize a group header."""
-        OdkComponent.__init__(self)
-        self.data = opener
-
-    def __repr__(self):
-        """Print representation of instance."""
-        return "<OdkGroupHeader: {}>".format(self.data)
-
-    def to_dict(self, lang):
-        """Render as dictionary representation."""
-        self.data = self.reformat_default_lang_vars(self.data, lang)
-        self.data = self.truncate_fields(self.data)
-        self.data['is_group_header'] = True
-        return self.data
-
-    def to_html(self, lang, highlighting):
-        """Render as html representation."""
-        # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/content-tr-base.html').\
-            render(question=self.to_dict(lang=lang), highlighting=highlighting)
-
-
-class OdkGroupFooter:
-    """OdkGroupFooter.
-
-    Class to represent a 'begin group' line of XLSForm,
-    and a group header in paper form.
-    """
-
-    def __init__(self, opener):
-        """Initialize a group header."""
-        self.data = opener
-
-    def __repr__(self):
-        """Print representation of instance."""
-        return "<OdkGroupFooter: {}>".format(self.data)
-
-    def to_dict(self):
-        """Render as dictionary representation."""
-        self.data['is_group_footer'] = True
-        return self.data
-
-    def to_html(self, highlighting):
-        """Render as html representation."""
-        # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=self.to_dict(), highlighting=highlighting)

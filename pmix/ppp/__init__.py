@@ -5,7 +5,16 @@ from pmix.ppp.odkform import OdkForm
 
 
 def run(inpath, language, output_format, outfile, **kwargs):
-    """Run ODK form conversion."""
+    """Run ODK form conversion.
+
+    Args:
+        inpath (str): Path to load source file.
+        language (str): Language to render form.
+        output_format (str): File format to be output.
+        outfile (str): Path to save converted file.
+        **debug (bool): Debugging on or off.
+        **highlight (bool): Highlighting on or off.
+    """
     survey = None
     form = OdkForm(file=inpath)
     if output_format == 'text':

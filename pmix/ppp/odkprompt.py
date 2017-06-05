@@ -38,7 +38,8 @@ class OdkComponent:
             # if k.startswith('label' or 'hint' or 'constraint_message'):
             if k.startswith('label') or k.startswith('hint') \
                     or k.startswith('constraint_message'):
-                prompt[k] = v.split('\n\n')
+                if v:
+                    prompt[k] = v.split('\n\n')
         return prompt
 
     def truncate_fields(self, row):

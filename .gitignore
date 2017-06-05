@@ -14,4 +14,4 @@ dev
 MANIFEST
 tags
 *.swp
-*.html
+/*.html

@@ -3,5 +3,5 @@
 from jinja2 import Environment, PackageLoader
 
 
-TEMPLATE_ENV = Environment(loader=PackageLoader('pmix'), trim_blocks=True,
+TEMPLATE_ENV = Environment(loader=PackageLoader('pmix.ppp'), trim_blocks=True,
                            lstrip_blocks=True)

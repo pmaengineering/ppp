@@ -23,6 +23,8 @@ class OdkRepeat:
 
         Only other prompts and groups are allowed to be added.
 
+        Args:
+            placeholder (place):
         :param obj: either Odkgroup or Odkprompt.
         """
         self.data.append(obj)
@@ -30,6 +32,11 @@ class OdkRepeat:
     def to_text(self, lang):
         """Get the text representation of the entire repeat group.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param lang: (str) The language.
         :return: (str) The text for this repeat.
         """
@@ -42,6 +49,11 @@ class OdkRepeat:
     def to_html(self, lang, highlighting):
         """Get the html representation of the full group.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param lang: (str) The language.
         :param highlighting: (bool) Highlighting on/off.
         :return: (dict) The text for this group.
@@ -60,12 +72,6 @@ class OdkRepeat:
                 html += i.to_html(lang, highlighting)
         html += self.render_footer()
         return html
-
-    @staticmethod
-    def render_prompt(i, lang, highlighting):
-        """Render prompt."""
-        i.row['in_repeat'] = True
-        return i.to_html(lang, highlighting)
 
     @staticmethod
     def render_header(i, lang, highlighting):

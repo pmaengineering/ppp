@@ -1,15 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""OdkPrompt."""
+"""Module for the OdkPrompt class."""
 import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
 
 
 class OdkPrompt:
-    """
-    Class to represent a single ODK prompt from an XLSForm.
+    """Class to represent a single ODK prompt from an XLSForm.
 
     This is described in a single row of an XLSForm.
+
+    Attributes:
+        row (dict): A dictionary representation of prompt.
+        choices (OdkChoices): Answer choices, if applicable.
+        odktype (str): The value corresponding to the prompts ODK type.
+        is_section_header (bool): Designates whether or not the prompt is a
+            section header.
+
+    Class Attributes:
+        select_types (tuple): Prompt types which can accept data and include a
+            list of choices.
+        response_types (tuple): Prompt types which can accept data and do not
+            include a list of choices.
+        non_response_types (tuple): Prompt types which do not accept data.
+        media_fields (tuple): Fields that can be set to file names of allowable
+            media types for the given field.
+        language_dependent_fields (tuple): Fields for which values can vary by
+            language. A single ODK XlsForm can have many such fields, suffixed
+            by '::language'.
+        truncatable_fields (tuple): Fields that should be limited to a specific
+            length. Current limit is 100 chars, which is somewhat arbitrary but
+            turns out good in converted forms.
     """
 
     select_types = (
@@ -29,11 +50,11 @@ class OdkPrompt:
     non_response_types = (
         'note',
     )
-    media_fields = ['image', 'media::image', 'audio', 'media::audio',
-                    'video', 'media::video']
+    media_fields = ('image', 'media::image', 'audio', 'media::audio',
+                    'video', 'media::video')
     language_dependent_fields = \
-        ['label', 'hint', 'constraint_message'] + media_fields
-    truncatable_fields = ['constraint', 'relevant']
+        ('label', 'hint', 'constraint_message') + media_fields
+    truncatable_fields = ('constraint', 'relevant')
 
     def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type).
@@ -42,8 +63,9 @@ class OdkPrompt:
         with a value from the class member variables `select_types`,
         `response_types`, or `non_response_types`.
 
-        :param row: (dict) XLSForm headers as keys, row entries as values.
-        :param choices: An Odkchoices object, or None if not a select type.
+        Args:
+            row (dict): XLSForm headers as keys, row entries as values.
+            choices (OdkChoices or None): Answer choices, if applicable.
         """
         self.row = row
         self.choices = choices
@@ -59,38 +81,50 @@ class OdkPrompt:
     def truncate_text(text):
         """Truncate text and add an ellipsis when text is too long.
 
-        :param text: (str) The text.
-        :return: (str) Truncated text.
+        Args:
+            text (str): The text.
+
+        Returns:
+            str: Truncated text.
         """
         if len(text) > 100:
             text = text[0:98] + ' …'
         return text
 
     @staticmethod
-    def reformat_double_line_breaks(prompt):
+    def reformat_double_line_breaks(row):
         """Convert labels and hints from strings to lists.
 
         This conversion process allows for line breaks to be rendered properly
         in html.
+
+        Args:
+            row (dict): The dictionary representation of prompt.
+
+        Returns:
+            dict: Reformatted representation.
         """
-        for k, v in prompt.items():
+        for k, v in row.items():
             # if k.startswith('label' or 'hint' or 'constraint_message'):
             if k.startswith('label') or k.startswith('hint') \
                     or k.startswith('constraint_message'):
                 if v:
-                    prompt[k] = v.split('\n\n')
-        return prompt
+                    row[k] = v.split('\n\n')
+        return row
 
     @staticmethod
     def reformat_default_lang_vars(row, lang):
         """Reformat default language variables.
 
-        Reformat ::<language_name> style variable names to remove the
-        ::<language_name>, leaving just the variable.
+        Reformat '::<language_name>' style variable names to remove the
+        '::<language_name>', leaving just the variable.
 
-        :param row: (str) The dictionary row of the component.
-        :param lang: (str) The language.
-        :return: (str) Dictionary row of the component, reformatted.
+        Args:
+            row (dict): The dictionary representation of prompt.
+            lang (str): The language.
+
+        Returns:
+            dict: Reformatted representation.
         """
         for field in OdkPrompt.language_dependent_fields:
             if field + '::' + lang in row:
@@ -100,7 +134,20 @@ class OdkPrompt:
     # pylint: disable=too-many-branches
     @staticmethod
     def create_additional_media_fields(row, prefix):
-        """Create additional media fields."""
+        """Create additional media fields.
+
+        Create 'media' field for populating list of all media for prompt.
+        Create individual, language-agnostic named media fields for each type
+        of media present in prompt, populated with value from corresponding
+        media field of default language.
+
+        Args:
+            row (dict): The dictionary representation of prompt.
+            prefix (str): Prefix for media fields allowed by ODK; 'media::'.
+
+        Returns:
+            dict: Reformatted representation.
+        """
         fields_to_add = []
         for key, val in row.items():
             for field in OdkPrompt.media_fields:
@@ -121,10 +168,13 @@ class OdkPrompt:
 
     @staticmethod
     def set_grouped_media_field(row):
-        """Format the text representing any media to be enclosed in brackets.
+        """Populate media field with all media for prompt.
 
-        :param row: (str) The dictionary row of the component.
-        :return: (str) Dictionary row of the component, reformatted.
+        Args:
+            row (dict): The dictionary representation of prompt.
+
+        Returns:
+            dict: Reformatted representation.
         """
         for key, val in row.items():
             for field in OdkPrompt.media_fields:
@@ -142,18 +192,28 @@ class OdkPrompt:
     def truncate_fields(self, row):
         """Call truncate_text() method for all truncatable fields in component.
 
-        :param row: (str) The dictionary row of the component.
-        :return: (d) Dictionary row of the component, reformatted.
+        Args:
+            row (dict): The dictionary representation of prompt.
+
+        Returns:
+            dict: Reformatted representation.
         """
         for field in OdkPrompt.truncatable_fields:
             row[field + '_original'] = row[field]
             row[field] = self.truncate_text(row[field])
         return row
 
-    def format_media_labels(self, input_row):
-        """Format media labels."""
+    def format_media_labels(self, row):
+        """Format text for all media labels to be enclosed in brackets.
+
+        Args:
+            row (dict): Dictionary representation of prompt.
+
+        Returns:
+            dict: Reformatted representation.
+        """
         arbitrary_media_prefix = 'media::'
-        row = self.create_additional_media_fields(input_row,
+        row = self.create_additional_media_fields(row,
                                                   arbitrary_media_prefix)
         for key, val in row.items():
             for field in OdkPrompt.media_fields:
@@ -173,9 +233,12 @@ class OdkPrompt:
 
         An example of field and language might be "label" and "English".
 
-        :param field: (str) The field from the header row.
-        :param lang: (str) The language.
-        :return: (str) The value found from this row.
+        Args:
+            field (str): The field from the header row.
+            lang (str): The language.
+
+        Returns:
+            str: The value found from this row.
         """
         value = None
         try:
@@ -195,8 +258,11 @@ class OdkPrompt:
     def to_text_relevant(self, lang):
         """Get the relevant text for this prompt.
 
-        :param lang: (str) The language.
-        :return: (str) The text representation of the relevant.
+        Args:
+            :param lang: (str) The language.
+
+        Returns:
+            str: The text representation of the relevant.
         """
         formatted_relevant = None
         relevant_text = self.text_field('relevant_text', lang)
@@ -210,9 +276,12 @@ class OdkPrompt:
         This is a text representation of the area of a paper questionnaire
         where the response is recorded.
 
-        :param lang: (str) The language.
-        :param numbered: (bool) Should choice options be numbered?
-        :return: (str) The text representation of the response entry field.
+        Args:
+            lang (str): The language.
+            numbered (bool): Should choice options be numbered?
+
+        Returns:
+            str: The text representation of the response entry field.
         """
         text_str = None
         if self.odktype == 'select_multiple':

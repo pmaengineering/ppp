@@ -250,8 +250,11 @@ class OdkPrompt:
         This is a representation of the area of a paper questionnaire where
         the response is recorded.
 
-        :param lang: (str) The language.
-        :return: (str or dict) The representation of the entry field.
+        Args:
+            lang (str): The language.
+
+        Returns:
+            (str or dict): The representation of the entry field.
         """
         field = None
         if self.odktype in ['select_multiple', 'select_one']:

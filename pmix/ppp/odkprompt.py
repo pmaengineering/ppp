@@ -62,7 +62,7 @@ class OdkPrompt:
                 guaranteed to have the "simple_type" key with a value from the
                 class member variables `select_types`, `response_types`, or
                 `non_response_types`.
-            choices (OdkChoices or None): Answer choices, if applicable.
+            choices (OdkChoices): Answer choices, if applicable.
         """
         self.row = row
         self.choices = choices

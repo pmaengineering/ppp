@@ -254,7 +254,7 @@ class OdkPrompt:
             lang (str): The language.
 
         Returns:
-            (str or dict): The representation of the entry field.
+            str or dict: The representation of the entry field.
         """
         field = None
         if self.odktype in ['select_multiple', 'select_one']:
@@ -266,8 +266,11 @@ class OdkPrompt:
     def to_text(self, lang):
         """Get the text representation of the full prompt.
 
-        :param lang: (str) The language.
-        :return: (str) The text from all parts of the prompt.
+        Args:
+            lang (str): The language.
+
+        Returns:
+            str: The text from all parts of the prompt.
         """
         # Note: May not need 'relevant_text'.
         # relevant_text = self.text_field('relevant_text', lang)
@@ -287,8 +290,13 @@ class OdkPrompt:
     def to_dict(self, lang, **kwargs):
         """Get the text representation of the full prompt.
 
-        :param lang: (str) The language.
-        :return: (dict) The text from all parts of the prompt.
+        Args:
+            lang (str): The language.
+            **bottom_border (bool): Renders a border at bottom of prompt. This
+                is necessary for section headers followed by a group.
+
+        Returns:
+            dict: The text from all parts of the prompt.
         """
         # TODO: Refactor so that the dict row is only looped through once
         # to make all of the changes below.
@@ -305,7 +313,17 @@ class OdkPrompt:
         return prompt
 
     def to_html(self, lang, highlighting, **kwargs):
-        """Convert to html."""
+        """Convert to html.
+
+        Args:
+            lang (str): The language.
+            highlighting (bool): For color highlighting of various components
+                of html template.
+            **kwargs: Arbitrary keyword arguments delegated fully to to_dict().
+
+        Returns:
+            str: A rendered html template.
+        """
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
             .render(question=self.to_dict(lang=lang, **kwargs),

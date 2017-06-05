@@ -14,7 +14,6 @@ class OdkTable:
         self.data = []
         self.header = None
         self.contents = None
-        self.is_group_footer = False
         self.in_repeat = False
 
     def __repr__(self):
@@ -89,5 +88,4 @@ class OdkTable:
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
             .render(table=table,
-                    lang=lang, highlighting=highlighting,
-                    is_group_footer=self.is_group_footer)
+                    lang=lang, highlighting=highlighting)

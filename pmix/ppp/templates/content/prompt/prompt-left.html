@@ -2,21 +2,16 @@
                             {% set side_letter_styling = 'side-letter-repeat-left' %}
                         {% endif %}
                         {% if question.in_group == True %}
-                            {% set group_styling = ' left-cell-in-group' %}
                             {% set side_letter_styling = 'side-letter-group-left' %}
                         {% else %}
-                            {% set group_styling = '' %}
                             {% set side_letter_styling = 'side-letter-left' %}
-                        {% endif %}
-                        {% if question.is_group_footer == True %}
-                            {% set group_footer_styling = ' group-footer' %}
                         {% endif %}
                         {% if highlighting %}
                             {% set name_highlight = ' bg-light-blue' %}
                             {% set label_hint_highlight = ' bg-light-green' %}
                             {% set constraint_highlight = ' bg-light-red' %}
                         {% endif %}
-                        <td class="question-cell align-top{{ group_styling }}{{ group_footer_styling }}">
+                        <td class="question-cell align-top">
                             <div class="align-top align-text-top{{ name_highlight }}">
                                 {% if question.name %}
                                     <span class="{{ side_letter_styling }}">N</span>

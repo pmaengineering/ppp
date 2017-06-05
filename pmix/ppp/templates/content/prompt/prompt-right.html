@@ -2,14 +2,9 @@
                             {% set side_letter_styling = ' side-letter-repeat-right' %}
                         {% endif %}
                         {% if question.in_group == True %}
-                            {% set group_styling = ' right-cell-in-group' %}
                             {% set side_letter_styling = ' side-letter-group-right' %}
                         {% else %}
-                            {% set group_styling = '' %}
                             {% set side_letter_styling = ' side-letter-right' %}
-                        {% endif %}
-                        {% if question.is_group_footer == True %}
-                            {% set group_footer_styling = ' group-footer' %}
                         {% endif %}
                         {% if highlighting %}
                             {% set type_highlight = ' bg-light-blue' %}
@@ -22,12 +17,9 @@
                         {% else %}
                           {% set input_margins = '' %}
                         {% endif %}
-                        <!--<td class="response-cell{{ group_styling }}">-->
-                        <td class="response-cell align-top{{ group_styling }}{{ group_footer_styling }}">
+                        <td class="response-cell align-top">
 
-                          <!--<div>-->
                           <div class="response-cell-container">
-                            <!--<div class="align-top align-text-top" style="display: flex; justify-content: space-between; flex-direction: row;">-->
                             <div class="response-cell-container-top">
                               <div class="question-type{{ type_highlight }}">{{ question.type }}</div>
                               {% if question.relevant %}
@@ -38,7 +30,6 @@
                               {% endif %}
                             </div>
 
-                            <!--<div class="{ input_highlight }}" style="display: flex;">-->
                             <div class="{{ input_highlight }}{{ input_margins }}">
                               {% if question.simple_type in ['select_one', 'select_multiple'] %}
                                 <p><!--<form>-->
@@ -68,7 +59,6 @@
                               {% endif %}
                             </div>
 
-                            <!--<div class="choice-filter{{ filter_highlight }}" style="display: flex;">-->
                             <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
                               {% if question.choice_filter %}
                                 {{ question.choice_filter }}

@@ -5,16 +5,55 @@ import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
 
 
-class OdkComponent:
-    """Base class for ODK components that comprise an ODK Form."""
+class OdkPrompt:
+    """
+    Class to represent a single ODK prompt from an XLSForm.
 
-    def __init__(self):
-        """Initialize."""
-        self.media_fields = ['image', 'media::image', 'audio', 'media::audio',
-                             'video', 'media::video']
-        self.language_dependent_fields = \
-            ['label', 'hint', 'constraint_message'] + self.media_fields
-        self.truncatable_fields = ['constraint', 'relevant']
+    This is described in a single row of an XLSForm.
+    """
+
+    select_types = (
+        'select_one',
+        'select_multiple'
+    )
+    response_types = (
+        'integer',
+        'decimal',
+        'geopoint',
+        'barcode',
+        'image',
+        'text',
+        'date',
+        'dateTime'
+    )
+    non_response_types = (
+        'note',
+    )
+    media_fields = ['image', 'media::image', 'audio', 'media::audio',
+                    'video', 'media::video']
+    language_dependent_fields = \
+        ['label', 'hint', 'constraint_message'] + media_fields
+    truncatable_fields = ['constraint', 'relevant']
+
+    def __init__(self, row, choices=None):
+        """Initialize the XLSForm prompt (a single row of a specific type).
+
+        Row is a dict object. It is guaranteed to have the "simple_type" key
+        with a value from the class member variables `select_types`,
+        `response_types`, or `non_response_types`.
+
+        :param row: (dict) XLSForm headers as keys, row entries as values.
+        :param choices: An Odkchoices object, or None if not a select type.
+        """
+        self.row = row
+        self.choices = choices
+        self.odktype = self.row['simple_type']
+        self.is_section_header = True if self.row['name'].startswith('sect_') \
+            else False
+
+    def __repr__(self):
+        """Print representation of instance."""
+        return "<OdkPrompt {}>".format(self.row['name'])
 
     @staticmethod
     def truncate_text(text):
@@ -42,18 +81,8 @@ class OdkComponent:
                     prompt[k] = v.split('\n\n')
         return prompt
 
-    def truncate_fields(self, row):
-        """Call truncate_text() method for all truncatable fields in component.
-
-        :param row: (str) The dictionary row of the component.
-        :return: (d) Dictionary row of the component, reformatted.
-        """
-        for field in self.truncatable_fields:
-            row[field + '_original'] = row[field]
-            row[field] = self.truncate_text(row[field])
-        return row
-
-    def reformat_default_lang_vars(self, row, lang):
+    @staticmethod
+    def reformat_default_lang_vars(row, lang):
         """Reformat default language variables.
 
         Reformat ::<language_name> style variable names to remove the
@@ -63,17 +92,18 @@ class OdkComponent:
         :param lang: (str) The language.
         :return: (str) Dictionary row of the component, reformatted.
         """
-        for field in self.language_dependent_fields:
+        for field in OdkPrompt.language_dependent_fields:
             if field + '::' + lang in row:
                 row[field] = row[field + '::' + lang]
         return row
 
     # pylint: disable=too-many-branches
-    def create_additional_media_fields(self, row, prefix):
+    @staticmethod
+    def create_additional_media_fields(row, prefix):
         """Create additional media fields."""
         fields_to_add = []
         for key, val in row.items():
-            for field in self.media_fields:
+            for field in OdkPrompt.media_fields:
                 if key.startswith(field) and len(val) > 0:
                     if field not in row:
                         fields_to_add.append(field)
@@ -89,13 +119,44 @@ class OdkComponent:
             row['media'] = []
         return row
 
+    @staticmethod
+    def set_grouped_media_field(row):
+        """Format the text representing any media to be enclosed in brackets.
+
+        :param row: (str) The dictionary row of the component.
+        :return: (str) Dictionary row of the component, reformatted.
+        """
+        for key, val in row.items():
+            for field in OdkPrompt.media_fields:
+                if val and key.startswith(field) and val not in row['media']:
+                    row['media'].append(val)
+        return row
+
+    @staticmethod
+    def text_relevant():
+        # def text_relevant(self, lang):
+        # TODO: Create this method.
+        """Find the relevant text for this row."""
+        pass
+
+    def truncate_fields(self, row):
+        """Call truncate_text() method for all truncatable fields in component.
+
+        :param row: (str) The dictionary row of the component.
+        :return: (d) Dictionary row of the component, reformatted.
+        """
+        for field in OdkPrompt.truncatable_fields:
+            row[field + '_original'] = row[field]
+            row[field] = self.truncate_text(row[field])
+        return row
+
     def format_media_labels(self, input_row):
         """Format media labels."""
         arbitrary_media_prefix = 'media::'
         row = self.create_additional_media_fields(input_row,
                                                   arbitrary_media_prefix)
         for key, val in row.items():
-            for field in self.media_fields:
+            for field in OdkPrompt.media_fields:
                 if key.startswith(field) and len(val) > 0:
                     if val[0] is not '[' and val[-1] is not ']':
                         formatted_media_label = '[' + val + ']'
@@ -106,74 +167,6 @@ class OdkComponent:
                             arbitrary_media_prefix, '')
                         row[non_prefixed_mf] = formatted_media_label
         return row
-
-    def set_grouped_media_field(self, row):
-        """Format the text representing any media to be enclosed in brackets.
-
-        :param row: (str) The dictionary row of the component.
-        :return: (str) Dictionary row of the component, reformatted.
-        """
-        for key, val in row.items():
-            for field in self.media_fields:
-                if val and key.startswith(field) and val not in row['media']:
-                    row['media'].append(val)
-        return row
-
-
-class OdkPrompt(OdkComponent):
-    """
-    Class to represent a single ODK prompt from an XLSForm.
-
-    This is described in a single row of an XLSForm.
-    """
-
-    select_types = (
-        'select_one',
-        'select_multiple'
-    )
-
-    response_types = (
-        'integer',
-        'decimal',
-        'geopoint',
-        'barcode',
-        'image',
-        'text',
-        'date',
-        'dateTime'
-    )
-
-    non_response_types = (
-        'note',
-    )
-
-    def __init__(self, row, choices=None):
-        """Initialize the XLSForm prompt (a single row of a specific type).
-
-        Row is a dict object. It is guaranteed to have the "simple_type" key
-        with a value from the class member variables `select_types`,
-        `response_types`, or `non_response_types`.
-
-        :param row: (dict) XLSForm headers as keys, row entries as values.
-        :param choices: An Odkchoices object, or None if not a select type.
-        """
-        OdkComponent.__init__(self)
-        self.row = row
-        self.choices = choices
-        self.odktype = self.row['simple_type']
-        self.is_section_header = True if self.row['name'].startswith('sect_') \
-            else False
-
-    def __repr__(self):
-        """Print representation of instance."""
-        return "<OdkPrompt {}>".format(self.row['name'])
-
-    @staticmethod
-    def text_relevant():
-        # def text_relevant(self, lang):
-        # TODO: Create this method.
-        """Find the relevant text for this row."""
-        pass
 
     def text_field(self, field, lang):
         """Find a row value given a field and language.

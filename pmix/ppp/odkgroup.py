@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """OdkGroup."""
 
-from pmix.ppp.odkprompt import OdkComponent, OdkPrompt
 from pmix.ppp.config import TEMPLATE_ENV
+from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odktable import OdkTable
 
 

@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""OdkForm."""
+"""Module for the OdkForm class."""
 import datetime
 import os.path
 from pmix.ppp.config import TEMPLATE_ENV

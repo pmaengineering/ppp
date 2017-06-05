@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""OdkChoices."""
+"""Module for the OdkChoices class."""
 from pmix.error import OdkformError
 
 

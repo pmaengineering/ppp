@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Module for the OdkPrompt class."""
 import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
@@ -59,12 +57,11 @@ class OdkPrompt:
     def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type).
 
-        Row is a dict object. It is guaranteed to have the "simple_type" key
-        with a value from the class member variables `select_types`,
-        `response_types`, or `non_response_types`.
-
         Args:
-            row (dict): XLSForm headers as keys, row entries as values.
+            row (dict): XLSForm headers as keys, row entries as values. It is
+                guaranteed to have the "simple_type" key with a value from the
+                class member variables `select_types`, `response_types`, or
+                `non_response_types`.
             choices (OdkChoices or None): Answer choices, if applicable.
         """
         self.row = row

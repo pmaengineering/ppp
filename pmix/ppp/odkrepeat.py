@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""OdkRepeat."""
+"""Module for the OdkRepeat class."""
 import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkgroup import OdkGroup

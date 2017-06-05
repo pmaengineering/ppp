@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""OdkGroup."""
+"""Module for the OdkGroup class."""
 
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkprompt import OdkPrompt

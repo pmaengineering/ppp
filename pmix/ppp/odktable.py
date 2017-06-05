@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""OdkTable."""
+"""Module for the OdkTable class."""
 
 from pmix.ppp.config import TEMPLATE_ENV
 # from pmix.error import OdkformError

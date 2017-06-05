@@ -28,7 +28,7 @@ def cli():
     language_help = 'Language to write the paper version in. If not ' \
                     'specified, the \'default_language\' in the \'settings\'' \
                     ' worksheet is used. If that is not specified and more' \
-                    ' than one language is in the Xlsform, the language that' \
+                    ' than one language is in the XLSForm, the language that' \
                     ' comes first alphabetically will be used.'
     parser.add_argument('-l', '--language', help=language_help)
 

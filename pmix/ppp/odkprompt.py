@@ -24,7 +24,7 @@ class OdkPrompt:
         media_fields (tuple): Fields that can be set to file names of allowable
             media types for the given field.
         language_dependent_fields (tuple): Fields for which values can vary by
-            language. A single ODK XlsForm can have many such fields, suffixed
+            language. A single ODK XLSForm can have many such fields, suffixed
             by '::language'.
         truncatable_fields (tuple): Fields that should be limited to a specific
             length. Current limit is 100 chars, which is somewhat arbitrary but

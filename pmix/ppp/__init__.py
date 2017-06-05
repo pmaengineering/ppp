@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""A package for converting ODK XlsForms into HTML."""
+"""A package for converting ODK forms."""
 from pmix.ppp.odkform import OdkForm
 
 
@@ -16,7 +16,7 @@ def run(inpath, language, output_format, outfile, **kwargs):
         **highlight (bool): Highlighting on or off.
     """
     survey = None
-    form = OdkForm(file=inpath)
+    form = OdkForm(language, file=inpath)
     if output_format == 'text':
         survey = form.to_text(language)
     elif output_format == 'dict':

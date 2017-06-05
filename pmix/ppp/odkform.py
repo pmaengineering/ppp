@@ -10,11 +10,44 @@ from pmix.ppp.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
 
 
-class OdkForm:
-    """Class to represent an entire XLSForm."""
+class InvalidLanguage(OdkformError):
+    """For errors related to language."""
 
-    def __init__(self, *, file=None, wb=None):
-        """Initialize."""
+    pass
+
+
+class OdkForm:
+    """Class to represent an entire XLSForm.
+
+    Attributes:
+        settings (dict): A dictionary represetnation of the original 'settings'
+            worksheet of an ODK XlsForm.
+        title (str): Title of the ODK form.
+        languages (list): List of languages used in the ODK form. This is taken
+            from the 'survey' worksheet.
+        choices (list): A list of rows from the 'choices' worksheet.
+        external_choices (list): A list of rows from the 'external_choices'
+            worksheet.
+        metadata (dict): A dictionary of metadata for the original and
+            converted ODK forms.
+        questionnaire (list): An ordered representation of the ODK form,
+            comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
+    """
+
+    def __init__(self, lang=None, file=None, wb=None):
+        """Initialize the OdkForm.
+
+        Create an instance of an ODK form, including survey representation,
+        choice options, settings, and metadata.
+
+        Args:
+            lang (str): The language to render form in, if specified.
+            file (str): The path for the source file of the ODK form,
+                typically an '.xlsx' file meeting the XlsForm specification.
+            wb (Workbook): A Workbook object meeting XlsForm specification.
+        Raises:
+            OdkformError: No ODK form is supplied.
+        """
         if file is None and wb is None:
             raise OdkformError()
         elif file is not None:
@@ -24,6 +57,15 @@ class OdkForm:
                          self.get_settings(wb).items()}
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.languages = self.get_languages(wb)
+        if lang:
+            if lang not in self.languages:
+                msg = 'Specified language not found in form: ' + lang
+                form = file if file else wb
+                msg += '\n\nThe form \'{}\' contains the following langauges.\n'\
+                    .format(form)
+                for language in self.languages:
+                    msg += '  * ' + language + '\n'
+                raise InvalidLanguage(msg[0:-1])
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -59,6 +101,11 @@ class OdkForm:
     def get_settings(wb):
         """Get the XLSForm settings as a settings_dict.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param wb: Source workbook.
         :return: (settings_dict) Form settings.
         """
@@ -77,6 +124,14 @@ class OdkForm:
     @staticmethod
     def get_choices(wb, ws):
         """Extract choices from an XLSForm.
+
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
+
+        Raises:
 
         :param wb: Source workbook.
         :param ws: One of 'choices' or 'external_choices'.
@@ -106,7 +161,14 @@ class OdkForm:
 
     @staticmethod
     def get_languages(wb):
-        """Get survey languages."""
+        """Get survey languages.
+
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
+        """
         header = wb['survey'][0]
         langs = set()
         for field in header:
@@ -123,7 +185,11 @@ class OdkForm:
         return sorted(list(langs))
 
     def get_survey_language(self):
-        """Get default survey language if specified."""
+        """Get default survey language if specified.
+
+        Returns:
+            placeholder:
+        """
         return self.settings['default_language'] \
             if 'default_language' in self.settings else self.languages[0]
 
@@ -145,6 +211,11 @@ class OdkForm:
     def to_text(self, lang):
         """Get the text representation of an entire XLSForm.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param lang: The language.
         :return: The full string of the XLSForm, ready to print or save.
         """
@@ -164,6 +235,11 @@ class OdkForm:
     def to_dict(self, lang):
         """Get the dictionary representation of an entire XLSForm.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param lang: The language.
         :return: A dictionary formatted questionnaire.
         """
@@ -179,6 +255,11 @@ class OdkForm:
     def to_json(self, lang, pretty=False):
         """Get the JSON representation of an entire XLSForm.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param lang: The language.
         :param pretty: Printing with whitespace for readability.
         :return: A JSON formatted questionnaire.
@@ -191,7 +272,14 @@ class OdkForm:
             return json.dumps(self.to_dict(lang))
 
     def to_html(self, lang, highlighting, debugging):
-        """Render html representation of form."""
+        """Render html representation of form.
+
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
+        """
         lang = lang if lang else self.metadata['survey_language']
         html_questionnaire = ''
         data = {
@@ -242,6 +330,11 @@ class OdkForm:
     def parse_type(self, row):
         """Describe with JSON the 'type' column of a row XLSForm.
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
         :param row: (row_type) A row as a dictionary.
         :return: (row_type) Info from parsing.
         """
@@ -334,6 +427,14 @@ class OdkForm:
         - table
         - context group (group without field-list appearance)
 
+        Args:
+            placeholder (place):
+
+        Returns:
+            placeholder:
+
+        Raises:
+            placeholder:
         :param wb: Workbook object representing an XLSForm.
         :return: A list of better python objects.
         """

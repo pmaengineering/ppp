@@ -21,7 +21,7 @@ class OdkForm:
 
     Attributes:
         settings (dict): A dictionary represetnation of the original 'settings'
-            worksheet of an ODK XlsForm.
+            worksheet of an ODK XLSForm.
         title (str): Title of the ODK form.
         languages (list): List of languages used in the ODK form. This is taken
             from the 'survey' worksheet.
@@ -43,10 +43,11 @@ class OdkForm:
         Args:
             lang (str): The language to render form in, if specified.
             file (str): The path for the source file of the ODK form,
-                typically an '.xlsx' file meeting the XlsForm specification.
-            wb (Workbook): A Workbook object meeting XlsForm specification.
+                typically an '.xlsx' file meeting the XLSForm specification.
+            wb (Workbook): A Workbook object meeting XLSForm specification.
         Raises:
             OdkformError: No ODK form is supplied.
+            InvalidLanguage: Language specified is not found in form.
         """
         if file is None and wb is None:
             raise OdkformError()
@@ -61,8 +62,8 @@ class OdkForm:
             if lang not in self.languages:
                 msg = 'Specified language not found in form: ' + lang
                 form = file if file else wb
-                msg += '\n\nThe form \'{}\' contains the following langauges.\n'\
-                    .format(form)
+                msg += '\n\nThe form \'{}\' contains the following languages' \
+                       '.\n'.format(form)
                 for language in self.languages:
                     msg += '  * ' + language + '\n'
                 raise InvalidLanguage(msg[0:-1])
@@ -102,12 +103,10 @@ class OdkForm:
         """Get the XLSForm settings as a settings_dict.
 
         Args:
-            placeholder (place):
+            wb (Workbook): A workbook object representing ODK form.
 
         Returns:
-            placeholder:
-        :param wb: Source workbook.
-        :return: (settings_dict) Form settings.
+            dict: Form settings.:
         """
         settings_dict = {}
         try:
@@ -126,16 +125,17 @@ class OdkForm:
         """Extract choices from an XLSForm.
 
         Args:
-            placeholder (place):
+            wb (Workbook): A Workbook object representing ODK form.
+            ws (Worksheet): One of 'choices' or 'external_choices'.
 
         Returns:
-            placeholder:
+            dict: A dictionary of choice list names with list of choices
+                options for each list.
 
         Raises:
-
-        :param wb: Source workbook.
-        :param ws: One of 'choices' or 'external_choices'.
-        :return: Dict with keys as list names.
+            OdkformError: Catches instances where list specified in the
+                'survey' worksheet, but the list does not appear in the
+                designated 'choices' or 'external_choices' worksheet.
         """
         formatted_choices = {}
         try:
@@ -164,10 +164,10 @@ class OdkForm:
         """Get survey languages.
 
         Args:
-            placeholder (place):
+            wb (Workbook): A Workbook object representing ODK form.
 
         Returns:
-            placeholder:
+            list: An alphabetically sorted list of languages in the form.
         """
         header = wb['survey'][0]
         langs = set()
@@ -188,7 +188,7 @@ class OdkForm:
         """Get default survey language if specified.
 
         Returns:
-            placeholder:
+            str: The default language of the form.
         """
         return self.settings['default_language'] \
             if 'default_language' in self.settings else self.languages[0]
@@ -201,7 +201,11 @@ class OdkForm:
             str(self.metadata['conversion_end'].time())[0:8]
 
     def get_running_conversion_time(self):
-        """Get running conversion time at this point in time."""
+        """Get running conversion time at this point in time.
+
+        Returns:
+            str: Total time taken to convert form.
+        """
         self.metadata['conversion_time'] = \
             str(self.metadata['conversion_end'] - self.metadata[
                 'conversion_start'])[5:10] + ' ' + 'seconds'
@@ -212,12 +216,10 @@ class OdkForm:
         """Get the text representation of an entire XLSForm.
 
         Args:
-            placeholder (place):
+            lang (str): The language.
 
         Returns:
-            placeholder:
-        :param lang: The language.
-        :return: The full string of the XLSForm, ready to print or save.
+            str: The full string of the XLSForm, ready to print or save.
         """
         lang = lang if lang else self.metadata['survey_language']
         title_lines = (
@@ -236,12 +238,10 @@ class OdkForm:
         """Get the dictionary representation of an entire XLSForm.
 
         Args:
-            placeholder (place):
+            lang (str): The language.
 
         Returns:
-            placeholder:
-        :param lang: The language.
-        :return: A dictionary formatted questionnaire.
+            dict: A full dictionary representation of the XLSForm.
         """
         lang = lang if lang else self.metadata['survey_language']
         html_questionnaire = {
@@ -256,13 +256,12 @@ class OdkForm:
         """Get the JSON representation of an entire XLSForm.
 
         Args:
-            placeholder (place):
+            lang (str): The language.
+            pretty (bool): Activates prettification, involving insertion of
+                several kinds of whitespace for readability.
 
         Returns:
-            placeholder:
-        :param lang: The language.
-        :param pretty: Printing with whitespace for readability.
-        :return: A JSON formatted questionnaire.
+            json: A full JSON representation of the XLSForm.
         """
         import json
         lang = lang if lang else self.metadata['survey_language']
@@ -272,13 +271,17 @@ class OdkForm:
             return json.dumps(self.to_dict(lang))
 
     def to_html(self, lang, highlighting, debugging):
-        """Render html representation of form.
+        """Get the JSON representation of an entire XLSForm.
 
         Args:
-            placeholder (place):
+            lang (str): The language.
+            highlighting (bool): For color highlighting of various components
+                of html template.
+            debugging (bool): For inclusion of debug information to be printed
+                in the JavaScript console.
 
         Returns:
-            placeholder:
+            str: A full HTML representation of the XLSForm.
         """
         lang = lang if lang else self.metadata['survey_language']
         html_questionnaire = ''
@@ -328,15 +331,13 @@ class OdkForm:
         return html_questionnaire
 
     def parse_type(self, row):
-        """Describe with JSON the 'type' column of a row XLSForm.
+        """Describe the 'type' column of a row XLSForm.
 
         Args:
-            placeholder (place):
+            row (dict): A row as a dictionary.
 
         Returns:
-            placeholder:
-        :param row: (row_type) A row as a dictionary.
-        :return: (row_type) Info from parsing.
+            dict: row_type information from parsing.
         """
         original_row_type = row['type']
         if original_row_type in OdkPrompt.response_types + \
@@ -415,7 +416,7 @@ class OdkForm:
     #  3. too-many-statements
     #  4. too-many-locals
     def convert_survey(self, wb):
-        """Convert rows and strings of a workbook into better python objects.
+        """Convert rows and strings of a workbook into object components.
 
         Main types are:
 
@@ -428,15 +429,16 @@ class OdkForm:
         - context group (group without field-list appearance)
 
         Args:
-            placeholder (place):
+            wb (Workbook): A Workbook object representing an XLSForm.
 
         Returns:
-            placeholder:
+            list: A list of objects representing form components.
 
         Raises:
-            placeholder:
-        :param wb: Workbook object representing an XLSForm.
-        :return: A list of better python objects.
+            OdkformError: Handle several errors, including: mismatched groups
+                or repeat groups, errors when appending to groups or repeat
+                groups, erroneously formed tables, duplicate context group
+                names, and groups nested within a field-list group.
         """
         result = []
         stack = []

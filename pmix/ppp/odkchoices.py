@@ -3,28 +3,51 @@ from pmix.error import OdkformError
 
 
 class OdkChoices:
-    """A class to represent a choice list defined in an XLSForm."""
+    """A class to represent a choice list defined in an XLSForm.
+
+    Attributes:
+        list_name (str): The name of the choice list.
+        data (list): A list of choice options for the choice list.
+    """
 
     def __init__(self, list_name):
-        """Initialize with a choice list name.
+        """Initialize a choice list.
 
-        :param list_name: (str) The name of the choice list.
+        Args:
+            list_name (str): The name of the choice list.
         """
         self.list_name = list_name
         self.data = []
 
+    def __repr__(self):
+        """Print representation of instance."""
+        return "<Odkchoices '{}(len: {})'>".format(self.list_name,
+                                                   len(self.data))
+
+    def __str__(self):
+        """String conversion of instance."""
+        return '{}: {}'.format(self.list_name, self.labels(lang='English'))
+
     def add(self, choice):
         """Add a choice to this choice list.
 
-        :param choice: A JSON row as parsed from the XLSForm.
+        Args:
+            choice (dict): A single choice row.
         """
         self.data.append(choice)
 
     def labels(self, lang):
         """Get the labels for this choice list in the desired language.
 
-        :param lang: (str) The language in which to return the choice labels.
-        :return: Correctly ordered list of choice labels.
+        Args:
+            lang (str): The language in which to return the choice labels.
+
+        Returns:
+            list: Correctly ordered list of choice labels.
+
+        Raises:
+            OdkformError: language parameter not found in choice list.
+            OdkformError: No languages found in choice list.
         """
         choice_langs = self.choice_langs()
         if lang not in choice_langs:
@@ -45,14 +68,22 @@ class OdkChoices:
         return labels
 
     def name_labels(self, lang):
-        """Get choice name labels."""
+        """Get choice name labels.
+
+        Args:
+            lang (str): The language of choice list.
+
+        Returns:
+            list: Choice variable names and associated labels for choice list.
+        """
         return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
                 for x in self.data]
 
     def choice_langs(self):
         """Discover all languages for these choices.
 
-        :return: Alphabetized list of languages.
+        Returns:
+            list: Alphabetized list of languages.
         """
         langs = set()
         for datum in self.data:
@@ -71,12 +102,3 @@ class OdkChoices:
                 raise OdkformError(msg)
         lang_list = sorted(list(langs))
         return lang_list
-
-    def __str__(self):
-        """String conversion of instance."""
-        return '{}: {}'.format(self.list_name, self.labels(lang='English'))
-
-    def __repr__(self):
-        """Print representation of instance."""
-        return "<Odkchoices '{}(len: {})'>".format(self.list_name,
-                                                   len(self.data))

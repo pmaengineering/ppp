@@ -5,7 +5,7 @@ import textwrap
 
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.ppp_config import TEMPLATE_ENV
+from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odktable import OdkTable
 
 

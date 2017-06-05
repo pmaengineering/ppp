@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """OdkTable."""
 
-from pmix.ppp.ppp_config import TEMPLATE_ENV
+from pmix.ppp.config import TEMPLATE_ENV
 # from pmix.error import OdkformError
 
 

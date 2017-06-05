@@ -3,7 +3,7 @@
 """OdkGroup."""
 
 from pmix.ppp.odkprompt import OdkComponent, OdkPrompt
-from pmix.ppp.ppp_config import TEMPLATE_ENV
+from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odktable import OdkTable
 
 

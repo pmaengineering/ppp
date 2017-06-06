@@ -58,4 +58,5 @@ def cli():
     except (OdkFormError, InvalidLanguageException) as err:
         print(err)
 
+
 cli()

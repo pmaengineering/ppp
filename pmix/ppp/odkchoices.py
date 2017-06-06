@@ -1,5 +1,5 @@
 """Module for the OdkChoices class."""
-from pmix.error import OdkformError
+from pmix.ppp.error import InvalidLanguageException
 
 
 class OdkChoices:
@@ -46,17 +46,18 @@ class OdkChoices:
             list: Correctly ordered list of choice labels.
 
         Raises:
-            OdkformError: language parameter not found in choice list.
-            OdkformError: No languages found in choice list.
+            InvalidLanguageException: Language parameter not found in choice
+                list.
+            InvalidLanguageException: No languages found in choice list.
         """
         choice_langs = self.choice_langs()
         if lang not in choice_langs:
             msg = 'Language "{}" not found in choice list {}'
             msg = msg.format(lang, self.list_name)
-            raise OdkformError(msg)
+            raise InvalidLanguageException(msg)
         elif not choice_langs:
             msg = 'No languages found in choice list {}'.format(self.list_name)
-            raise OdkformError(msg)
+            raise InvalidLanguageException(msg)
 
         if lang:
             lang_col = 'label::{}'.format(lang)
@@ -76,14 +77,21 @@ class OdkChoices:
         Returns:
             list: Choice variable names and associated labels for choice list.
         """
-        return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
-                for x in self.data]
+        try:
+            return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
+                    for x in self.data]
+        except:
+            raise
 
     def choice_langs(self):
         """Discover all languages for these choices.
 
         Returns:
             list: Alphabetized list of languages.
+
+        Raises:
+            InvalidLanguageException: If choice languages differe from survey
+                languages.
         """
         langs = set()
         for datum in self.data:
@@ -99,6 +107,6 @@ class OdkChoices:
             elif langs != these_langs:
                 msg = 'In choice list {}, different languages found: {} and {}'
                 msg = msg.format(self.list_name, langs, these_langs)
-                raise OdkformError(msg)
+                raise InvalidLanguageException(msg)
         lang_list = sorted(list(langs))
         return lang_list

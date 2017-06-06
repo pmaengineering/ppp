@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Error classes for package."""
 
 
@@ -29,11 +27,5 @@ class QlangError(Exception):
 
 class CascadeError(Exception):
     """General Cascade error."""
-
-    pass
-
-
-class OdkformError(Exception):
-    """General Odkform error."""
 
     pass

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """CLI for PPP package."""
 import argparse
-from pmix.error import OdkformError
+from pmix.ppp.error import OdkFormError, InvalidLanguageException
 from pmix.ppp import run
 
 
@@ -49,11 +49,14 @@ def cli():
     if args.highlight and args.format and args.format not in ['html', 'pdf']:
         msg = 'Can only specify highlighting when using the following ' \
               'formats: \'html\', \'pdf\'.'
-        raise OdkformError(msg)
+        raise OdkFormError(msg)
 
-    run(inpath=args.xlsxfile, language=args.language,
-        output_format=args.format, outfile=args.outpath,
-        debug=args.debug, highlight=args.highlight)
+    try:
+        run(inpath=args.xlsxfile, language=args.language,
+            output_format=args.format, outfile=args.outpath,
+            debug=args.debug, highlight=args.highlight)
+    except (OdkFormError, InvalidLanguageException) as e:
+        print(e)
 
 
 if __name__ == '__main__':

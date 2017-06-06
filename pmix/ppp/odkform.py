@@ -5,15 +5,9 @@ from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
-from pmix.error import OdkformError
+from pmix.ppp.error import OdkFormError
 from pmix.ppp.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
-
-
-class InvalidLanguage(OdkformError):
-    """For errors related to language."""
-
-    pass
 
 
 class OdkForm:
@@ -34,14 +28,13 @@ class OdkForm:
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
     """
 
-    def __init__(self, lang=None, file=None, wb=None):
+    def __init__(self, file=None, wb=None):
         """Initialize the OdkForm.
 
         Create an instance of an ODK form, including survey representation,
         choice options, settings, and metadata.
 
         Args:
-            lang (str): The language to render form in, if specified.
             file (str): The path for the source file of the ODK form,
                 typically an '.xlsx' file meeting the XLSForm specification.
             wb (Workbook): A Workbook object meeting XLSForm specification.
@@ -50,7 +43,7 @@ class OdkForm:
             InvalidLanguage: Language specified is not found in form.
         """
         if file is None and wb is None:
-            raise OdkformError()
+            raise OdkFormError()
         elif file is not None:
             wb = Workbook(file)
 
@@ -58,15 +51,6 @@ class OdkForm:
                          self.get_settings(wb).items()}
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.languages = self.get_languages(wb)
-        if lang:
-            if lang not in self.languages:
-                msg = 'Specified language not found in form: ' + lang
-                form = file if file else wb
-                msg += '\n\nThe form \'{}\' contains the following languages' \
-                       '.\n'.format(form)
-                for language in self.languages:
-                    msg += '  * ' + language + '\n'
-                raise InvalidLanguage(msg[0:-1])
         self.choices = self.get_choices(wb, 'choices')
         self.external_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -143,7 +127,7 @@ class OdkForm:
             header = [str(x) for x in choices[0]]
             if 'list_name' not in header:
                 msg = 'Column "list_name" not found in {} tab'.format(ws)
-                raise OdkformError(msg)
+                raise OdkFormError(msg)
             for i, row in enumerate(choices):
                 if i == 0:
                     continue
@@ -470,7 +454,7 @@ class OdkForm:
                         stack.append(group)
                     else:
                         msg = 'Unable to add group at row {}'.format(i + 1)
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                 elif token['token_type'] == 'end group':
                     if context_groups and context_groups[-1]['name'] == \
                             dict_row['name'] \
@@ -487,21 +471,21 @@ class OdkForm:
                         else:
                             msg = 'Mismatched "end group" at row {}'\
                                 .format(i + 1)
-                            raise OdkformError(msg)
+                            raise OdkFormError(msg)
                 elif token['token_type'] == 'begin repeat':
                     if not stack:
                         repeat = OdkRepeat(dict_row)
                         stack.append(repeat)
                     else:
                         msg = 'Unable to add repeat at row {}'.format(i + 1)
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                 elif token['token_type'] == 'end repeat':
                     if stack and isinstance(stack[-1], OdkRepeat):
                         repeat = stack.pop()  # Stack guaranteed empty now.
                         result.append(repeat)
                     else:
                         msg = 'Mismatched "end repeat" at row {}'.format(i + 1)
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                 elif token['token_type'] == 'table':
                     dict_row['simple_type'] = token['simple_type']
                     if 'choice_list' in token:
@@ -515,13 +499,13 @@ class OdkForm:
                         msg = 'Table found outside of field-list group at' \
                               ' row {}'
                         msg = msg.format(i + 1)
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                 elif token['token_type'] == 'context group':
                     if any(d['name'] == dict_row['name']
                            for d in context_groups):
                         msg = 'A context group with this name already exists' \
                               ' in survey.'
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                     else:
                         this_context_group = {
                             'name': dict_row['name'],
@@ -532,7 +516,7 @@ class OdkForm:
                     if stack and isinstance(stack[-1], OdkGroup):
                         msg = ('PPP does not allow a group nested in a '
                                'field-list group. See row {}').format(i + 1)
-                        raise OdkformError(msg)
+                        raise OdkFormError(msg)
                 # Intentionally no handling for these types.
                 elif token['token_type'] in OdkForm.unhandled_token_types:
                     OdkForm.conversion_info = {} \

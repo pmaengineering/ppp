@@ -58,6 +58,4 @@ def cli():
     except (OdkFormError, InvalidLanguageException) as err:
         print(err)
 
-
-if __name__ == '__main__':
-    cli()
+cli()

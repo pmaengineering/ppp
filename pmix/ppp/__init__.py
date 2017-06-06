@@ -16,10 +16,15 @@ def run(inpath, language, output_format, outfile, **kwargs):
         outfile (str): Path to save converted file.
         **debug (bool): Debugging on or off.
         **highlight (bool): Highlighting on or off.
+    Raises:
+        InvalidLanguageException: Language related.
+        OdkChoicesError: Choice or choice list related.
+        OdkFormError: General form related exception.
     """
-    survey = None
-    form = OdkForm(file=inpath)
-    try:
+    def render():
+        """Render form based on selected parameters."""
+        survey = None
+        form = OdkForm(file=inpath)
         if output_format == 'text':
             survey = form.to_text(language)
         elif output_format == 'dict':
@@ -37,6 +42,8 @@ def run(inpath, language, output_format, outfile, **kwargs):
                 file.write(survey)
         else:
             print(survey)
+    try:
+        render()
     except InvalidLanguageException as err:
         if len(str(err)):
             raise InvalidLanguageException(err)
@@ -47,8 +54,7 @@ def run(inpath, language, output_format, outfile, **kwargs):
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
-    except OdkFormError as err:
-        raise OdkFormError(err)
     except OdkChoicesError as err:
         raise OdkFormError(err)
-
+    except OdkFormError as err:
+        raise OdkFormError(err)

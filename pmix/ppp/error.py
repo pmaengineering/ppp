@@ -6,6 +6,7 @@ class OdkFormError(Exception):
 
     pass
 
+
 class OdkChoicesError(Exception):
     """General OdkChoices error."""
 

@@ -6,6 +6,7 @@ class OdkFormError(Exception):
 
     pass
 
+
 class InvalidLanguageException(OdkFormError):
     """For errors related to language of ODK form."""
 

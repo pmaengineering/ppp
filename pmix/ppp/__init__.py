@@ -39,14 +39,12 @@ def run(inpath, language, output_format, outfile, **kwargs):
     except InvalidLanguageException as e:
         raise InvalidLanguageException(e)
     except OdkFormError as e:
-        raise OdkFormError(e)
-    except:
-        if language not in form.languages:
-            msg = '\nSpecified language not found in form: ' + language
+        if len(str(e)):
+            raise OdkFormError(e)
+        elif language not in form.languages:
+            msg = 'Specified language not found in form: ' + language
             msg += '\n\nThe form \'{}\' contains the following languages' \
                    '.\n'.format(inpath)
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
-        else:
-            raise BaseException

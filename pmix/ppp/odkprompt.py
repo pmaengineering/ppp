@@ -187,32 +187,6 @@ class OdkPrompt:
         """Find the relevant text for this row."""
         pass
 
-    @staticmethod
-    def do_input_replacements(row, lang):
-        """Replace generic ODK input representation with special 'ppp_input'.
-
-        The 'ppp_input' field is an optional field in an ODK form. There should
-        be one 'ppp_input' per language, using the 'ppp_input::<language>'
-        syntax. This function dynamically replaces normal, generic ODK input
-        with the contents of this field.
-
-        Args:
-            row (dict): The dictionary representation of prompt.
-            lang (str): The language.
-
-        Returns:
-            dict: Reformatted representation of prompt.
-        Raises:
-            InvalidLanguage: Language must be specified for 'ppp_input'.
-        """
-        if 'ppp_input' in row:
-            msg = 'A language must be specified for \'ppp_input\'. Please ' \
-                  'use \'::<language>\' syntax, e.g. \'ppp_input::English\'.'
-            raise InvalidLanguageException(msg)
-        if 'ppp_input::' + lang:
-            pass
-        return row
-
     def truncate_fields(self, row):
         """Call truncate_text() method for all truncatable fields in component.
 
@@ -398,7 +372,6 @@ class OdkPrompt:
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
-        prompt = self.do_input_replacements(prompt, lang)
         prompt['input_field'] = self.to_html_input_field(lang)
         if self.is_section_header:
             prompt['is_section_header'] = True

@@ -43,7 +43,7 @@ class OdkForm:
             InvalidLanguage: Language specified is not found in form.
         """
         if file is None and wb is None:
-            raise OdkFormError()
+            raise OdkFormError
         elif file is not None:
             wb = Workbook(file)
 

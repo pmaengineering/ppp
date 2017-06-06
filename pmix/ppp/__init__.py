@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """A package for converting ODK forms."""
 from pmix.ppp.odkform import OdkForm
-from pmix.ppp.error import OdkFormError, InvalidLanguageException
+from pmix.ppp.error import OdkFormError, OdkChoicesError, \
+    InvalidLanguageException
 
 
 def run(inpath, language, output_format, outfile, **kwargs):
@@ -48,3 +49,6 @@ def run(inpath, language, output_format, outfile, **kwargs):
             raise InvalidLanguageException(msg[0:-1])
     except OdkFormError as err:
         raise OdkFormError(err)
+    except OdkChoicesError as err:
+        raise OdkFormError(err)
+

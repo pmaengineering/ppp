@@ -2,7 +2,12 @@
 
 
 class OdkFormError(Exception):
-    """General Odkform error."""
+    """General OdkForm error."""
+
+    pass
+
+class OdkChoicesError(Exception):
+    """General OdkChoices error."""
 
     pass
 

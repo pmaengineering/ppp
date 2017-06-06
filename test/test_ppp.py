@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
-
 import unittest
 from os import path as os_path
 from pmix.ppp.odkform import OdkForm
 # from pmix.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
-
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
@@ -25,7 +23,11 @@ class PppTest:
         """Convert specified forms from form name strings to objects."""
         forms = {}
         for datum in data:
-            file = datum[0]['file']
+            # Should streamline setUps. Currently in both tuple and dict.
+            try:
+                file = datum[0]['file']
+            except KeyError:
+                file = datum['inputs']['file']
             if file not in forms:
                 forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + file)
         return forms
@@ -33,28 +35,43 @@ class PppTest:
 
 class OdkPromptTest(unittest.TestCase, PppTest):
     """Unit tests for the OdkPrompt class."""
+
+    media_types = ['image', 'audio', 'video', 'media::image',
+                              'media::audio', 'media::video']
+    media_lead_char = '['
+    media_end_char = ']'
+    arbitrary_language_param = 'English'
+
     def setUp(self):
         self.data = (
-            ({'file': 'FQ.xlsx',
-              'media_types': ['image', 'audio', 'video', 'media::image',
-                              'media::audio', 'media::video']},
-             {'lead_char': '[', 'end_char': ']'}),
+            ({'inputs': {
+                 'file': 'FQ.xlsx'
+            }, 'expected_outputs': {
+
+            }},
+             {'inputs': {
+                 'file': 'HQ.xlsx'
+             }, 'expected_outputs': {
+
+             }},
+            )
         )
 
     def test_to_dict(self):
         """Test to_dict method."""
         def test_media_fields_in_prompts():
             """Tests for media fields."""
-            arbitrary_language_param = 'English'
+            lang = OdkPromptTest.arbitrary_language_param
+            lead_char = OdkPromptTest.media_lead_char
+            end_char = OdkPromptTest.media_end_char
             forms = self.get_forms(self.data)
-            for i, expected_output in self.data:
-                lead_char = expected_output['lead_char']
-                end_char = expected_output['end_char']
-                for item in forms[i['file']].questionnaire:
+            for i in self.data:
+                file_name = i['inputs']['file']
+                for item in forms[file_name].questionnaire:
                     if isinstance(item, OdkPrompt):
-                        item_dict = item.to_dict(arbitrary_language_param)
+                        item_dict = item.to_dict(lang)
                         for key, val in item_dict.items():
-                            for media_type in i['media_types']:
+                            for media_type in OdkPromptTest.media_types:
                                 if key.startswith(media_type) and len(val) > 0:
                                     # A field such as 'media::image::English'
                                     # is formatted correctly.
@@ -76,6 +93,15 @@ class OdkPromptTest(unittest.TestCase, PppTest):
                                     self.assertTrue(
                                         len(item_dict['media']) > 0)
         test_media_fields_in_prompts()
+
+    def test_initialization_has_choices(self):
+        forms = self.get_forms(self.data)
+        for form_name, form in forms.items():
+            for item in form.questionnaire:
+                if isinstance(item, OdkPrompt):
+                    if item.odktype in item.select_types:
+                        msg = 'No choices found in \'{}\'.'.format(item)
+                        self.assertTrue(item.choices is not None, msg=msg)
 
 
 class OdkGroupTest(unittest.TestCase):
@@ -150,26 +176,26 @@ class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
             ({'file': 'FQ.xlsx', 'position': 100},
              {'class': OdkPrompt,
               'repr': '<OdkPrompt injectable_probe_current>'}),
-            # ({'file': 'HQ.xlsx', 'position': 0},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt your_name_check>'}),
-            # ({'file': 'HQ.xlsx', 'position': 25},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt error_extraheads>'}),
-            # ({'file': 'HQ.xlsx', 'position': 50},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt water_months_avail_2>'}),
-            # ({'file': 'HQ.xlsx', 'position': 75},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt water_reliability_8>'}),
-            # ({'file': 'HQ.xlsx', 'position': 100},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt water_collection_14>'}),
-            # ({'file': 'SQ.xlsx', 'position': 0},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt your_name_check>'}),
-            # ({'file': 'SQ.xlsx', 'position': 25},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt sect_services_info>'}),
-            # ({'file': 'SQ.xlsx', 'position': 50},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt fp_offered>'}),
-            # ({'file': 'SQ.xlsx', 'position': 75},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt implant_insert>'}),
-            # ({'file': 'SQ.xlsx', 'position': 100},
-            #  {'class': OdkPrompt, 'repr': '<OdkPrompt stock_implants>'}),
+            ({'file': 'HQ.xlsx', 'position': 0},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt your_name_check>'}),
+            ({'file': 'HQ.xlsx', 'position': 25},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt error_extraheads>'}),
+            ({'file': 'HQ.xlsx', 'position': 50},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt water_months_avail_2>'}),
+            ({'file': 'HQ.xlsx', 'position': 75},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt water_reliability_8>'}),
+            ({'file': 'HQ.xlsx', 'position': 100},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt water_collection_14>'}),
+            ({'file': 'SQ.xlsx', 'position': 0},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt your_name_check>'}),
+            ({'file': 'SQ.xlsx', 'position': 25},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt sect_services_info>'}),
+            ({'file': 'SQ.xlsx', 'position': 50},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt fp_offered>'}),
+            ({'file': 'SQ.xlsx', 'position': 75},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt implant_insert>'}),
+            ({'file': 'SQ.xlsx', 'position': 100},
+             {'class': OdkPrompt, 'repr': '<OdkPrompt stock_implants>'}),
             ({'file': 'FQ-nut.xlsx', 'position': 0},
              {'class': OdkGroup,
               'repr': '<OdkGroup empty_warn_grp: [<OdkPrompt '

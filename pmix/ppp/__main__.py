@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """CLI for PPP package."""
 import argparse
-from pmix.ppp.error import OdkFormError, InvalidLanguageException
+from pmix.ppp.error import OdkFormError, OdkChoicesError, \
+    InvalidLanguageException
 from pmix.ppp import run
 
 
@@ -55,7 +56,7 @@ def cli():
         run(inpath=args.xlsxfile, language=args.language,
             output_format=args.format, outfile=args.outpath,
             debug=args.debug, highlight=args.highlight)
-    except (OdkFormError, InvalidLanguageException) as err:
+    except (OdkFormError, InvalidLanguageException, OdkChoicesError) as err:
         print(err)
 
 

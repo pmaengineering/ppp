@@ -5,7 +5,7 @@ from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.error import OdkFormError
+from pmix.ppp.error import OdkFormError, OdkChoicesError
 from pmix.ppp.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
 
@@ -323,6 +323,29 @@ class OdkForm:
         Returns:
             dict: row_type information from parsing.
         """
+        def fetch_choices(list_name, worksheet):
+            """Fetch choices from worksheet.
+
+            Args:
+                list_name (str): A row as a dictionary.
+                worksheet (str): A row as a dictionary.
+
+            Returns:
+                OdkChoices: Choice object with list name and and list of
+                    choices for list.
+
+            Raises:
+                KeyError: If no choices found in for choice list.
+            """
+            try:
+                if worksheet is 'choices':
+                    return self.choices[list_name]
+                elif worksheet is 'external_choices':
+                    return self.external_choices[list_name]
+            except KeyError:
+                msg = 'OdkChoicesError: No choice options found for list ' \
+                      '\'{}\'.'.format(list_name)
+                raise OdkChoicesError(msg)
         original_row_type = row['type']
         if original_row_type in OdkPrompt.response_types + \
                 OdkPrompt.non_response_types:
@@ -332,7 +355,7 @@ class OdkForm:
             }
         elif original_row_type.startswith('select_one_external '):
             choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = self.external_choices[choice_list]
+            choices = fetch_choices(choice_list, 'external_choices')
             row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_one',
@@ -340,7 +363,7 @@ class OdkForm:
             }
         elif original_row_type.startswith('select_multiple_external '):
             choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = self.external_choices[choice_list]
+            choices = fetch_choices(choice_list, 'external_choices')
             row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_multiple',
@@ -348,8 +371,7 @@ class OdkForm:
             }
         elif original_row_type.startswith('select_one '):
             choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = self.choices[choice_list]  # Breaks on this line. nothing
-            #  seems to happen after.
+            choices = fetch_choices(choice_list, 'choices')
             row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_one',
@@ -362,7 +384,7 @@ class OdkForm:
             return row_type
         elif original_row_type.startswith('select_multiple '):
             choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = self.choices[choice_list]
+            choices = fetch_choices(choice_list, 'choices')
             row_type = {
                 'token_type': 'prompt',
                 'simple_type': 'select_multiple',

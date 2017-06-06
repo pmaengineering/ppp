@@ -1,6 +1,7 @@
 """Module for the OdkPrompt class."""
 import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
+from pmix.ppp.error import OdkChoicesError
 
 
 class OdkPrompt:
@@ -69,6 +70,10 @@ class OdkPrompt:
         self.odktype = self.row['simple_type']
         self.is_section_header = True if self.row['name'].startswith('sect_') \
             else False
+        if self.odktype in OdkPrompt.select_types and self.choices is None:
+            msg = 'No choices found for prompt \'{}\' of type \'{}\'.'\
+                .format(self.row['name'], self.odktype)
+            raise OdkChoicesError(msg)
 
     def __repr__(self):
         """Print representation of instance."""

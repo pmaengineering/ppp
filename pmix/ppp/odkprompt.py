@@ -1,7 +1,6 @@
 """Module for the OdkPrompt class."""
 import textwrap
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import InvalidLanguageException
 
 
 class OdkPrompt:

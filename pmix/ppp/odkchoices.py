@@ -1,5 +1,5 @@
 """Module for the OdkChoices class."""
-from pmix.ppp.error import OdkFormError, InvalidLanguageException
+from pmix.ppp.error import InvalidLanguageException
 
 
 class OdkChoices:
@@ -80,8 +80,8 @@ class OdkChoices:
         try:
             return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
                     for x in self.data]
-        except:
-            raise OdkFormError
+        except KeyError:
+            raise InvalidLanguageException
 
     def choice_langs(self):
         """Discover all languages for these choices.

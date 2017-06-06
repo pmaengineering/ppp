@@ -36,11 +36,9 @@ def run(inpath, language, output_format, outfile, **kwargs):
                 file.write(survey)
         else:
             print(survey)
-    except InvalidLanguageException as e:
-        raise InvalidLanguageException(e)
-    except OdkFormError as e:
-        if len(str(e)):
-            raise OdkFormError(e)
+    except InvalidLanguageException as err:
+        if len(str(err)):
+            raise InvalidLanguageException(err)
         elif language not in form.languages:
             msg = 'Specified language not found in form: ' + language
             msg += '\n\nThe form \'{}\' contains the following languages' \
@@ -48,3 +46,5 @@ def run(inpath, language, output_format, outfile, **kwargs):
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
+    except OdkFormError as err:
+        raise OdkFormError(err)

@@ -55,8 +55,8 @@ def cli():
         run(inpath=args.xlsxfile, language=args.language,
             output_format=args.format, outfile=args.outpath,
             debug=args.debug, highlight=args.highlight)
-    except (OdkFormError, InvalidLanguageException) as e:
-        print(e)
+    except (OdkFormError, InvalidLanguageException) as err:
+        print(err)
 
 
 if __name__ == '__main__':

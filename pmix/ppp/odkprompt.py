@@ -51,7 +51,7 @@ class OdkPrompt:
     media_fields = ('image', 'media::image', 'audio', 'media::audio',
                     'video', 'media::video')
     language_dependent_fields = \
-        ('label', 'hint', 'constraint_message') + media_fields
+        ('label', 'hint', 'constraint_message', 'ppp_input') + media_fields
     truncatable_fields = ('constraint', 'relevant')
 
     def __init__(self, row, choices=None):

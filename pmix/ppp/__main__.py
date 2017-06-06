@@ -22,7 +22,7 @@ def cli():
 
     highlighting_help = 'Turns on highlighting of various portions of survey' \
                         ' components. Useful to assess positioning.'
-    parser.add_argument('-hl', '--highlight', action='store_true',
+    parser.add_argument('-H', '--highlight', action='store_true',
                         help=highlighting_help)
 
     language_help = 'Language to write the paper version in. If not ' \

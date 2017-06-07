@@ -36,8 +36,7 @@ def run(inpath, language, output_format, outfile, **kwargs):
         elif output_format == 'json_pretty':
             output = form.to_json(language, pretty=True)
         elif output_format == 'html' or not output_format:
-            output = form.to_html(language, kwargs['highlight'],
-                                  kwargs['debug'])
+            output = form.to_html(language, **kwargs)
         if outfile:
             with open(outfile, mode='w', encoding='utf-8') as file:
                 file.write(output)

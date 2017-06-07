@@ -91,6 +91,19 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
+    # TODO: Finish this or change debug feature.
+    # def to_dict(self, lang):
+    #     """Format components of a repeat.
+    #
+    #     Args:
+    #         lang (str): The language.
+    #
+    #     Returns:
+    #         list: A list of reformatted components.
+    #     """
+    #     repeat = []
+    #     return repeat
+
     def to_html(self, lang, highlighting):
         """Convert repeat group components to html and return concatenation.
 

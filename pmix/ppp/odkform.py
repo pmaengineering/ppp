@@ -73,6 +73,7 @@ class OdkForm:
             'changelog': None,
             'info': None
         }
+        self.raw_data = wb
         self.questionnaire = self.convert_survey(wb)
 
     unhandled_token_types = \
@@ -218,26 +219,28 @@ class OdkForm:
         result = sep.join(q_text)
         return title_box + sep + result + sep
 
-    def to_dict(self, lang):
-        """Get the dictionary representation of an entire XLSForm.
-
-        Args:
-            lang (str): The language.
-
-        Returns:
-            dict: A full dictionary representation of the XLSForm.
-        """
-        lang = lang if lang else self.metadata['survey_language']
-        html_questionnaire = {
-            'title': self.title,
-            'questions': []
-        }
-        for item in self.questionnaire:
-            html_questionnaire['questions'].append(item.to_dict(lang))
-        return html_questionnaire
+    # TODO: Finish this or change debug feature. If fixed, change to_json to
+    # call dump return of this method instead of self.raw_data.
+    # def to_dict(self, lang):
+    #     """Get the dictionary representation of an entire XLSForm.
+    #
+    #     Args:
+    #         lang (str): The language.
+    #
+    #     Returns:
+    #         dict: A full dictionary representation of the XLSForm.
+    #     """
+    #     lang = lang if lang else self.metadata['survey_language']
+    #     html_questionnaire = {
+    #         'title': self.title,
+    #         'questions': []
+    #     }
+    #     for item in self.questionnaire:
+    #         html_questionnaire['questions'].append(item.to_dict(lang))
+    #     return html_questionnaire
 
     def to_json(self, lang, pretty=False):
-        """Get the JSON representation of an entire XLSForm.
+        """Get the JSON representation of an entire XLSForm taken at initial
 
         Args:
             lang (str): The language.
@@ -248,20 +251,27 @@ class OdkForm:
             json: A full JSON representation of the XLSForm.
         """
         import json
-        lang = lang if lang else self.metadata['survey_language']
-        if pretty:
-            return json.dumps(self.to_dict(lang), indent=2)
-        else:
-            return json.dumps(self.to_dict(lang))
+        # lang = lang if lang else self.metadata['survey_language']
+        raw_survey = []
+        header = self.raw_data['survey'][0]
+        for i, row in enumerate(self.raw_data['survey']):
+            if i == 0:
+                continue
+            raw_survey.append({str(k): str(v) for k, v in zip(header, row)})
 
-    def to_html(self, lang, highlighting, debugging):
+        if pretty:
+            return json.dumps(raw_survey, indent=2)
+        else:
+            return json.dumps(raw_survey)
+
+    def to_html(self, lang, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
         Args:
             lang (str): The language.
-            highlighting (bool): For color highlighting of various components
+            **highlight(bool): For color highlighting of various components
                 of html template.
-            debugging (bool): For inclusion of debug information to be printed
+            **debug (bool): For inclusion of debug information to be printed
                 in the JavaScript console.
 
         Returns:
@@ -275,7 +285,8 @@ class OdkForm:
             },
             'footer': {
                 'data':
-                    self.to_json(lang, pretty=True) if debugging else 'false'
+                    self.to_json(lang, pretty=True) if kwargs['debug']
+                    else 'false'
             },
             'questionnaire': self.questionnaire
         }
@@ -295,10 +306,10 @@ class OdkForm:
                 html_questionnaire += grp_spc
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += item.to_html(lang, highlighting,
+                html_questionnaire += item.to_html(lang, kwargs['highlight'],
                                                    bottom_border=True)
             else:
-                html_questionnaire += item.to_html(lang, highlighting)
+                html_questionnaire += item.to_html(lang, kwargs['highlight'])
             prev_item = item
         self.set_conversion_end()
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \

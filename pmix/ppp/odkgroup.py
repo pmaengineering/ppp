@@ -33,24 +33,22 @@ class OdkGroup:
         return "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
 
     @staticmethod
-    def render_header(i, lang, highlighting):
+    def format_header(header):
         """Render group header.
 
-        A group header is an OdkPrompt with a few extra attributes.
+        A group header is an OdkPrompt with a few extra attributes. Header is
+        formatted and returned before initializating as an OdkPrompt.
 
         Args:
-            i (dict): A dictionary row representing first row of group.
-            lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
+            header (dict): A dictionary row representing first row of group.
 
         Returns:
-            str: A rendered html template of an OdkPrompt object.
+            dict: A reformatted representation.
         """
-        i['in_group'] = True
-        i['simple_type'] = i['type']
-        i['is_group_header'] = True
-        return OdkPrompt(i).to_html(lang, highlighting)
+        header['in_group'] = True
+        header['simple_type'] = header['type']
+        header['is_group_header'] = True
+        return header
 
     def add(self, row):
         """Add a row of data from XLSForm.
@@ -97,6 +95,20 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
+    # TODO: Finish this or change debug feature.
+    # def to_dict(self, lang):
+    #     """Format components of a group.
+    #
+    #     Args:
+    #         lang (str): The language.
+    #
+    #     Returns:
+    #         list: A list of reformatted components.
+    #     """
+    #     group = []
+    #     # header = self.format_header(self.opener, lang, highlighting)
+    #     return group
+
     def to_html(self, lang, highlighting):
         """Convert group components to html and return concatenation.
 
@@ -112,7 +124,8 @@ class OdkGroup:
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
             .render()
-        html += self.render_header(self.opener, lang, highlighting)
+        header = self.format_header(self.opener)
+        html += OdkPrompt(header).to_html(lang, highlighting)
         for i in self.data:
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat

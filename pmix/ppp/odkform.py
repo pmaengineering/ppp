@@ -239,11 +239,10 @@ class OdkForm:
     #         html_questionnaire['questions'].append(item.to_dict(lang))
     #     return html_questionnaire
 
-    def to_json(self, lang, pretty=False):
-        """Get the JSON representation of an entire XLSForm taken at initial
+    def to_json(self, pretty=False):
+        """Get the JSON representation of raw ODK form.
 
         Args:
-            lang (str): The language.
             pretty (bool): Activates prettification, involving insertion of
                 several kinds of whitespace for readability.
 
@@ -285,7 +284,7 @@ class OdkForm:
             },
             'footer': {
                 'data':
-                    self.to_json(lang, pretty=True) if kwargs['debug']
+                    self.to_json(pretty=True) if kwargs['debug']
                     else 'false'
             },
             'questionnaire': self.questionnaire

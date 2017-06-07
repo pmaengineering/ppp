@@ -36,9 +36,7 @@ def cli():
     format_help = ('Format to generate. Currently "text" and "html" are '
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')
-    parser.add_argument('-f', '--format', choices=('html', 'text', 'dict',
-                                                   'json', 'json_pretty',
-                                                   'pdf'),
+    parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
                         help=format_help)
 
     out_help = ('Path to write output. If this argument is not supplied, then '

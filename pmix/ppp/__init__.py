@@ -21,20 +21,11 @@ def run(inpath, language, output_format, outfile, **kwargs):
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
     """
-    form = OdkForm(file=inpath)
-
-    def render():
-        """Render form based on selected parameters."""
+    try:
+        form = OdkForm(file=inpath)
         output = None
         if output_format == 'text':
             output = form.to_text(language)
-        elif output_format == 'dict':
-            output = form.to_dict(language)
-        elif output_format == 'json':
-            # pylint: disable=redefined-variable-type
-            output = form.to_json(language, pretty=False)
-        elif output_format == 'json_pretty':
-            output = form.to_json(language, pretty=True)
         elif output_format == 'html' or not output_format:
             output = form.to_html(language, **kwargs)
         if outfile:
@@ -42,8 +33,6 @@ def run(inpath, language, output_format, outfile, **kwargs):
                 file.write(output)
         else:
             print(output)
-    try:
-        render()
     except InvalidLanguageException as err:
         if len(str(err)):
             raise InvalidLanguageException(err)

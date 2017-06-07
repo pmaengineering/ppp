@@ -71,9 +71,9 @@ class OdkForm:
             'conversion_end_formatted': None,
             'conversion_time': None,
             'changelog': None,
-            'info': None
+            'info': None,
+            'raw_data': wb
         }
-        self.raw_data = wb
         self.questionnaire = self.convert_survey(wb)
 
     unhandled_token_types = \
@@ -220,7 +220,7 @@ class OdkForm:
         return title_box + sep + result + sep
 
     # TODO: Finish this or change debug feature. If fixed, change to_json to
-    # call dump return of this method instead of self.raw_data.
+    # call dump return of this method instead of raw data.
     # def to_dict(self, lang):
     #     """Get the dictionary representation of an entire XLSForm.
     #
@@ -252,8 +252,8 @@ class OdkForm:
         import json
         # lang = lang if lang else self.metadata['survey_language']
         raw_survey = []
-        header = self.raw_data['survey'][0]
-        for i, row in enumerate(self.raw_data['survey']):
+        header = self.metadata['raw_data']['survey'][0]
+        for i, row in enumerate(self.metadata['raw_data']['survey']):
             if i == 0:
                 continue
             raw_survey.append({str(k): str(v) for k, v in zip(header, row)})

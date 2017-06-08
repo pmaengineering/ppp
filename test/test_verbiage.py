@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-"""Unit tests for verbiage.py"""
+"""Unit tests for verbiage.py."""
 
 # Unittest bad-ness:
 # Consider package /pmix/pmix/test
@@ -70,6 +69,7 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
             number, text = td.split_text(s)
             msg = 'Number present in "{}"'.format(s)
             self.assertTrue(number == '', msg=msg)
+
 
 if __name__ == '__main__':
     unittest.main()

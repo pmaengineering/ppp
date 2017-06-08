@@ -3,11 +3,15 @@ env/
 __pycache__
 test/files/*
 */test/files/*
+test/~$*
+*/test/~$*
 *.DS_Store
 dist/
 *.py[cod]
 build
+.dev
 dev
 MANIFEST
 tags
 *.swp
+/*.html

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Get the tracked fields for PMA Analytics.
 
 Need to be able to get the ODK names from files (possibly collapse across
@@ -19,7 +21,7 @@ def is_analytics_type(odk_type):
         odk_type (str): The type to test
 
     Returns:
-        Returns true if and only if odk_type is good for analytics
+        Return true if and only if odk_type is good for analytics
     """
     bad_types = (
         'type',
@@ -37,7 +39,7 @@ def is_analytics_type(odk_type):
 
 
 def get_filtered_survey_names(xlsform):
-    """Returns the ODK names from 'survey' to track in analytics.
+    """Return the ODK names from 'survey' to track in analytics.
 
     Args:
         xlsform (pmix.Xlsform): An xlsform (workbook) object

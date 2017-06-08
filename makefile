@@ -16,4 +16,3 @@ ltags:
 
 test:
 	${PYTHON} -m unittest discover -v
-

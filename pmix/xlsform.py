@@ -1,4 +1,4 @@
-"""This module defines the Xlsform class to work with ODK XLSForms"""
+"""This module defines the Xlsform class to work with ODK XLSForms."""
 
 from pmix.xlstab import Xlstab
 from pmix.workbook import Workbook
@@ -22,6 +22,7 @@ class Xlsform(Workbook):
         """
         super().__init__(path)
         self.data = [Xlstab.from_worksheet(ws) for ws in self]
+        self.settings = {}
         self.init_settings()
 
     def init_settings(self):
@@ -33,8 +34,8 @@ class Xlsform(Workbook):
             local_settings = self['settings']
             headers = local_settings[0]
             values = local_settings[1]
-            self.settings = {str(k): v for k, v in zip(headers, values) if not
-                    k.is_blank()}
+            self.settings = {str(k): v for k, v in zip(headers, values) if
+                             not k.is_blank()}
         except (KeyError, IndexError):
             self.settings = {}
 
@@ -62,6 +63,6 @@ class Xlsform(Workbook):
             sheet.add_language(language)
 
     def merge_translations(self, translations, ignore=None, carry=False):
-        """Merge translations"""
+        """Merge translations."""
         for sheet in self:
             sheet.merge_translations(translations, ignore, carry=carry)

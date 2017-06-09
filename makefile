@@ -4,7 +4,7 @@ SRC=pmix/
 .PHONY: lint tags ltags test
 
 lint:
-	${PYTHON} -m pylint ${SRC} 	&& \
+	${PYTHON} -m pylint --output-format=colorized --reports=n ${SRC} && \
 	${PYTHON} -m pycodestyle ${SRC} && \
 	${PYTHON} -m pydocstyle ${SRC}
 

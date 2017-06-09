@@ -1,6 +1,4 @@
 """Module for the Xlstab class."""
-import logging
-
 from pmix.error import XlsformError
 from pmix.worksheet import Worksheet
 
@@ -204,9 +202,9 @@ class Xlstab(Worksheet):
             ignore = []
         try:
             base = self.column_headers().index(base)
-            ncol = worksheet.ncol()
+            ncol = self.ncol()
             indices = range(base, ncol)
-            for pair in worksheet.column_pairs(indices=indices, start=1):
+            for pair in self.column_pairs(indices=indices, start=1):
                 src, other = pair
                 if src['header'] in ignore or other['header'] in ignore:
                     continue

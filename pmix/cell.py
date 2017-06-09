@@ -73,18 +73,19 @@ class Cell:
         Returns:
             The python object represented by this cell.
         """
+        value = None
         if cell.ctype == xlrd.XL_CELL_BOOLEAN:
-            return True if cell.value == 1 else False
+            value = True if cell.value == 1 else False
         elif cell.ctype == xlrd.XL_CELL_EMPTY:
-            return None
+            # value = None  # ... redundant
+            pass
         elif cell.ctype == xlrd.XL_CELL_TEXT:
             # Trimming whitespace until use-case shows no-need
-            val = cell.value.strip()
-            return val
+            value = cell.value.strip()
         elif cell.ctype == xlrd.XL_CELL_NUMBER:
             # Make integer what is equal to an integer
             int_val = int(cell.value)
-            return int_val if int_val == cell.value else cell.value
+            value = int_val if int_val == cell.value else cell.value
         elif cell.ctype == xlrd.XL_CELL_DATE:
             if datemode is None:
                 # set to modern Excel
@@ -92,13 +93,15 @@ class Cell:
             date_tuple = xlrd.xldate_as_tuple(cell.value, datemode)
             if date_tuple[:3] == (0, 0, 0):
                 # must be time only
-                return datetime.time(*date_tuple[3:])
+                value = datetime.time(*date_tuple[3:])
             elif date_tuple[3:] == (0, 0, 0):
                 # must be date only
-                return datetime.date(*date_tuple[:3])
+                # pylint: disable=redefined-variable-type
+                value = datetime.date(*date_tuple[:3])
             else:
-                return datetime.datetime(*date_tuple)
+                value = datetime.datetime(*date_tuple)
         else:
             msg = 'Unhandled cell type: {}. Value is: {}'
             msg = msg.format(cell.ctype, cell.value)
             raise TypeError(msg)
+        return value

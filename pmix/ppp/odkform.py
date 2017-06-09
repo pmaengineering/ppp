@@ -2,10 +2,10 @@
 import datetime
 import os.path
 from pmix.ppp.config import TEMPLATE_ENV
+from pmix.ppp.error import OdkFormError
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.error import OdkFormError, OdkChoicesError
 from pmix.ppp.odkrepeat import OdkRepeat
 from pmix.workbook import Workbook
 
@@ -19,8 +19,8 @@ class OdkForm:
         title (str): Title of the ODK form.
         languages (list): List of languages used in the ODK form. This is taken
             from the 'survey' worksheet.
-        choices (list): A list of rows from the 'choices' worksheet.
-        external_choices (list): A list of rows from the 'external_choices'
+        choices (dict): A list of rows from the 'choices' worksheet.
+        ext_choices (dict): A list of rows from the 'external_choices'
             worksheet.
         metadata (dict): A dictionary of metadata for the original and
             converted ODK forms.
@@ -52,7 +52,7 @@ class OdkForm:
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.languages = self.get_languages(wb)
         self.choices = self.get_choices(wb, 'choices')
-        self.external_choices = self.get_choices(wb, 'external_choices')
+        self.ext_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
         self.metadata = {  # TODO Finish filling this out.
             'file_name': os.path.split(wb.file)[1],
@@ -74,7 +74,8 @@ class OdkForm:
             'info': None,
             'raw_data': wb
         }
-        self.questionnaire = self.convert_survey(wb)
+        self.questionnaire = self.convert_survey(wb, self.choices,
+                                                 self.ext_choices)
 
     unhandled_token_types = \
         ['calculate', 'start', 'end', 'deviceid', 'simserial',
@@ -324,114 +325,133 @@ class OdkForm:
         html_questionnaire += footer
         return html_questionnaire
 
-    def parse_type(self, row):
+    @staticmethod
+    def parse_select_type(row, choices, ext_choices):
+        """Extract relevant information from a select_* ODK prompt.
+
+        Build a dictionary that distills the main details of the row. The
+        select type questions can have a token type of 'prompt' or 'table'.
+        The prompt type is default, and table type is if the appearance of the
+        question has either 'label' or 'list-nolabel'.
+
+        Args:
+            row (dict): A row as a dictionary. Keys and values are strings.
+            choices (dict): A dictionary with list_names as keys. Represents
+                the choices found in 'choices' tab.
+            ext_choices (dict): A dictionary with list_names as keys.
+                Represents choices found in 'external_choices' tab.
+
+        Returns:
+            A dictionary with the simple information about this prompt.
+
+        Raises:
+            OdkFormError: If the row is not select_[one|multiple](_external)?
+            KeyError: If the select question's choice list is not found.
+        """
+        simple_row = {'token_type': 'prompt'}
+        simple_type = 'select_one'
+        choice_list = None
+        row_type = row['type']
+        if row_type.startswith('select_one_external '):
+            list_name = row_type.split(maxsplit=1)[1]
+            choice_list = ext_choices[list_name]
+        elif row_type.startswith('select_multiple_external '):
+            simple_type = 'select_multiple'
+            list_name = row_type.split(maxsplit=1)[1]
+            choice_list = ext_choices[list_name]
+        elif row_type.startswith('select_one '):
+            list_name = row_type.split(maxsplit=1)[1]
+            choice_list = choices[list_name]
+        elif row_type.startswith('select_multiple '):
+            simple_type = 'select_multiple'
+            list_name = row_type.split(maxsplit=1)[1]
+            choice_list = choices[list_name]
+        else:
+            raise OdkFormError()
+
+        simple_row['simple_type'] = simple_type
+        simple_row['choice_list'] = choice_list
+
+        appearance = row.get('appearance', '')
+        if 'label' in appearance or 'list-nolabel' in appearance:
+            simple_row['token_type'] = 'table'
+
+        return simple_row
+
+    @staticmethod
+    def parse_group_repeat(row):
+        """Extract relevant information about a begin/end group/repeat.
+
+        Args:
+            row (dict): A row as a dictionary. Keys and values are strings.
+
+        Returns:
+            A dictionary with the simple information about this prompt.
+
+        Raises:
+            OdkFormError: If type is not begin/end group/repeat.
+        """
+        row_type = row['type']
+        token_type = row_type
+        appearance = row.get('appearance', '')
+        good = ('begin group', 'end group', 'begin repeat', 'end repeat')
+        if row_type == 'begin group' and 'field-list' not in appearance:
+            token_type = 'context group'
+        elif row_type not in good:
+            raise OdkFormError()
+        simple_row = {'token_type': token_type}
+        return simple_row
+
+    @staticmethod
+    def make_simple_prompt(row_type):
+        """Extract relevant information from an ODK prompt.
+
+        Make the simplest dictionary: token_type is set to 'prompt',
+        simple_type is copied from the row type, and choices is set to None.
+
+        Args:
+            row_type (str): The type of the row.
+
+        Returns:
+            A dictionary with the simple information about this prompt.
+        """
+        simple_row = {
+            'token_type': 'prompt',
+            'simple_type': row_type,
+            'choice_list': None
+        }
+        return simple_row
+
+    @staticmethod
+    def parse_type(row, choices, ext_choices):
         """Describe the 'type' column of a row XLSForm.
 
         Args:
-            row (dict): A row as a dictionary.
+            row (dict): A row as a dictionary. Keys and values are strings.
+            choices (dict): A dictionary with list_names as keys. Represents
+                the choices found in 'choices' tab.
+            ext_choices (dict): A dictionary with list_names as keys.
+                Represents choices found in 'external_choices' tab.
 
         Returns:
-            dict: row_type information from parsing.
+            dict: simple_row information from parsing.
         """
-        def fetch_choices(list_name, worksheet):
-            """Fetch choices from worksheet.
+        simple_row = {}
 
-            Args:
-                list_name (str): A row as a dictionary.
-                worksheet (str): A row as a dictionary.
-
-            Returns:
-                OdkChoices: Choice object with list name and and list of
-                    choices for list.
-
-            Raises:
-                KeyError: If no choices found in for choice list.
-            """
-            try:
-                if worksheet is 'choices':
-                    return self.choices[list_name]
-                elif worksheet is 'external_choices':
-                    return self.external_choices[list_name]
-            except KeyError:
-                msg = 'OdkChoicesError: No choice options found for list ' \
-                      '\'{}\'.'.format(list_name)
-                raise OdkChoicesError(msg)
-        original_row_type = row['type']
-        if original_row_type in OdkPrompt.response_types + \
-                OdkPrompt.non_response_types:
-            row_type = {
-                'token_type': 'prompt',
-                'simple_type': original_row_type
-            }
-        elif original_row_type.startswith('select_one_external '):
-            choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = fetch_choices(choice_list, 'external_choices')
-            row_type = {
-                'token_type': 'prompt',
-                'simple_type': 'select_one',
-                'choice_list': choices
-            }
-        elif original_row_type.startswith('select_multiple_external '):
-            choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = fetch_choices(choice_list, 'external_choices')
-            row_type = {
-                'token_type': 'prompt',
-                'simple_type': 'select_multiple',
-                'choice_list': choices
-            }
-        elif original_row_type.startswith('select_one '):
-            choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = fetch_choices(choice_list, 'choices')
-            row_type = {
-                'token_type': 'prompt',
-                'simple_type': 'select_one',
-                'choice_list': choices
-            }
-            table_label = 'label' in row.get('appearance', '')
-            table_list = 'list-nolabel' in row.get('appearance', '')
-            if table_label or table_list:
-                row_type['token_type'] = 'table'
-            return row_type
-        elif original_row_type.startswith('select_multiple '):
-            choice_list = original_row_type.split(maxsplit=1)[1]
-            choices = fetch_choices(choice_list, 'choices')
-            row_type = {
-                'token_type': 'prompt',
-                'simple_type': 'select_multiple',
-                'choice_list': choices
-            }
-            table_label = 'label' in row.get('appearance', '')
-            # - Note: list-nolabel is like a table within a table. Whereas the
-            # field-list on its own is a table
-            # comprised primarily of rows, list-nolabel is comprised primarily
-            # of columns and a header.
-            table_list = 'list-nolabel' in row.get('appearance', '')
-            if table_label or table_list:
-                row_type['token_type'] = 'table'
-            return row_type
-        elif original_row_type == 'begin group':
-            row_type = {'token_type': 'context group'}
-            appearance = row.get('appearance', '')
-            if 'field-list' in appearance:
-                # - Note: This returns "begin group" which will render visually
-                #  since it is a 'field-list', and not just
-                #  a group that is there solely for context.
-                row_type['token_type'] = original_row_type
-            return row_type
-        elif original_row_type in ('end group', 'begin repeat', 'end repeat'):
-            row_type = {
-                'token_type': original_row_type
-            }
+        row_type = row['type']
+        simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
+        if row_type in simple_types:
+            simple_row = OdkForm.make_simple_prompt(row_type)
+        elif row_type.startswith('select_'):
+            simple_row = OdkForm.parse_select_type(row, choices, ext_choices)
+        elif row_type.startswith('begin ') or row_type.startswith('end '):
+            simple_row = OdkForm.parse_group_repeat(row)
         else:  # Note - Some unhandled token types remain.
-            row_type = {'token_type': original_row_type}
-        return row_type
+            simple_row = {'token_type': 'unhandled', 'simple_type': row_type}
+        return simple_row
 
-    # TODO: Resolve the following 4 pylint violations:
-    #  1. too-many-branches
-    #  2. too-many-nested-blocks
-    #  3. too-many-statements
-    #  4. too-many-locals
-    def convert_survey(self, wb):
+    @staticmethod
+    def convert_survey(wb, choices, ext_choices):
         """Convert rows and strings of a workbook into object components.
 
         Main types are:
@@ -456,9 +476,7 @@ class OdkForm:
                 groups, erroneously formed tables, duplicate context group
                 names, and groups nested within a field-list group.
         """
-        result = []
-        stack = []
-        context_groups = []
+        context = OdkForm.ConversionContext()
         try:
             survey = wb['survey']
             header = survey[0]
@@ -467,106 +485,211 @@ class OdkForm:
                 if i == 0:
                     continue
                 dict_row = {str(k): str(v) for k, v in zip(header, row)}
-                token = self.parse_type(dict_row)
+                token = OdkForm.parse_type(dict_row, choices, ext_choices)
 
                 if token['token_type'] == 'prompt':
                     dict_row['simple_type'] = token['simple_type']
-                    if 'choice_list' in token:
-                        choices = token['choice_list']
-                    else:
-                        choices = None
-                    this_prompt = OdkPrompt(dict_row, choices)
-                    if stack:
-                        stack[-1].add(this_prompt)
-                    else:
-                        result.append(this_prompt)
+                    choice_list = token['choice_list']
+                    this_prompt = OdkPrompt(dict_row, choice_list)
+                    context.add_prompt(this_prompt)
                 elif token['token_type'] == 'begin group':
-                    if not stack or isinstance(stack[-1], OdkRepeat):
-                        group = OdkGroup(dict_row)
-                        stack.append(group)
-                    else:
-                        msg = 'Unable to add group at row {}'.format(i + 1)
-                        raise OdkFormError(msg)
+                    this_group = OdkGroup(dict_row)
+                    context.add_group(this_group)
+                elif token['token_type'] == 'context group':
+                    # Possibly make an OdkGroup here...
+                    context.add_context_group()
                 elif token['token_type'] == 'end group':
-                    if context_groups and context_groups[-1]['name'] == \
-                            dict_row['name'] \
-                            and context_groups[-1]['is_closed'] is False:
-                        context_groups[-1]['is_closed'] = True
-                    else:
-                        if stack and isinstance(stack[-1], OdkGroup):
-                            group = stack.pop()
-                            group.add_pending()
-                            if stack:
-                                stack[-1].add(group)
-                            else:
-                                result.append(group)
-                        else:
-                            msg = 'Mismatched "end group" at row {}'\
-                                .format(i + 1)
-                            raise OdkFormError(msg)
+                    context.end_group()
                 elif token['token_type'] == 'begin repeat':
-                    if not stack:
-                        repeat = OdkRepeat(dict_row)
-                        stack.append(repeat)
-                    else:
-                        msg = 'Unable to add repeat at row {}'.format(i + 1)
-                        raise OdkFormError(msg)
+                    this_repeat = OdkRepeat(dict_row)
+                    context.add_repeat(this_repeat)
                 elif token['token_type'] == 'end repeat':
-                    if stack and isinstance(stack[-1], OdkRepeat):
-                        repeat = stack.pop()  # Stack guaranteed empty now.
-                        result.append(repeat)
-                    else:
-                        msg = 'Mismatched "end repeat" at row {}'.format(i + 1)
-                        raise OdkFormError(msg)
+                    context.end_repeat()
                 elif token['token_type'] == 'table':
                     dict_row['simple_type'] = token['simple_type']
-                    if 'choice_list' in token:
-                        choices = token['choice_list']
-                    else:
-                        choices = None
-                    if stack and isinstance(stack[-1], OdkGroup):
-                        this_prompt = OdkPrompt(dict_row, choices)
-                        stack[-1].add_table(this_prompt)
-                    else:
-                        msg = 'Table found outside of field-list group at' \
-                              ' row {}'
-                        msg = msg.format(i + 1)
-                        raise OdkFormError(msg)
-                elif token['token_type'] == 'context group':
-                    if any(d['name'] == dict_row['name']
-                           for d in context_groups):
-                        msg = 'A context group with this name already exists' \
-                              ' in survey.'
-                        raise OdkFormError(msg)
-                    else:
-                        this_context_group = {
-                            'name': dict_row['name'],
-                            'is_closed': False,
-                            'data': dict_row
-                        }
-                        context_groups.append(this_context_group)
-                    if stack and isinstance(stack[-1], OdkGroup):
-                        msg = ('PPP does not allow a group nested in a '
-                               'field-list group. See row {}').format(i + 1)
-                        raise OdkFormError(msg)
-                # Intentionally no handling for these types.
-                elif token['token_type'] in OdkForm.unhandled_token_types:
-                    OdkForm.conversion_info = {} \
-                        if OdkForm.conversion_info is None \
-                        else OdkForm.conversion_info
-                    k = 'Unhandled Token Types'
-                    if k not in OdkForm.conversion_info:
-                        OdkForm.conversion_info[k] = []
-                    if token['token_type'] not in OdkForm.conversion_info[k]:
-                        OdkForm.conversion_info[k].append(token['token_type'])
+                    choice_list = token['choice_list']
+                    this_prompt = OdkPrompt(dict_row, choice_list)
+                    context.add_table(this_prompt)
+                elif token['token_type'] == 'unhandled':
+                    # Intentionally no handling for these types.
+                    # possibly start logging
+                    pass
                 else:
-                    OdkForm.warnings = {} if OdkForm.warnings is None \
-                        else OdkForm.warnings
-                    k = 'Unknown Token Types'
-                    if k not in OdkForm.warnings:
-                        OdkForm.warnings[k] = []
-                    if token['token_type'] not in OdkForm.warnings[k]:
-                        OdkForm.warnings[k].append(token['token_type'])
+                    # make an error
+                    pass
         except KeyError:  # No survey found.
             pass
-        return result
+        return context.result
+
+    class ConversionContext:
+        """A class to help questionnaire conversion.
+
+        This class is the context during questionnaire conversion. It
+        remembers state, adds components in the correct order, and enforces
+        rules during conversion.
+
+        Instance attributes:
+            result (list): The list of survey components that is built up
+            pending_stack (list): A stack for tracking nested groups and
+                repeats.
+            group_stack (list): A stck for tracking nested groups and context
+                groups.
+        """
+
+        def __init__(self):
+            """Initialize a conversion context before parsing."""
+            self.result = []
+            self.pending_stack = []
+            self.group_stack = []
+
+        def add_prompt(self, prompt):
+            """Add a prompt to the questionnaire.
+
+            If there is an item on the pending stack, it is added there,
+            otherwise it is added to the list of components.
+
+            Args:
+                prompt (OdkPrompt): A prompt to add.
+            """
+            if self.pending_stack:
+                self.pending_stack[-1].add(prompt)
+            else:
+                self.result.append(prompt)
+
+        def add_group(self, group):
+            """Add a group to the pending stack.
+
+            A group can be added to the pending stack as long as it is empty
+            or the last pending stack item is a repeat. This is triggered by a
+            'begin group' row with a 'field-list' in the appearance.
+
+            Args:
+                group (OdkGroup): The group to add to the pending stack.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if self.pending_stack:
+                last = self.pending_stack[-1]
+                if isinstance(last, OdkGroup):
+                    msg = 'Groups cannot be nested in each other.'
+                    raise OdkFormError(msg)
+            self.pending_stack.append(group)
+            self.group_stack.append(group)
+
+        def add_context_group(self):
+            """Add a context group to the group stack.
+
+            Context groups are tracked only to help popping groups correctly
+            from the pending stack.
+            """
+            self.group_stack.append(None)
+
+        def end_pending_group(self):
+            """End a pending group.
+
+            A pending group is a group on the pending stack. This is not a
+            context group. This function is only called internally in response
+            to receiving and dealing with an 'end group' type.
+
+            If the pending group is nested in a repeat, then it is added to
+            that repeat.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if self.pending_stack:
+                last_pending = self.pending_stack.pop()
+                if not isinstance(last_pending, OdkGroup):
+                    msg = 'Found end group but no group in pending stack'
+                    raise OdkFormError(msg)
+                last_pending.add_pending()
+                if self.pending_stack:
+                    self.pending_stack[-1].add(last_pending)
+                else:
+                    self.result.append(last_pending)
+            else:
+                msg = 'Found end group but nothing pending stack.'
+                raise OdkFormError(msg)
+
+        def end_group(self):
+            """Finish a group after seeing 'end group' type.
+
+            The 'end group' type can finish a field-list group or a context
+            group. This function handles the logic for finishing both types.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if self.group_stack:
+                last_group = self.group_stack.pop()
+                if isinstance(last_group, OdkGroup):
+                    self.end_pending_group()
+            else:
+                msg = 'Begin/end group mismatch'
+                raise OdkFormError(msg)
+
+        def add_repeat(self, repeat):
+            """Add a repeat to the pending stack.
+
+            The pending stack must first be empty because a repeat cannot be
+            nested in a group or other repeat.
+
+            Args:
+                repeat (OdkRepeat): The repeat to deal with.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if not self.pending_stack:
+                self.pending_stack.append(repeat)
+            else:
+                msg = 'Unable to nest repeat inside a group or repeat.'
+                raise OdkFormError(msg)
+
+        def end_repeat(self):
+            """Finish a repeat in this questionniare.
+
+            A repeat can be ended only if it is first on the pending stack.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if self.pending_stack:
+                last_pending = self.pending_stack.pop()
+                if isinstance(last_pending, OdkRepeat):
+                    self.result.append(last_pending)
+                else:
+                    msg = 'Found end repeat but no repeat in pending stack.'
+                    raise OdkFormError(msg)
+            else:
+                msg = 'Found end repeat but nothing in pending stack.'
+                raise OdkFormError(msg)
+
+        def add_table(self, prompt):
+            """Add a table row to the questionnaire.
+
+            The table can only be added if there is a group on the pending
+            stack.
+
+            Args:
+                prompt (OdkPrompt): The prompt representing the table row.
+
+            Raises:
+                OdkFormError: If the parsing rules are broken based on the
+                    current context.
+            """
+            if self.pending_stack:
+                last_pending = self.pending_stack[-1]
+                if not isinstance(last_pending, OdkGroup):
+                    msg = 'A table can only be in a group.'
+                    raise OdkFormError(msg)
+                last_pending.add_table(prompt)
+            else:
+                msg = 'A table can only be in a group, no group found.'
+                raise OdkFormError(msg)

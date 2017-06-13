@@ -3,7 +3,7 @@
 """Unit tests for Viffer package."""
 import unittest
 from os import path as os_path
-from pmix.viffer.__main__ import run
+from pmix.viffer.__main__ import analyze
 from pmix.viffer.error import VifferError
 
 
@@ -46,7 +46,7 @@ class VifferMainTest(unittest.TestCase, VifferTest):
             ]
             for case in cases:
                 args = {'xlsxfiles': case}
-                self.assertRaises(VifferError, run, args)
+                self.assertRaises(VifferError, analyze, args)
 
         test_run_args_xlsxfiles_error_raised()
 

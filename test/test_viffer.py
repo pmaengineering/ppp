@@ -3,7 +3,8 @@
 """Unit tests for Viffer package."""
 import unittest
 from os import path as os_path
-from pmix.viffer.__main__ import cli
+from pmix.viffer.__main__ import run
+from pmix.viffer.error import VifferError
 
 
 TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__))
@@ -14,47 +15,41 @@ TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__))
 class VifferTest:
     """Base class for Viffer package tests."""
 
+    # TODO: Refactor this. Should use a different data structure, i.e. list.
     @staticmethod
     def get_forms(data):
-        """Convert specified forms from form name strings to objects."""
-        forms = {}
-        for datum in data:
-            # Should streamline setUps. Currently in both tuple and dict.
-            try:
-                file = datum[0]['file']
-            except KeyError:
-                file = datum['inputs']['file']
-            if file not in forms:
-                forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + file)
-        return forms
+        """Convert specified forms from name strings to objects."""
+        # forms = {}
+        # for datum in data:
+        #     try:
+        #         file = datum[0]['file']
+        #     except KeyError:
+        #         file = datum['inputs']['file']
+        #     if file not in forms:
+        #         # forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' +
+        #  file)
+        #         pass
+        # return forms
+        pass
 
 
-class OdkPromptTest(unittest.TestCase, VifferTest):
-    """Unit tests for the OdkPrompt class."""
+class VifferMainTest(unittest.TestCase, VifferTest):
+    """Unit tests for the viffer.__main__."""
 
-    media_types = ['image', 'audio', 'video', 'media::image',
-                   'media::audio', 'media::video']
-    media_lead_char = '['
-    media_end_char = ']'
-    arbitrary_language_param = 'English'
+    def test_run(self):
+        """Unit tests for the viffer.__main__.run()."""
+        def test_run_args_xlsxfiles_error_raised():
+            """Error is raised when incorrect number of files is passed."""
+            cases = [
+                ['Viffer-FQ-v1.xlsx'],
+                ['Viffer-FQ-v1.xlsx', 'Viffer-FQ-v3.xlsx', 'Viffer-FQ-v3.xlsx']
+            ]
+            for case in cases:
+                args = {'xlsxfiles': case}
+                self.assertRaises(VifferError, run, args)
 
-    def setUp(self):
-        self.data = (
-            ({'inputs': {
-                 'files': []
-            }, 'expected_outputs': {
+        test_run_args_xlsxfiles_error_raised()
 
-            }},
-             {'inputs': {
-                 'file': []
-             }, 'expected_outputs': {
 
-             }},
-            )
-        )
-
-    def test_initialization_has_choices(self):
-        error = True
-        if error:
-            msg = 'Error.'
-            self.assertTrue(error is False, msg=msg)
+if __name__ == '__main__':
+    unittest.main()

@@ -29,13 +29,18 @@ class VifferTest:
         Returns:
             list: Test forms.
         """
-        test_forms = listdir(TEST_FORMS_DIRECTORY)
-        print(test_forms)
-        for form in test_forms:
+        xls_form_present = False
+        test_forms = []
+        for form in listdir(TEST_FORMS_DIRECTORY):
             if form.endswith('.xls'):
-                print('WARNING')
-        # TODO: Regex to get all .xlsx files.
-        # Print warning if .xls file found.
+                xls_form_present = True
+            elif form.endswith('.xlsx'):
+                test_forms.append(form)
+        if xls_form_present:
+            print('WARNING: File(s) with \'.xls\' extension found in test '
+                  'directory \'{}\'. XlsForms of \'.xls\' extension have been '
+                  'deprecated according to PMA2020 ODK standards. It is '
+                  'recommended to use \'.xlsx\'.'.format(TEST_FORMS_DIRECTORY))
         return test_forms
 
     @staticmethod

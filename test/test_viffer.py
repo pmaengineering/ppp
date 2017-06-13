@@ -16,43 +16,50 @@ TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__))
 # PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
 class VifferTest:
     """Base class for Viffer package tests."""
+    REF_FILE_NAME_PATTERN = r'[A-Za-z]{2}-ref-v?[0-9]{0,3}'  # Ex: FQ-ref-v13
+
     def __init__(self):
         self.test_forms = self.get_test_forms()
         self.test_ref_forms = self.get_test_ref_forms(self.test_forms)
-    REF_FILE_NAME_PATTERN = r'[A-Za-z]{2}-ref-v?[0-9]{0,3}'  # Ex: FQ-ref-v13
 
     @staticmethod
     def get_test_forms():
-        """Gets a list of all forms in test directory."""
-        test_forms = []
+        """Gets a list of all teset forms in test directory.
+
+        Returns:
+            list: Test forms.
+        """
+        test_forms = listdir(TEST_FORMS_DIRECTORY)
+        print(test_forms)
+        for form in test_forms:
+            if form.endswith('.xls'):
+                print('WARNING')
+        # TODO: Regex to get all .xlsx files.
+        # Print warning if .xls file found.
         return test_forms
 
     @staticmethod
     def get_test_ref_forms(test_forms):
-        """Gets a list of all forms in test directory matching ref pattern."""
-        test_ref_forms = []
-        return test_ref_forms
+        """Gets a list of all forms in test directory matching ref pattern.
 
-    # TODO: Refactor this. Should use a different data structure, i.e. list.
-    @staticmethod
-    def get_forms(data):
-        """Convert specified forms from name strings to objects."""
-        # forms = {}
-        # for datum in data:
-        #     try:
-        #         file = datum[0]['file']
-        #     except KeyError:
-        #         file = datum['inputs']['file']
-        #     if file not in forms:
-        #         # forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' +
-        #  file)
-        #         pass
-        # return forms
-        pass
+        Args:
+            test_forms (list): A list of test forms.
+
+        Returns:
+            list: Reference template test forms.
+        """
+        test_ref_forms = []
+        for form in test_forms:
+            if re.match(VifferTest.REF_FILE_NAME_PATTERN, form):
+                test_ref_forms.append(form)
+        return test_ref_forms
 
 
 class VifferMainTest(unittest.TestCase, VifferTest):
     """Unit tests for the viffer.__main__."""
+    def __init__(self, *args, **kwargs):
+        super(VifferMainTest, self).__init__(*args, **kwargs)
+        VifferTest.__init__(self)
 
     def test_render_form_objects(self):
         """Unit tests for the viffer.__main__.run()."""
@@ -69,14 +76,9 @@ class VifferMainTest(unittest.TestCase, VifferTest):
 
         def test_render_form_objects_returns_wb_obj():
             """ODK form objects correctly created from ODK Xlsforms."""
-            cases = ['']
-            for case in cases:
+            for form in self.test_ref_forms:
+                # print(TEST_FORMS_DIRECTORY + '/' + form)
                 # TODO: Logic
-                print(re.match(r'[A-Za-z]{2}-ref-[v0-9][0-9]{0,3}', 'FQ-ref-v13'))
-                print(re.match(VifferTest.REF_FILE_NAME_PATTERN,
-                               'FQ-ref-v13'))
-
-                print(listdir(TEST_FORMS_DIRECTORY))
                 self.assertTrue(True)
                 # self.assertTrue(isinstance(case, Workbook))
 

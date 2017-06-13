@@ -350,7 +350,6 @@ class OdkForm:
         """
         simple_row = {'token_type': 'prompt'}
         simple_type = 'select_one'
-        choice_list = None
         row_type = row['type']
         if row_type.startswith('select_one_external '):
             list_name = row_type.split(maxsplit=1)[1]
@@ -436,8 +435,6 @@ class OdkForm:
         Returns:
             dict: simple_row information from parsing.
         """
-        simple_row = {}
-
         row_type = row['type']
         simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
         if row_type in simple_types:

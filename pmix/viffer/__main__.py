@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Entry point for package."""
 import argparse
+# from pmix.workbook import Workbook
 from pmix.viffer.error import VifferError
 
 
@@ -67,7 +68,7 @@ def output(pending_output, output_format):
         to_text(pending_output)
 
 
-def analyze(files):
+def analyze(forms):
     """Run variable differ.
 
     Will analyze variable difference between two ODK XlsForms. Differences
@@ -79,25 +80,41 @@ def analyze(files):
     assess the similarities accross different dimensions.
 
     Args:
-        files (list):
+        forms (list): A list of form objects.
 
     Returns:
         dict: An analysis of variable differences.
+    """
+
+    analysis = {}
+
+    return analysis
+
+
+def render_form_objects(files):
+    """Creates ODK form objects based on ODK XlsForms.
+
+    Args:
+        files (list): A list of file paths.
+
+    Returns:
+        list: A list of form objects.
 
     Raises:
         VifferError: Must select two and only two files to diff.
     """
-    analysis = {}
     if len(files) is not 2:
         msg = 'VifferError: Must select two and only two files to diff.'
         raise VifferError(msg)
-    return analysis
+    form_objects = []
+    return form_objects
 
 
 if __name__ == '__main__':
     try:
         USER_INPUT = cli()
-        ANALYSIS = analyze(USER_INPUT['xlsxfiles'])
+        FORMS = render_form_objects(USER_INPUT['xlsxfiles'])
+        ANALYSIS = analyze(FORMS)
         output(ANALYSIS, USER_INPUT['format'])
     except VifferError as err:
         print(err)

@@ -77,6 +77,16 @@ class OdkChoices:
         Returns:
             list: Choice variable names and associated labels for choice list.
         """
+        # 1. 'label' / all language fields alone needs to be supported if no
+        # default language specified in form and no language passed.
+        #  * Whatever language is determined needs to be consistent.
+        # 2. if no default language and no language passed, we need to
+        # determine what the default language is. And there needs to be
+        # consistency between worksheets.
+        # 3. if language is passed or there is a default language, need to
+        # throw an error here if there is no label::<language> field.
+        #  * Unit test to make sure that the invalidlanguageexception fires for
+        #  the form "InvalidLanguage_FQ".
         try:
             return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
                     for x in self.data]

@@ -1,8 +1,10 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 from pmix import __version__
 
+packages = find_packages(exclude=['test'])
+packages.append('pmix.test')
 
 setup(
     name='pmix',
@@ -10,10 +12,10 @@ setup(
     author='James K. Pringle',
     author_email='jpringle@jhu.edu',
     url='http://www.pma2020.org',
-    packages=[
-        'pmix', 
-        'pmix.test'
-    ],
+    packages=packages,
+    package_dir={
+        'pmix.test': 'test'
+    },
     license='LICENSE.txt',
     description='Smattering of Python3 tools for PMA workflow',
     long_description=open('README.md').read(),

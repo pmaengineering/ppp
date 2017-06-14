@@ -86,14 +86,13 @@ def analyze(forms):
     Returns:
         dict: An analysis of variable differences.
     """
-
     analysis = {}
 
     return analysis
 
 
 def render_form_objects(files):
-    """Creates ODK form objects based on ODK XlsForms.
+    """Create ODK form objects based on ODK XlsForms.
 
     Args:
         files (list): A list of file paths.

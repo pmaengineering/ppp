@@ -83,7 +83,7 @@ class VifferMainTest(unittest.TestCase, VifferTest):
         def test_render_form_objects_returns_wb_obj():
             """ODK form objects correctly created from ODK Xlsforms."""
             for form in self.test_ref_forms:  # TODO: Use the __main__.py
-                # function, not the instance attribute.   
+                # function, not the instance attribute.
                 file = TEST_FORMS_DIRECTORY + '/' + form
                 self.assertTrue(isinstance(Xlsform(file), Xlsform))
 

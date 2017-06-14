@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Entry point for package."""
+"""Entry point for Viffer (Variable diff(erentiator)) package."""
 import argparse
 # from pmix.workbook import Workbook
+# from pmix.xlsform import Xlsform
 from pmix.viffer.error import VifferError
 
 

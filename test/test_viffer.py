@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Unit tests for Viffer package."""
+"""Unit tests for Viffer (Variable diff(erentiator)) package."""
 from os import path as os_path, listdir
 import unittest
 import re
 # from pmix.workbook import Workbook
+from pmix.xlsform import Xlsform
 from pmix.viffer.__main__ import render_form_objects
 from pmix.viffer.error import VifferError
 
@@ -81,11 +82,10 @@ class VifferMainTest(unittest.TestCase, VifferTest):
 
         def test_render_form_objects_returns_wb_obj():
             """ODK form objects correctly created from ODK Xlsforms."""
-            for form in self.test_ref_forms:
-                # print(TEST_FORMS_DIRECTORY + '/' + form)
-                # TODO: Logic
-                self.assertTrue(True)
-                # self.assertTrue(isinstance(case, Workbook))
+            for form in self.test_ref_forms:  # TODO: Use the __main__.py
+                # function, not the instance attribute.
+                file = TEST_FORMS_DIRECTORY + '/' + form
+                self.assertTrue(isinstance(Xlsform(file), Xlsform))
 
         test_render_form_objects_args_xlsxfiles_error_raised()
         test_render_form_objects_returns_wb_obj()

@@ -461,13 +461,16 @@ class OdkForm:
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
             else 'false'
 
-        OdkForm.conversion_info = {} if OdkForm.conversion_info is 'false' \
-            else OdkForm.conversion_info  # (1)
+        OdkForm.conversion_info = {} \
+            if OdkForm.conversion_info is 'false' else 'false'  # (1)
+        # else OdkForm.conversion_info  # (1)
         # self.get_running_conversion_time()  # (1)
+        # conversion_time = str(self.metadata['conversion_time'])  # (1)
+        conversion_time = "some time"
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,
-                    conversion_time=str(self.metadata['conversion_time']),
+                    conversion_time=conversion_time,
                     data=data['footer']['data'])
         html_questionnaire += footer
         return html_questionnaire

@@ -46,8 +46,10 @@ class OdkTable:
         self.header = self.data[0]
         self.contents = self.data[1:]
 
+    # Temporary noinspection until method is added.
+    # noinspection PyUnusedLocal
     @staticmethod
-    def to_text():
+    def to_text(lang):
         """Get the text representation of the table."""
         # def to_text(self, lang):
         # """Get the text representation of the table.

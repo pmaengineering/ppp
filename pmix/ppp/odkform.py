@@ -186,7 +186,7 @@ class OdkForm:
         return lang_fields
 
     @staticmethod
-    def check_for_generic_language_fields(ws_lang_fields):
+    def check_generic_language_fields(ws_lang_fields):
         """Check for presense of generic language fields.
 
         Generic language fields are defined as ODK fields such as 'label',
@@ -204,7 +204,7 @@ class OdkForm:
             field. Otherwise returns False.
         """
         for k, v in ws_lang_fields.items():
-            if v['has_generic_language_field'] is True:
+            if k[v]['has_generic_language_field'] is True:
                 return True
         return False
 
@@ -234,7 +234,6 @@ class OdkForm:
         Returns:
             dict: Dictionary of general information on form language.
         """
-
         # TODO: Handle the following cases, both with (1) cases of a
         # TODO: presence of 'default_language', and (2) not.
         # * A 'label' field by itself on both sheets.
@@ -258,7 +257,7 @@ class OdkForm:
                 ws_data['label_language_list'] = \
                     self.get_label_language_list(wslf)
                 ws_data['has_generic_language_fields'] = \
-                    self.check_for_generic_language_fields(wslf)
+                    self.check_generic_language_fields(wslf)
 
         # Set self.languages['has_generic_language_field']
         for k, v in workbook_languages['worksheets'].items():
@@ -267,8 +266,7 @@ class OdkForm:
                 break
         return workbook_languages
 
-    @staticmethod
-    def get_languages(wb):
+    def get_languages(self, wb):
         """Get survey languages.
 
         Args:
@@ -317,7 +315,7 @@ class OdkForm:
             raise InvalidLanguageException(msg)
         return default
 
-    # Currently unused pending re-addition.
+    # Currently unused.
     # def set_conversion_end(self):
     #     """Set conversion end time."""
     #     # self.metadata['conversion_end'] = datetime.datetime.now()
@@ -359,10 +357,10 @@ class OdkForm:
         q_text = (q.to_text(lang) for q in self.questionnaire)
         sep = '\n\n' + '=' * 52 + '\n\n'
         result = sep.join(q_text)
-        return title_box + sep + result + sep
+        return title_box + sep + result + sep # TODO: Finish below to_dict or
+    # TODO: change debug feature. If fixed, change to_json to
+    # TODO: call dump return of this method instead of raw data.
 
-    # TODO: Finish this or change debug feature. If fixed, change to_json to
-    # call dump return of this method instead of raw data.
     # def to_dict(self, lang):
     #     """Get the dictionary representation of an entire XLSForm.
     #

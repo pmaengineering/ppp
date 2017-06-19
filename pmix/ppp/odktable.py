@@ -49,7 +49,7 @@ class OdkTable:
     # Temporary noinspection until method is added.
     # noinspection PyUnusedLocal
     @staticmethod
-    def to_text(lang):
+    def to_text():
         """Get the text representation of the table."""
         # def to_text(self, lang):
         # """Get the text representation of the table.

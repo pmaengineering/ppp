@@ -357,7 +357,7 @@ class OdkForm:
         q_text = (q.to_text(lang) for q in self.questionnaire)
         sep = '\n\n' + '=' * 52 + '\n\n'
         result = sep.join(q_text)
-        return title_box + sep + result + sep # TODO: Finish below to_dict or
+        return title_box + sep + result + sep  # TODO: Finish below to_dict or
     # TODO: change debug feature. If fixed, change to_json to
     # TODO: call dump return of this method instead of raw data.
 

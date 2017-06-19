@@ -60,8 +60,11 @@ class OdkForm:
         self.languages = {
             'general_language_info': self.get_general_language_info(),
             'has_generic_language_field': False,
-            'language_list': self.get_languages(wb),
-            # 'default_language': self.get_default_language()
+            'language_list': self.get_languages(wb)
+        }
+        self.languages = {
+            **self.languages,
+            **{'default_language': self.get_default_language()}
         }
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
@@ -83,7 +86,6 @@ class OdkForm:
                 'conversion_time': None
             }
         }
-
         self.questionnaire = self.convert_survey(wb, self.choices,
                                                  self.ext_choices)
 
@@ -303,13 +305,13 @@ class OdkForm:
         """
         default = self.settings['default_language'] \
             if 'default_language' in self.settings \
-            else self.languages['languages_list'][0]
+            else self.languages['language_list'][0]
         if not default:
             msg = 'InvalidLanguageException: \'default_language\' cannot be ' \
                   'empty.'
-            msg += str(self.languages['languages_list'])
+            msg += str(self.languages['language_list'])
             raise InvalidLanguageException(msg)
-        elif default not in self.languages['languages_list']:
+        elif default not in self.languages['language_list']:
             msg = 'InvalidLanguageException: \'default_language\' specified ' \
                   'was not found in \'survey\' worksheet.'
             raise InvalidLanguageException(msg)
@@ -346,7 +348,7 @@ class OdkForm:
             str: The full string of the XLSForm, ready to print or save.
         """
         lang = kwargs['lang'] if 'lang' in kwargs \
-            else self.languages['languages_list']['default_language']
+            else self.languages['language_list']['default_language']
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -371,7 +373,7 @@ class OdkForm:
     #         dict: A full dictionary representation of the XLSForm.
     #     """
     #     lang = lang if lang \
-    #         else self.languages['languages_list']['default_language']
+    #         else self.languages['language_list']['default_language']
     #     html_questionnaire = {
     #         'title': self.title,
     #         'questions': []
@@ -392,7 +394,7 @@ class OdkForm:
         """
         import json
         # lang = lang if lang \
-        #     else self.languages['languages_list']['default_language']
+        #     else self.languages['language_list']['default_language']
         raw_survey = []
         header = self.metadata['raw_data']['survey'][0]
         for i, row in enumerate(self.metadata['raw_data']['survey']):
@@ -418,10 +420,10 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
-        # Currently not logging conversion time.
-        # conversion_start = datetime.datetime.now()
+        # *(1) Currently not logging conversion time.
+        # conversion_start = datetime.datetime.now()  # (1)
         lang = kwargs['lang'] if 'lang' in kwargs else \
-            self.languages['languages_list']['default_language']
+            self.languages['default_language']
         html_questionnaire = ''
         data = {
             'header': {
@@ -455,13 +457,13 @@ class OdkForm:
             else:
                 html_questionnaire += item.to_html(lang, kwargs['highlight'])
             prev_item = item
-        self.set_conversion_end()
+        # self.set_conversion_end()  # (1)
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
             else 'false'
-        # Currently not logging conversion time.
+
         OdkForm.conversion_info = {} if OdkForm.conversion_info is 'false' \
-            else OdkForm.conversion_info
-        self.get_running_conversion_time()
+            else OdkForm.conversion_info  # (1)
+        # self.get_running_conversion_time()  # (1)
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,

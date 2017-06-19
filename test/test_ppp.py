@@ -4,9 +4,9 @@
 import unittest
 from os import path as os_path
 from pmix.ppp.odkform import OdkForm
-# from pmix.odkchoices import OdkChoices
-from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
+from pmix.ppp.odkgroup import OdkGroup
+# from pmix.odkchoices import OdkChoices
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
@@ -157,7 +157,7 @@ class OdkGroupTest(unittest.TestCase):
             self.assertTrue(output == expected_output, msg=msg)
 
 
-class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
+class OdkFormTest(unittest.TestCase, PppTest):
     """Unit tests for the OdkForm class."""
 
     def setUp(self):
@@ -221,6 +221,54 @@ class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
             output = forms[i['file']].questionnaire[i['position']]
             self.assertTrue(str(output) == expected_output['repr'])
             self.assertTrue(isinstance(output, expected_output['class']))
+
+    def test_languages(self):
+        """Language based tests."""
+        def test_get_label_language_list():
+            input = {
+                'audio': {
+                    'has_generic_language_field': True,
+                    'language_list': []
+                },
+                'constraint_message': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'hint': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'image': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'label': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'media::video': {
+                    'has_generic_language_field': False,
+                    'language_list': ['English']
+                }
+            }
+            expected_output = ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo',
+                               'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
+                               'Runyoro-Rutoro']
+            self.assertTrue(
+                OdkForm.get_label_language_list(input) == expected_output)
+        test_get_label_language_list()
 
 
 if __name__ == '__main__':

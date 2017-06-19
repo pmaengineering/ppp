@@ -60,11 +60,15 @@ class OdkForm:
         self.languages = {
             'general_language_info': self.get_general_language_info(),
             'has_generic_language_field': False,
-            'language_list': self.get_languages(wb)
+            'language_list': self.get_languages(wb),
+            'default_language': self.settings['default_language']
+            if 'default_language' in self.settings else ''
         }
         self.languages = {
             **self.languages,
-            **{'default_language': self.get_default_language()}
+            **{'default_language': self.get_default_language(
+                settings_default=self.settings['default_language'],
+                language_list=self.languages['language_list'])}
         }
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
@@ -294,8 +298,25 @@ class OdkForm:
                 langs.add(lang)
         return sorted(list(langs))
 
-    def get_default_language(self):
+    @staticmethod
+    def get_default_language(settings_default, language_list):
         """Get default survey language if specified.
+
+        >>> from pmix.ppp.odkform import OdkForm as odk
+        >>> odk.get_default_language(settings_default='Russian',
+        ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
+        'Russian'
+        >>> odk.get_default_language(settings_default='',
+        ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
+        'Ateso'
+        >>> odk.get_default_language(settings_default='Russian',
+        ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Slovak'])
+        'InvalidLanguageException: \'default_language\' specified '
+                  'was not found in \'survey\' worksheet.'
+
+        Args:
+            settings_default (str): Default language of form, if specified.
+            language_list (list): Sorted list of languages in form.
 
         Returns:
             str: The default language of the form.
@@ -303,15 +324,19 @@ class OdkForm:
         Raises:
             InvalidLanguageException: Various.
         """
-        default = self.settings['default_language'] \
-            if 'default_language' in self.settings \
-            else self.languages['language_list'][0]
+        # form = OdkForm()
+        # test = form.get_default_language(settings_default='',
+        #                              language_list=['Ateso', 'English',
+        #                                             'Luganda', 'Luo', 'Russian'])
+
+        default = settings_default if settings_default is not '' \
+            else language_list[0]
         if not default:
             msg = 'InvalidLanguageException: \'default_language\' cannot be ' \
                   'empty.'
-            msg += str(self.languages['language_list'])
+            msg += str(language_list)
             raise InvalidLanguageException(msg)
-        elif default not in self.languages['language_list']:
+        elif default not in language_list:
             msg = 'InvalidLanguageException: \'default_language\' specified ' \
                   'was not found in \'survey\' worksheet.'
             raise InvalidLanguageException(msg)

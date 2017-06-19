@@ -274,3 +274,5 @@ class OdkFormTest(unittest.TestCase, PppTest):
 
 if __name__ == '__main__':
     unittest.main()
+    # import doctest
+    # doctest.testfile(TEST_FORMS_DIRECTORY + "/../" + "pmix/ppp/odkform.py")

@@ -1,5 +1,7 @@
 """Module for the OdkPrompt class."""
 import textwrap
+from pmix.ppp.constants import MEDIA_FIELDS, LANGUAGE_DEPENDENT_FIELDS, \
+    TRUNCATABLE_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.error import OdkChoicesError
 
@@ -22,14 +24,6 @@ class OdkPrompt:
         response_types (tuple): Prompt types which can accept data and do not
             include a list of choices.
         non_response_types (tuple): Prompt types which do not accept data.
-        media_fields (tuple): Fields that can be set to file names of allowable
-            media types for the given field.
-        language_dependent_fields (tuple): Fields for which values can vary by
-            language. A single ODK XLSForm can have many such fields, suffixed
-            by '::language'.
-        truncatable_fields (tuple): Fields that should be limited to a specific
-            length. Current limit is 100 chars, which is somewhat arbitrary but
-            turns out good in converted forms.
     """
 
     select_types = (
@@ -49,11 +43,6 @@ class OdkPrompt:
     non_response_types = (
         'note',
     )
-    media_fields = ('image', 'media::image', 'audio', 'media::audio',
-                    'video', 'media::video')
-    language_dependent_fields = \
-        ('label', 'hint', 'constraint_message', 'ppp_input') + media_fields
-    truncatable_fields = ('constraint', 'relevant')
 
     def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type).
@@ -128,10 +117,11 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation.
         """
-        for field in OdkPrompt.language_dependent_fields:
-            if field + '::' + lang in row:
-                row[field] = row[field + '::' + lang]
-        return row
+        new_row = row.copy()
+        for field in LANGUAGE_DEPENDENT_FIELDS:
+            if field + '::' + lang in new_row:
+                new_row[field] = new_row[field + '::' + lang]
+        return new_row
 
     # pylint: disable=too-many-branches
     @staticmethod
@@ -151,8 +141,9 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         fields_to_add = []
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
+        new_row = row.copy()
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
                 if key.startswith(field) and len(val) > 0:
                     if field not in row:
                         fields_to_add.append(field)
@@ -178,11 +169,13 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation of prompt.
         """
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
-                if val and key.startswith(field) and val not in row['media']:
-                    row['media'].append(val)
-        return row
+        new_row = row.copy()
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
+                if val and key.startswith(field) \
+                        and val not in new_row['media']:
+                    new_row['media'].append(val)
+        return new_row
 
     @staticmethod
     def text_relevant():
@@ -200,10 +193,11 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation of prompt.
         """
-        for field in OdkPrompt.truncatable_fields:
-            row[field + '_original'] = row[field]
-            row[field] = self.truncate_text(row[field])
-        return row
+        new_row = row.copy()
+        for field in TRUNCATABLE_FIELDS:
+            new_row[field + '_original'] = new_row[field]
+            new_row[field] = self.truncate_text(new_row[field])
+        return new_row
 
     def format_media_labels(self, row):
         """Format text for all media labels to be enclosed in brackets.
@@ -215,10 +209,10 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         arbitrary_media_prefix = 'media::'
-        row = self.create_additional_media_fields(row,
-                                                  arbitrary_media_prefix)
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
+        new_row = self.create_additional_media_fields(row,
+                                                      arbitrary_media_prefix)
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
                 if key.startswith(field) and len(val) > 0:
                     if val[0] is not '[' and val[-1] is not ']':
                         formatted_media_label = '[' + val + ']'

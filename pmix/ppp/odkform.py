@@ -1,8 +1,9 @@
 """Module for the OdkForm class."""
 import datetime
 import os.path
+from pmix.ppp.constants import LANGUAGE_DEPENDENT_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError
+from pmix.ppp.error import OdkFormError, InvalidLanguageException
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
@@ -40,7 +41,6 @@ class OdkForm:
             wb (Workbook): A Workbook object meeting XLSForm specification.
         Raises:
             OdkformError: No ODK form is supplied.
-            InvalidLanguage: Language specified is not found in form.
         """
         if file is None and wb is None:
             raise OdkFormError
@@ -50,30 +50,40 @@ class OdkForm:
         self.settings = {str(k): str(v) for k, v in
                          self.get_settings(wb).items()}
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
-        self.languages = self.get_languages(wb)
-        self.choices = self.get_choices(wb, 'choices')
-        self.ext_choices = self.get_choices(wb, 'external_choices')
-        conversion_start = datetime.datetime.now()
         self.metadata = {  # TODO Finish filling this out.
-            'file_name': os.path.split(wb.file)[1],
-            'form_id': self.settings.get('form_id'),
-            'country': self.settings.get('form_id')[3:5],
-            'round': self.settings.get('form_id')[6:7],
-            'type_of_form': self.settings.get('form_id')[0:2],
             'last_author': None,
             'last_updated': None,
-            'survey_language': self.get_survey_language(),
-            'conversion_start': conversion_start,
-            'conversion_start_formatted':
-                str(conversion_start.date()) +
-                ' ' + str(conversion_start.time())[0:8],
-            'conversion_end': None,
-            'conversion_end_formatted': None,
-            'conversion_time': None,
             'changelog': None,
             'info': None,
             'raw_data': wb
         }
+        self.languages = {
+            'general_language_info': self.get_general_language_info(),
+            'has_generic_language_field': False,
+            'language_list': self.get_languages(wb),
+            # 'default_language': self.get_default_language()
+        }
+        self.choices = self.get_choices(wb, 'choices')
+        self.ext_choices = self.get_choices(wb, 'external_choices')
+        conversion_start = datetime.datetime.now()
+        self.metadata = {
+            **self.metadata,
+            **{
+                'file_name': os.path.split(wb.file)[1],
+                'form_id': self.settings.get('form_id'),
+                'country': self.settings.get('form_id')[3:5],
+                'round': self.settings.get('form_id')[6:7],
+                'type_of_form': self.settings.get('form_id')[0:2],
+                'conversion_start': conversion_start,
+                'conversion_start_formatted':
+                    str(conversion_start.date()) +
+                    ' ' + str(conversion_start.time())[0:8],
+                'conversion_end': None,
+                'conversion_end_formatted': None,
+                'conversion_time': None
+            }
+        }
+
         self.questionnaire = self.convert_survey(wb, self.choices,
                                                  self.ext_choices)
 
@@ -146,6 +156,118 @@ class OdkForm:
         return formatted_choices
 
     @staticmethod
+    def get_worksheet_languages(header):
+        """Get worksheet languages.
+
+        Args:
+            header (list): Worksheet header.
+
+        Returns:
+            list: An alphabetically sorted list of languages.
+        """
+        lang_fields = {}
+        for field in header:
+            for lang_field in LANGUAGE_DEPENDENT_FIELDS:
+                if str(field).startswith(lang_field) \
+                        and not str(field).startswith('ppp_'):
+                    if lang_field not in lang_fields:
+                        lang_fields[lang_field] = {
+                            'language_list': [],
+                            'has_generic_language_field': False
+                        }
+                    if lang_field == str(field):
+                        lang_fields[lang_field]['has_generic_language_field']\
+                            = True
+                    else:
+                        lang = str(field)[len(lang_field + '::'):]
+                        lang_fields[lang_field]['language_list'].append(lang)
+        for field, data in lang_fields.items():
+            data['language_list'] = sorted(data['language_list'])
+        return lang_fields
+
+    @staticmethod
+    def check_for_generic_language_fields(ws_lang_fields):
+        """Check for presense of generic language fields.
+
+        Generic language fields are defined as ODK fields such as 'label',
+        'hint', 'constraint_message', or media fields which have no
+        corresponding '::<language>' assigned. In an XlsForm, for example, a
+        field named 'label' would be an example of a generic language field. A
+        field named 'label::Chinese' would not.
+
+        Args:
+            ws_lang_fields (dict): A dictionary of language field information
+            for a given worksheet.
+
+        Returns:
+            bool: True if any language field in worksheet has generic language
+            field. Otherwise returns False.
+        """
+        for k, v in ws_lang_fields.items():
+            if v['has_generic_language_field'] is True:
+                return True
+        return False
+
+    @staticmethod
+    def get_label_language_list(ws_lang_fields):
+        """Get list of label languages for worksheet.
+
+        Args:
+            ws_lang_fields (dict): A dictionary of language field information
+            for a given worksheet.
+
+        Returns:
+            list: An alphabetically sorted list of languages.
+        """
+        return sorted(ws_lang_fields['label']['language_list'])
+
+    def get_general_language_info(self):
+        """Consolidate language information for ODK form.
+
+        Consolidate pertinent language information, such as languages list for
+        relevant worksheets.
+
+        Side Effects:
+            self.languages['generic_language_fields_present']: True if generic
+            language field is found in any language field.
+
+        Returns:
+            dict: Dictionary of general information on form language.
+        """
+
+        # TODO: Handle the following cases, both with (1) cases of a
+        # TODO: presence of 'default_language', and (2) not.
+        # * A 'label' field by itself on both sheets.
+        # * A 'label' field with 'label::' fields on both sheets.
+        # * Inconsistent 'label' 'label::' in worksheets.
+        wb = self.metadata['raw_data']
+        language_pertinent_worksheets = ['survey', 'choices',
+                                         'external_choices']
+        workbook_languages = {'worksheets': {}}
+
+        # Set self.languages['general_language_info']
+        for ws in language_pertinent_worksheets:
+            if ws in [ws.name for ws in wb.data]:
+                workbook_languages['worksheets'][ws] = {
+                    'language_fields': self.get_worksheet_languages(wb[ws][0]),
+                    'label_language_list': [],
+                    'has_generic_language_field': False
+                }
+                ws_data = workbook_languages['worksheets'][ws]
+                wslf = ws_data['language_fields']
+                ws_data['label_language_list'] = \
+                    self.get_label_language_list(wslf)
+                ws_data['has_generic_language_fields'] = \
+                    self.check_for_generic_language_fields(wslf)
+
+        # Set self.languages['has_generic_language_field']
+        for k, v in workbook_languages['worksheets'].items():
+            if v['has_generic_language_field'] is True:
+                self.languages['has_generic_language_field'] = True
+                break
+        return workbook_languages
+
+    @staticmethod
     def get_languages(wb):
         """Get survey languages.
 
@@ -158,33 +280,51 @@ class OdkForm:
         header = wb['survey'][0]
         langs = set()
         for field in header:
-            # TODO: Handle the following cases, both with cases of a presence
-            # of 'default_language', and not.
-            # 1. No 'label' or 'label::' fields at all,
-            # 2. A 'label' field by itself.
-            # 3. A 'label' field with 'label::' fields.
+            # TODO: Handle the following cases, both with (1) cases of a
+            # TODO: presence of 'default_language', and (2) not.
+            # * A 'label' field by itself on both sheets.
+            # * A 'label' field with 'label::' fields on both sheets.
+            # * Inconsistent 'label' 'label::' in worksheets.
             if field == 'label':
-                langs.add('')  # Default language.
+                if self.settings['default_language']:
+                    raise InvalidLanguageException
+                langs.add('')  # Default language. / Does this do anything?
             elif str(field).startswith('label::'):
                 lang = str(field)[len('label::'):]
                 langs.add(lang)
         return sorted(list(langs))
 
-    def get_survey_language(self):
+    def get_default_language(self):
         """Get default survey language if specified.
 
         Returns:
             str: The default language of the form.
-        """
-        return self.settings['default_language'] \
-            if 'default_language' in self.settings else self.languages[0]
 
-    def set_conversion_end(self):
-        """Set conversion end time."""
-        self.metadata['conversion_end'] = datetime.datetime.now()
-        self.metadata['conversion_end_formatted'] = \
-            str(self.metadata['conversion_end'].date()) + ' ' + \
-            str(self.metadata['conversion_end'].time())[0:8]
+        Raises:
+            InvalidLanguageException: Various.
+        """
+        default = self.settings['default_language'] \
+            if 'default_language' in self.settings \
+            else self.languages['languages_list'][0]
+        if not default:
+            msg = 'InvalidLanguageException: \'default_language\' cannot be ' \
+                  'empty.'
+            msg += str(self.languages['languages_list'])
+            raise InvalidLanguageException(msg)
+        elif default not in self.languages['languages_list']:
+            msg = 'InvalidLanguageException: \'default_language\' specified ' \
+                  'was not found in \'survey\' worksheet.'
+            raise InvalidLanguageException(msg)
+        return default
+
+    # Currently unused pending re-addition.
+    # def set_conversion_end(self):
+    #     """Set conversion end time."""
+    #     # self.metadata['conversion_end'] = datetime.datetime.now()
+    #     # self.metadata['conversion_end_formatted'] = \
+    #     #     str(self.metadata['conversion_end'].date()) + ' ' + \
+    #     #     str(self.metadata['conversion_end'].time())[0:8]
+    #     pass
 
     def get_running_conversion_time(self):
         """Get running conversion time at this point in time.
@@ -198,16 +338,17 @@ class OdkForm:
 
         return self.metadata['conversion_time']
 
-    def to_text(self, lang):
+    def to_text(self, **kwargs):
         """Get the text representation of an entire XLSForm.
 
         Args:
-            lang (str): The language.
+            **lang (str): The language.
 
         Returns:
             str: The full string of the XLSForm, ready to print or save.
         """
-        lang = lang if lang else self.metadata['survey_language']
+        lang = kwargs['lang'] if 'lang' in kwargs \
+            else self.languages['languages_list']['default_language']
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -231,7 +372,8 @@ class OdkForm:
     #     Returns:
     #         dict: A full dictionary representation of the XLSForm.
     #     """
-    #     lang = lang if lang else self.metadata['survey_language']
+    #     lang = lang if lang \
+    #         else self.languages['languages_list']['default_language']
     #     html_questionnaire = {
     #         'title': self.title,
     #         'questions': []
@@ -251,7 +393,8 @@ class OdkForm:
             json: A full JSON representation of the XLSForm.
         """
         import json
-        # lang = lang if lang else self.metadata['survey_language']
+        # lang = lang if lang \
+        #     else self.languages['languages_list']['default_language']
         raw_survey = []
         header = self.metadata['raw_data']['survey'][0]
         for i, row in enumerate(self.metadata['raw_data']['survey']):
@@ -264,12 +407,12 @@ class OdkForm:
         else:
             return json.dumps(raw_survey)
 
-    def to_html(self, lang, **kwargs):
+    def to_html(self, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
         Args:
-            lang (str): The language.
-            **highlight(bool): For color highlighting of various components
+            **lang (str): The language.
+            **highlight (bool): For color highlighting of various components
                 of html template.
             **debug (bool): For inclusion of debug information to be printed
                 in the JavaScript console.
@@ -277,7 +420,10 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
-        lang = lang if lang else self.metadata['survey_language']
+        # Currently not logging conversion time.
+        # conversion_start = datetime.datetime.now()
+        lang = kwargs['lang'] if 'lang' in kwargs else \
+            self.languages['languages_list']['default_language']
         html_questionnaire = ''
         data = {
             'header': {
@@ -314,6 +460,7 @@ class OdkForm:
         self.set_conversion_end()
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
             else 'false'
+        # Currently not logging conversion time.
         OdkForm.conversion_info = {} if OdkForm.conversion_info is 'false' \
             else OdkForm.conversion_info
         self.get_running_conversion_time()

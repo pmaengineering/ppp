@@ -37,6 +37,7 @@ def cli():
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')
     parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
+                        default='html', const='html', nargs='?',
                         help=format_help)
 
     out_help = ('Path to write output. If this argument is not supplied, then '
@@ -51,11 +52,12 @@ def cli():
         raise OdkFormError(msg)
 
     try:
-        run(inpath=args.xlsxfile, language=args.language,
-            output_format=args.format, outfile=args.outpath,
+        run(in_file=args.xlsxfile, language=args.language,
+            output_format=args.format, out_file=args.outpath,
             debug=args.debug, highlight=args.highlight)
     except (OdkFormError, InvalidLanguageException, OdkChoicesError) as err:
         print(err)
 
 
-cli()
+if __name__ == '__main__':
+    cli()

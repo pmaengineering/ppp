@@ -225,7 +225,8 @@ class OdkFormTest(unittest.TestCase, PppTest):
     def test_languages(self):
         """Language based tests."""
         def test_get_label_language_list():
-            input = {
+            """Test OdkForm.get_label_language_list()."""
+            test_input = {
                 'audio': {
                     'has_generic_language_field': True,
                     'language_list': []
@@ -267,7 +268,7 @@ class OdkFormTest(unittest.TestCase, PppTest):
                                'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
                                'Runyoro-Rutoro']
             self.assertTrue(
-                OdkForm.get_label_language_list(input) == expected_output)
+                OdkForm.get_label_language_list(test_input) == expected_output)
         test_get_label_language_list()
 
 

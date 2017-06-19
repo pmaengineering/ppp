@@ -203,8 +203,8 @@ class OdkForm:
             bool: True if any language field in worksheet has generic language
             field. Otherwise returns False.
         """
-        for k, v in ws_lang_fields.items():
-            if k[v]['has_generic_language_field'] is True:
+        for dummy, v in ws_lang_fields.items():
+            if v['has_generic_language_field'] is True:
                 return True
         return False
 
@@ -260,7 +260,7 @@ class OdkForm:
                     self.check_generic_language_fields(wslf)
 
         # Set self.languages['has_generic_language_field']
-        for k, v in workbook_languages['worksheets'].items():
+        for dummy, v in workbook_languages['worksheets'].items():
             if v['has_generic_language_field'] is True:
                 self.languages['has_generic_language_field'] = True
                 break

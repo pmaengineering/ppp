@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import unittest
-from os import path as os_path
+import doctest
+import os
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkgroup import OdkGroup
@@ -10,7 +11,8 @@ from pmix.ppp.odkgroup import OdkGroup
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
-TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__)) + '/files'
+TEST_PACKAGE = 'pmix.ppp'
+TEST_FORMS_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) + '/files'
 
 
 # pylint: disable=too-few-public-methods
@@ -271,8 +273,40 @@ class OdkFormTest(unittest.TestCase, PppTest):
                 OdkForm.get_label_language_list(test_input) == expected_output)
         test_get_label_language_list()
 
-
 if __name__ == '__main__':
+    def get_test_modules(test_package):
+        """Get files to test.
+
+        Args:
+            test_package (str): The package containing modules to test.
+
+        Returns:
+            list: List of all python modules in package.
+        """
+        test_modules = []
+        root_dir = TEST_FORMS_DIRECTORY + "/../../" + "pmix/ppp"
+
+        for root, _, filenames in os.walk(root_dir):
+            for file in filenames:
+                if file.endswith('.py'):
+                    file = file[:-3]
+                    test_module = test_package + '.' + file
+                    test_modules.append(test_module)
+        return test_modules
+
+    def get_test_suite():
+        """Get suite to test.
+
+        Returns:
+            TestSuite: Suite to test.
+        """
+        suite = unittest.TestSuite()
+        pkg_modules = get_test_modules(test_package=TEST_PACKAGE)
+        for pkg_module in pkg_modules:
+            suite.addTest(doctest.DocTestSuite(pkg_module))
+        return suite
+
+    print('# Running doctests & unittests.')
+    test_suite = get_test_suite()
+    unittest.TextTestRunner(verbosity=1).run(test_suite)
     unittest.main()
-    # import doctest
-    # doctest.testfile(TEST_FORMS_DIRECTORY + "/../" + "pmix/ppp/odkform.py")

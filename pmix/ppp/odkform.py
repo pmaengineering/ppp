@@ -302,17 +302,17 @@ class OdkForm:
     def get_default_language(settings_default, language_list):
         """Get default survey language if specified.
 
-        >>> from pmix.ppp.odkform import OdkForm as odk
-        >>> odk.get_default_language(settings_default='Russian',
+        >>> from pmix.ppp.odkform import OdkForm
+        >>> OdkForm.get_default_language(settings_default='Russian',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
         'Russian'
-        >>> odk.get_default_language(settings_default='',
+        >>> OdkForm.get_default_language(settings_default='',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
         'Ateso'
-        >>> odk.get_default_language(settings_default='Russian',
-        ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Slovak'])
-        'InvalidLanguageException: \'default_language\' specified '
-                  'was not found in \'survey\' worksheet.'
+        >>> OdkForm.get_default_language(settings_default='z', language_list=
+        ... ['a', 'b', 'c', 'd', 'e']) #doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+        InvalidLanguageException
 
         Args:
             settings_default (str): Default language of form, if specified.
@@ -322,21 +322,17 @@ class OdkForm:
             str: The default language of the form.
 
         Raises:
-            InvalidLanguageException: Various.
+            InvalidLanguageException: Default language not found in survey
+            worksheet.
         """
-        # form = OdkForm()
-        # test = form.get_default_language(settings_default='',
-        #                              language_list=['Ateso', 'English',
-        #                                             'Luganda', 'Luo', 'Russian'])
-
         default = settings_default if settings_default is not '' \
             else language_list[0]
-        if not default:
-            msg = 'InvalidLanguageException: \'default_language\' cannot be ' \
-                  'empty.'
-            msg += str(language_list)
-            raise InvalidLanguageException(msg)
-        elif default not in language_list:
+        # if not default:  # - Note: Check removed. Will allow.
+        #     msg = 'InvalidLanguageException: \'default_language\' cannot ' \
+        #           'be empty.'
+        #     msg += str(language_list)
+        #     raise InvalidLanguageException(msg)
+        if default not in language_list:
             msg = 'InvalidLanguageException: \'default_language\' specified ' \
                   'was not found in \'survey\' worksheet.'
             raise InvalidLanguageException(msg)

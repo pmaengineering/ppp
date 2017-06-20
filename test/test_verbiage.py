@@ -26,6 +26,7 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
     """Unit tests for the TranslationDict number splitting."""
 
     def test_yes_split_text(self):
+        """Test that question identifiers are correctly split from label."""
         yes_split = (
             ('SIQ4. Where did you hear about bilharzia?', 'SIQ4. '),
             ('M-2.  Are you menstruating today? ', 'M-2.  '),
@@ -42,14 +43,15 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
             ('114c.d.i. My falsified question', '114c.d.i. '),
             ('411i. Post pregnancy usage', '411i. ')
         )
-        td = TranslationDict()
-        for s, n in yes_split:
-            number, text = td.split_text(s)
-            msg = 'Found "{}", expected "{}"'.format(number, n)
-            self.assertTrue(number == n, msg=msg)
+        trans_dict = TranslationDict()
+        for lab, num in yes_split:
+            number, dummy = trans_dict.split_text(lab)
+            msg = 'Found "{}", expected "{}"'.format(number, num)
+            self.assertTrue(number == num, msg=msg)
 
     def test_no_split_text(self):
-        self.longMessage = True
+        """Test that question identifiers do not appear in label."""
+        # self.longMessage = True  # Deactivated; Unused & causes lint errors.
         no_split = (
             'READ THIS WARNING: This individual questionnaire...',
             'Press OK to continue',
@@ -64,10 +66,10 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
             '',
             'sayana_150x300.jpg'
         )
-        td = TranslationDict()
-        for s in no_split:
-            number, text = td.split_text(s)
-            msg = 'Number present in "{}"'.format(s)
+        trans_dict = TranslationDict()
+        for lab in no_split:
+            number, dummy = trans_dict.split_text(lab)
+            msg = 'Number present in "{}"'.format(lab)
             self.assertTrue(number == '', msg=msg)
 
 

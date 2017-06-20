@@ -62,8 +62,8 @@ class OdkForm:
             'has_generic_language_field': False,
             'language_list': self.get_languages(wb),
             'default_language':
-                self.settings['default_language'] if 'default_language'
-                                                     in self.settings else ''
+                self.settings['default_language']
+                if 'default_language' in self.settings else ''
         }
         self.languages = {
             **self.languages,

@@ -48,7 +48,7 @@ class OdkPromptTest(unittest.TestCase, PppTest):
     def setUp(self):
         self.data = (
             ({'inputs': {
-                 'file': 'FQ.xlsx'
+                'file': 'FQ.xlsx'
             }, 'expected_outputs': {
 
             }},
@@ -98,8 +98,9 @@ class OdkPromptTest(unittest.TestCase, PppTest):
         test_media_fields_in_prompts()
 
     def test_initialization_has_choices(self):
+        """Test that choice list exists on initialization."""
         forms = self.get_forms(self.data)
-        for form_name, form in forms.items():
+        for dummy, form in forms.items():
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
                     if item.odktype in item.select_types:
@@ -274,14 +275,15 @@ class OdkFormTest(unittest.TestCase, PppTest):
                 OdkForm.get_label_language_list(test_input) == expected_output)
         test_get_label_language_list()
 
+
 if __name__ == '__main__':
     def get_args():
         """CLI for PPP test runner."""
         desc = 'Run tests for PPP package.'
         parser = ArgumentParser(description=desc)
         doctests_only_help = 'Specifies whether to run doctests only, as ' \
-                            'opposed to doctests with unittests. Default is ' \
-                            'False.'
+                             'opposed to doctests with unittests. Default is' \
+                             ' False.'
         parser.add_argument('-d', '--doctests-only', action='store_true',
                             help=doctests_only_help)
         args = parser.parse_args()
@@ -299,7 +301,7 @@ if __name__ == '__main__':
         test_modules = []
         root_dir = TEST_FORMS_DIRECTORY + "/../../" + "pmix/ppp"
 
-        for root, _, filenames in os.walk(root_dir):
+        for dummy, dummy, filenames in os.walk(root_dir):
             for file in filenames:
                 if file.endswith('.py'):
                     file = file[:-3]
@@ -319,9 +321,9 @@ if __name__ == '__main__':
             suite.addTest(doctest.DocTestSuite(pkg_module))
         return suite
 
-    params = get_args()
-    if params.doctests_only:
-        test_suite = get_test_suite()
-        unittest.TextTestRunner(verbosity=1).run(test_suite)
+    PARAMS = get_args()
+    if PARAMS.doctests_only:
+        TEST_SUITE = get_test_suite()
+        unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
     else:
         unittest.main()

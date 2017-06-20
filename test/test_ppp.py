@@ -4,6 +4,7 @@
 import unittest
 import doctest
 import os
+from argparse import ArgumentParser
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkgroup import OdkGroup
@@ -274,6 +275,18 @@ class OdkFormTest(unittest.TestCase, PppTest):
         test_get_label_language_list()
 
 if __name__ == '__main__':
+    def get_args():
+        """CLI for PPP test runner."""
+        desc = 'Run tests for PPP package.'
+        parser = ArgumentParser(description=desc)
+        doctests_only_help = 'Specifies whether to run doctests only, as ' \
+                            'opposed to doctests with unittests. Default is ' \
+                            'False.'
+        parser.add_argument('-d', '--doctests-only', action='store_true',
+                            help=doctests_only_help)
+        args = parser.parse_args()
+        return args
+
     def get_test_modules(test_package):
         """Get files to test.
 
@@ -306,7 +319,9 @@ if __name__ == '__main__':
             suite.addTest(doctest.DocTestSuite(pkg_module))
         return suite
 
-    print('# Running doctests & unittests.')
-    test_suite = get_test_suite()
-    unittest.TextTestRunner(verbosity=1).run(test_suite)
-    unittest.main()
+    params = get_args()
+    if params.doctests_only:
+        test_suite = get_test_suite()
+        unittest.TextTestRunner(verbosity=1).run(test_suite)
+    else:
+        unittest.main()

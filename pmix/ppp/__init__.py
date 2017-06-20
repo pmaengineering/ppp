@@ -6,7 +6,7 @@ from pmix.ppp.error import OdkFormError, OdkChoicesError, \
     InvalidLanguageException
 
 
-def run(in_file, language=False, output_format=False, out_file=False,
+def run(in_file, language=None, output_format=None, out_file=None,
         **kwargs):
     """Run ODK form conversion.
 
@@ -37,7 +37,7 @@ def run(in_file, language=False, output_format=False, out_file=False,
     except InvalidLanguageException as err:
         if len(str(err)):
             raise InvalidLanguageException(err)
-        elif language is False:
+        elif language is None:
             msg = 'InvalidLanguageException: An unknown error occurred when ' \
                   'attempting to convert form. If a language was not ' \
                   'supplied, please supply and try again.'

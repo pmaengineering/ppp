@@ -1,7 +1,8 @@
 """Module for the OdkForm class."""
 import datetime
 import os.path
-from pmix.ppp.constants import LANGUAGE_DEPENDENT_FIELDS
+from pmix.ppp.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
+    LANGUAGE_DEPENDENT_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.error import OdkFormError, InvalidLanguageException
 from pmix.ppp.odkchoices import OdkChoices
@@ -49,6 +50,9 @@ class OdkForm:
 
         self.settings = {str(k): str(v) for k, v in
                          self.get_settings(wb).items()}
+        settings_default = self.settings['default_language'] \
+            if 'default_language' in self.settings \
+               and self.settings['default_language'] is not '' else None
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.metadata = {  # TODO Finish filling this out.
             'last_author': None,
@@ -58,19 +62,24 @@ class OdkForm:
             'raw_data': wb
         }
         self.languages = {
-            'general_language_info': self.get_general_language_info(),
+            'general_language_info':
+                self.get_general_language_info(),
             'has_generic_language_field': False,
-            'language_list': self.get_languages(wb),
-            'default_language':
-                self.settings['default_language']
-                if 'default_language' in self.settings else ''
+            'language_list':
+                self.get_languages(
+                    settings_default=settings_default,
+                    survey_header=wb['survey'][0]),
+            'default_language': settings_default
         }
         self.languages = {
             **self.languages,
             **{'default_language': self.get_default_language(
-                settings_default=self.settings['default_language'],
+                settings_default=settings_default,
                 language_list=self.languages['language_list'])}
         }
+        self.check_for_bad_default_language(
+            default_lang=self.languages['default_language'],
+            ws_info=self.languages['general_language_info']['worksheets'])
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -193,6 +202,39 @@ class OdkForm:
         return lang_fields
 
     @staticmethod
+    def check_for_bad_default_language(default_lang, ws_info):
+        """Check for erroneous default language.
+
+        Args:
+            default_lang (str): The default language listed in XlsForm.
+            ws_info (dict): Parsed information on XlsForm worksheets.
+
+        Raises:
+             InvalidLanguageException: If erroneous default language.
+        >>> from pmix.ppp.odkform import OdkForm
+        >>> OdkForm.check_for_bad_default_language(default_lang='Huh?',
+        ... ws_info={'choices': {'language_fields': {'label': {'language_list':
+        ... ['a', 'b', 'c']}}}}) #doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+        InvalidLanguageException
+        """
+        err_msg = 'InvalidLanguageException: Erroneous default language.\n\n' \
+                  ' The \'default_language\' listed in the \'settings\'' \
+                  ' worksheet was not found in one or more language ' \
+                  'dependent fields in one or more language pertinent ' \
+                  'worksheets.\n\nLanguage-dependent fields: {}\n' \
+                  'Language-pertinent worksheets: {}'\
+            .format(LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_PERTINENT_WORKSHEETS)
+        for worksheet in ws_info:
+            # print(worksheet)
+            # print('hi')
+            if worksheet in LANGUAGE_PERTINENT_WORKSHEETS:
+                for dummy, field \
+                        in ws_info[worksheet]['language_fields'].items():
+                    if default_lang not in field['language_list']:
+                        raise InvalidLanguageException(err_msg)
+
+    @staticmethod
     def check_generic_language_fields(ws_lang_fields):
         """Check for presense of generic language fields.
 
@@ -240,19 +282,26 @@ class OdkForm:
 
         Returns:
             dict: Dictionary of general information on form language.
+
+        >>> from pmix.ppp.odkform import OdkForm
+        >>> OdkForm.get_languages(settings_default='X',
+        ... survey_header=['X'])
+        'X'
         """
         # TODO: Handle the following cases, both with (1) cases of a
         # TODO: presence of 'default_language', and (2) not.
         # * A 'label' field by itself on both sheets.
         # * A 'label' field with 'label::' fields on both sheets.
         # * Inconsistent 'label' 'label::' in worksheets.
+
         wb = self.metadata['raw_data']
-        language_pertinent_worksheets = ['survey', 'choices',
-                                         'external_choices']
+        settings_default = self.settings['default_language'] \
+            if 'default_language' in self.settings \
+               and self.settings['default_language'] is not '' else None
         workbook_languages = {'worksheets': {}}
 
-        # Set self.languages['general_language_info']
-        for ws in language_pertinent_worksheets:
+        # I. Set self.languages['general_language_info']
+        for ws in LANGUAGE_PERTINENT_WORKSHEETS:
             if ws in [ws.name for ws in wb.data]:
                 workbook_languages['worksheets'][ws] = {
                     'language_fields': self.get_worksheet_languages(wb[ws][0]),
@@ -266,32 +315,49 @@ class OdkForm:
                 ws_data['has_generic_language_fields'] = \
                     self.check_generic_language_fields(wslf)
 
-        # Set self.languages['has_generic_language_field']
+        # II. Set self.languages['has_generic_language_field']
         for dummy, v in workbook_languages['worksheets'].items():
             if v['has_generic_language_field'] is True:
                 self.languages['has_generic_language_field'] = True
                 break
+
+        # III. Catch exceptions.
+        if settings_default:
+            if workbook_languages['has_generic_language_field']:
+                msg = 'InvalidLanguageException: Ambiguous default language.' \
+                      ' A \'default_language\' has been specified in the ' \
+                      'form settings, but one or more worksheets contains ' \
+                      'language-dependent fields that are language agnostic,' \
+                      ' e.g. \'label\' rather than \'label::<some language>' \
+                      '\'.\n\nPlease correct the issue by using one or the ' \
+                      'other, but not both: default language, or language ' \
+                      'agnostic language-dependent fields.\n\n' \
+                      'Language-dependent fields: ' + LANGUAGE_DEPENDENT_FIELDS
+                raise InvalidLanguageException(msg)
+            pass
+        else:
+            # * A 'label' field by itself on both sheets.
+            # * A 'label' field with 'label::' fields on both sheets.
+            # * Inconsistent 'label' 'label::' in worksheets.
+            pass
+
         return workbook_languages
 
-    def get_languages(self, wb):
+    @staticmethod
+    def get_languages(settings_default, survey_header):
         """Get survey languages.
 
         Args:
-            wb (Workbook): A Workbook object representing ODK form.
+            settings_default (str): Default language of form, if specified.
+            survey_header (list): Header row of survey worksheet in an XlsForm.
 
         Returns:
             list: An alphabetically sorted list of languages in the form.
         """
-        header = wb['survey'][0]
         langs = set()
-        for field in header:
-            # TODO: Handle the following cases, both with (1) cases of a
-            # TODO: presence of 'default_language', and (2) not.
-            # * A 'label' field by itself on both sheets.
-            # * A 'label' field with 'label::' fields on both sheets.
-            # * Inconsistent 'label' 'label::' in worksheets.
+        for field in survey_header:
             if field == 'label':
-                if self.settings['default_language']:
+                if settings_default:
                     raise InvalidLanguageException
                 langs.add('')  # Default language. / Does this do anything?
             elif str(field).startswith('label::'):
@@ -302,6 +368,17 @@ class OdkForm:
     @staticmethod
     def get_default_language(settings_default, language_list):
         """Get default survey language if specified.
+
+        Args:
+            settings_default (str): Default language of form, if specified.
+            language_list (list): Sorted list of languages in form.
+
+        Returns:
+            str: The default language of the form.
+
+        Raises:
+            InvalidLanguageException: Default language not found in survey
+            worksheet.
 
         >>> from pmix.ppp.odkform import OdkForm
         >>> OdkForm.get_default_language(settings_default='Russian',
@@ -314,19 +391,9 @@ class OdkForm:
         ... ['a', 'b', 'c', 'd', 'e']) #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
         InvalidLanguageException
-
-        Args:
-            settings_default (str): Default language of form, if specified.
-            language_list (list): Sorted list of languages in form.
-
-        Returns:
-            str: The default language of the form.
-
-        Raises:
-            InvalidLanguageException: Default language not found in survey
-            worksheet.
         """
-        default = settings_default if settings_default is not '' \
+        default = settings_default \
+            if settings_default is not None and settings_default is not '' \
             else language_list[0]
         # if not default:  # - Note: Check removed. Will allow.
         #     msg = 'InvalidLanguageException: \'default_language\' cannot ' \

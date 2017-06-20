@@ -322,8 +322,12 @@ if __name__ == '__main__':
         return suite
 
     PARAMS = get_args()
+    TEST_SUITE = get_test_suite()
+    unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
     if PARAMS.doctests_only:
-        TEST_SUITE = get_test_suite()
-        unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
+        pass
+        # TEST_SUITE = get_test_suite()
+        # unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
     else:
-        unittest.main()
+        # unittest.main()
+        pass

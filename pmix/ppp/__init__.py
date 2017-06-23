@@ -3,7 +3,7 @@
 """A package for converting ODK forms."""
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.error import OdkFormError, OdkChoicesError, \
-    InvalidLanguageException
+    InvalidLanguageException, AmbiguousLanguageError
 
 
 def run(in_file, language=None, output_format=None, out_file=None,
@@ -35,7 +35,7 @@ def run(in_file, language=None, output_format=None, out_file=None,
         else:
             print(output)
     except InvalidLanguageException as err:
-        if len(str(err)):
+        if len(str(err)) > 0:
             raise InvalidLanguageException(err)
         elif language is None:
             msg = 'InvalidLanguageException: An unknown error occurred when ' \
@@ -49,7 +49,9 @@ def run(in_file, language=None, output_format=None, out_file=None,
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
+    except AmbiguousLanguageError as err:
+        raise AmbiguousLanguageError(err)
     except OdkChoicesError as err:
-        raise OdkFormError(err)
+        raise OdkChoicesError(err)
     except OdkFormError as err:
         raise OdkFormError(err)

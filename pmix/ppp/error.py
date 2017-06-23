@@ -14,6 +14,11 @@ class OdkChoicesError(Exception):
 
 
 class InvalidLanguageException(OdkFormError):
-    """For errors related to language of ODK form."""
+    """General error related to language of ODK form."""
+
+    pass
+
+class AmbiguousLanguageError(InvalidLanguageException):
+    """Ambiguous language error."""
 
     pass

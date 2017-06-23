@@ -4,7 +4,7 @@
 import sys
 import argparse
 from pmix.ppp.error import OdkFormError, OdkChoicesError, \
-    InvalidLanguageException
+    InvalidLanguageException, AmbiguousLanguageError
 from pmix.ppp import run
 
 
@@ -56,9 +56,10 @@ def cli():
         run(in_file=args.xlsxfile, language=args.language,
             output_format=args.format, out_file=args.outpath,
             debug=args.debug, highlight=args.highlight)
-    except (OdkFormError, InvalidLanguageException, OdkChoicesError) as err:
-        print(err)
+    except (OdkFormError, OdkChoicesError, InvalidLanguageException,
+            AmbiguousLanguageError) as err:
         print(err, file=sys.stderr)
+        print(err)
 
 
 if __name__ == '__main__':

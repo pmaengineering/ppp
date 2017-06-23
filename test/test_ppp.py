@@ -12,8 +12,30 @@ from pmix.ppp.odkgroup import OdkGroup
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
-TEST_PACKAGE = 'pmix.ppp'
-TEST_FORMS_DIRECTORY = os.path.dirname(os.path.realpath(__file__)) + '/files'
+TEST_PACKAGES = ['pmix.ppp', 'test']
+TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
+TEST_FILES_DIR = TEST_DIR + 'files/'
+
+
+def run_mock_form(file_name, folder=None):
+    """Run mock form.
+
+    Args:
+        file_name (str): File name.
+        folder (str): Directory.
+
+    Returns:
+        OdkForm: OdkForm instance.
+
+    >>> from test.test_ppp import run_mock_form
+    >>> form = run_mock_form(file_name='no-errors')
+    >>> isinstance(form, OdkForm)
+    True
+    """
+    # TODO finish above docstring test.
+    path = TEST_FILES_DIR + folder + file_name + '.xlsx' if folder \
+        else TEST_FILES_DIR + file_name + '.xlsx'
+    return OdkForm(path)
 
 
 # pylint: disable=too-few-public-methods
@@ -32,7 +54,7 @@ class PppTest:
             except KeyError:
                 file = datum['inputs']['file']
             if file not in forms:
-                forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + file)
+                forms[file] = OdkForm(file=TEST_FILES_DIR + file)
         return forms
 
 
@@ -298,9 +320,14 @@ if __name__ == '__main__':
         Returns:
             list: List of all python modules in package.
         """
-        test_modules = []
-        root_dir = TEST_FORMS_DIRECTORY + "/../../" + "pmix/ppp"
+        if test_package == 'pmix.ppp':  # TODO: Make dynamic.
+            root_dir = TEST_DIR + "../" + "pmix/ppp"
+        elif test_package == 'test':
+            root_dir = TEST_DIR
+        else:
+            raise Exception('Test package not found.')
 
+        test_modules = []
         for dummy, dummy, filenames in os.walk(root_dir):
             for file in filenames:
                 if file.endswith('.py'):
@@ -309,22 +336,23 @@ if __name__ == '__main__':
                     test_modules.append(test_module)
         return test_modules
 
-    def get_test_suite():
+    def get_test_suite(test_packages):
         """Get suite to test.
 
         Returns:
             TestSuite: Suite to test.
         """
         suite = unittest.TestSuite()
-        pkg_modules = get_test_modules(test_package=TEST_PACKAGE)
-        for pkg_module in pkg_modules:
-            suite.addTest(doctest.DocTestSuite(pkg_module))
+        for package in test_packages:
+            pkg_modules = get_test_modules(test_package=package)
+            for pkg_module in pkg_modules:
+                suite.addTest(doctest.DocTestSuite(pkg_module))
         return suite
 
     PARAMS = get_args()
-    TEST_SUITE = get_test_suite()
+    TEST_SUITE = get_test_suite(TEST_PACKAGES)
     unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
-    if PARAMS.doctests_only:
+    if PARAMS.doctests_only:  # - For dev testing needs. Refactor.
         pass
         # TEST_SUITE = get_test_suite()
         # unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)

@@ -21,6 +21,7 @@ def run(in_file, language=None, output_format=None, out_file=None,
         InvalidLanguageException: Language related.
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
+
     """
     form = OdkForm(file=in_file)
     try:
@@ -34,8 +35,10 @@ def run(in_file, language=None, output_format=None, out_file=None,
                 file.write(output)
         else:
             print(output)
+    except AmbiguousLanguageError as err:
+        raise AmbiguousLanguageError(err)
     except InvalidLanguageException as err:
-        if len(str(err)) > 0:
+        if str(err):
             raise InvalidLanguageException(err)
         elif language is None:
             msg = 'InvalidLanguageException: An unknown error occurred when ' \
@@ -49,8 +52,6 @@ def run(in_file, language=None, output_format=None, out_file=None,
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
-    except AmbiguousLanguageError as err:
-        raise AmbiguousLanguageError(err)
     except OdkChoicesError as err:
         raise OdkChoicesError(err)
     except OdkFormError as err:

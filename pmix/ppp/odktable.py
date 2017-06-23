@@ -12,6 +12,7 @@ class OdkTable:
         header (OdkPrompt): OdkPrompt representing table header.
         contents (list): List of OdkPrompts consisting of table rows.
         in_repeat (bool): Is this table part of a repeat group?
+
     """
 
     def __init__(self):
@@ -31,6 +32,7 @@ class OdkTable:
 
         Args:
             odkprompt (OdkPrompt): ODK table row.
+
         """
         self.data.append(odkprompt)
 
@@ -39,6 +41,7 @@ class OdkTable:
 
         Args:
             lang (str): The language.
+
         """
         for i in self.data:
             i.row['in_group'] = True
@@ -58,6 +61,7 @@ class OdkTable:
         #     lang (str): The language.
         # Returns:
         #     str: The text for this table.
+        #
         # """
         # choices = pmix.utils.d(self.choices, lang)
         #
@@ -101,6 +105,7 @@ class OdkTable:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     table = []
     #     return table
@@ -119,6 +124,7 @@ class OdkTable:
 
         Returns:
             str: A rendered html template.
+
         """
         self.set_header_and_contents(lang)
         table = list()

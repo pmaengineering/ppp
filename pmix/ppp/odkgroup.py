@@ -14,6 +14,7 @@ class OdkGroup:
         pending_table (OdkTable): A variable for storing an OdkTable object as
             it is being constructed.
         in_repeat (bool): Is this group part of a repeat group?
+
     """
 
     def __init__(self, opener):
@@ -22,6 +23,7 @@ class OdkGroup:
         Args:
             opener (dict): A dictionary row representing first row of group.
                 In ODK Specification, this would be of 'begin group' type.
+
         """
         self.opener = opener
         self.data = []
@@ -29,7 +31,7 @@ class OdkGroup:
         self.in_repeat = False
 
     def __repr__(self):
-        """Printed representation."""
+        """Print representation."""
         return "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
 
     @staticmethod
@@ -44,6 +46,7 @@ class OdkGroup:
 
         Returns:
             dict: A reformatted representation.
+
         """
         header['in_group'] = True
         header['simple_type'] = header['type']
@@ -57,6 +60,7 @@ class OdkGroup:
 
         Args:
             row (dict): Row from XLSForm.
+
         """
         self.add_pending()
         self.data.append(row)
@@ -68,6 +72,7 @@ class OdkGroup:
 
         Args:
             odkprompt (OdkPrompt): Row from XLSForm.
+
         """
         if self.pending_table:
             self.pending_table.add(odkprompt)
@@ -89,6 +94,7 @@ class OdkGroup:
 
         Returns:
             str: The text for this group.
+
         """
         obj_texts = (d.to_text(lang) for d in self.data)
         sep = '\n\n{}\n\n'.format(' -' * 25)
@@ -104,6 +110,7 @@ class OdkGroup:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     group = []
     #     # header = self.format_header(self.opener, lang, highlighting)
@@ -119,6 +126,7 @@ class OdkGroup:
 
         Returns:
             str: A rendered html concatenation of component templates.
+
         """
         html = ''
         # pylint: disable=no-member

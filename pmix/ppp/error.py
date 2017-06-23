@@ -18,6 +18,7 @@ class InvalidLanguageException(OdkFormError):
 
     pass
 
+
 class AmbiguousLanguageError(InvalidLanguageException):
     """Ambiguous language error."""
 

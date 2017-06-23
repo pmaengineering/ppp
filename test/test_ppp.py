@@ -31,6 +31,7 @@ def run_mock_form(file_name, folder=None):
     >>> form = run_mock_form(file_name='no-errors')
     >>> isinstance(form, OdkForm)
     True
+
     """
     # TODO finish above docstring test.
     path = TEST_FILES_DIR + folder + file_name + '.xlsx' if folder \
@@ -86,6 +87,25 @@ class OdkPromptTest(unittest.TestCase, PppTest):
         """Test to_dict method."""
         def test_media_fields_in_prompts():
             """Tests for media fields."""
+            def asserts(item_dict):
+                """Iterate through asserts."""
+                for key, val in item_dict.items():
+                    for media_type in OdkPromptTest.media_types:
+                        if key.startswith(media_type) and val:
+                            # A field such as 'media::image::English'
+                            # is formatted correctly.
+                            self.assertTrue(val[0] == lead_char and
+                                            val[-1] == end_char)
+                            # A field such as 'image' exists and is
+                            # formatted correctly.
+                            self.assertTrue(
+                                item_dict[media_type][0] == lead_char and
+                                item_dict[media_type][-1] == end_char)
+                            # No discrepancies between language based and non
+                            # language based media fields.
+                            self.assertTrue(item_dict[media_type] == val)
+                            # The field 'media' exists and formatted correct.
+                            self.assertTrue(item_dict['media'])
             lang = OdkPromptTest.arbitrary_language_param
             lead_char = OdkPromptTest.media_lead_char
             end_char = OdkPromptTest.media_end_char
@@ -94,29 +114,8 @@ class OdkPromptTest(unittest.TestCase, PppTest):
                 file_name = i['inputs']['file']
                 for item in forms[file_name].questionnaire:
                     if isinstance(item, OdkPrompt):
-                        item_dict = item.to_dict(lang)
-                        for key, val in item_dict.items():
-                            for media_type in OdkPromptTest.media_types:
-                                if key.startswith(media_type) and len(val) > 0:
-                                    # A field such as 'media::image::English'
-                                    # is formatted correctly.
-                                    self.assertTrue(val[0] == lead_char and
-                                                    val[-1] == end_char)
-                                    # A field such as 'image' exists and is
-                                    # formatted correctly.
-                                    self.assertTrue(
-                                        item_dict[media_type][0] == lead_char
-                                        and
-                                        item_dict[media_type][-1] == end_char)
-                                    # No discrepancies between language
-                                    # based and non-language based media
-                                    # fields.
-                                    self.assertTrue(
-                                        item_dict[media_type] == val)
-                                    # The field 'media' exists and is
-                                    # formatted correctly.
-                                    self.assertTrue(
-                                        len(item_dict['media']) > 0)
+                        asserts(item.to_dict(lang))
+
         test_media_fields_in_prompts()
 
     def test_initialization_has_choices(self):
@@ -240,8 +239,9 @@ class OdkFormTest(unittest.TestCase, PppTest):
         )
 
     def test_questionnaire(self):
-        """Test expected results of converted questionnaire based on
-        position."""
+        """Test expected results of converted questionnaire based on position.
+
+        """
         forms = self.get_forms(self.data)
         for i, expected_output in self.data:
             output = forms[i['file']].questionnaire[i['position']]
@@ -319,6 +319,7 @@ if __name__ == '__main__':
 
         Returns:
             list: List of all python modules in package.
+
         """
         if test_package == 'pmix.ppp':  # TODO: Make dynamic.
             root_dir = TEST_DIR + "../" + "pmix/ppp"
@@ -341,6 +342,7 @@ if __name__ == '__main__':
 
         Returns:
             TestSuite: Suite to test.
+
         """
         suite = unittest.TestSuite()
         for package in test_packages:

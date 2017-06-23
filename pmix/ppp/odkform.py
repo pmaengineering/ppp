@@ -29,6 +29,7 @@ class OdkForm:
             converted ODK forms.
         questionnaire (list): An ordered representation of the ODK form,
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
+
     """
 
     def __init__(self, file=None, wb=None):
@@ -43,6 +44,7 @@ class OdkForm:
             wb (Workbook): A Workbook object meeting XLSForm specification.
         Raises:
             OdkformError: No ODK form is supplied.
+
         """
         if file is None and wb is None:
             raise OdkFormError
@@ -86,12 +88,13 @@ class OdkForm:
         }
         self.languages = {
             **self.languages,
-            **{'has_generic_language_field':
-                self.check_generic_language_fields(
-                    self.languages['general_language_info']['worksheets']),
-               'default_language': self.get_default_language(
-                   settings_default=settings_default,
-                   language_list=self.languages['language_list'])}
+            **{
+                'has_generic_language_field':
+                    self.check_generic_language_fields(
+                        self.languages['general_language_info']['worksheets']),
+                'default_language': self.get_default_language(
+                    settings_default=settings_default,
+                    language_list=self.languages['language_list'])}
         }
         self.check_language_exceptions(settings=self.settings,
                                        languages=self.languages)
@@ -134,6 +137,7 @@ class OdkForm:
 
         Returns:
             dict: Form settings.
+
         """
         settings_dict = {}
         try:
@@ -163,6 +167,7 @@ class OdkForm:
             OdkformError: Catches instances where list specified in the
                 'survey' worksheet, but the list does not appear in the
                 designated 'choices' or 'external_choices' worksheet.
+
         """
         formatted_choices = {}
         try:
@@ -195,6 +200,7 @@ class OdkForm:
 
         Returns:
             list: An alphabetically sorted list of languages.
+
         """
         lang_fields = {}
         for field in header:
@@ -232,6 +238,7 @@ class OdkForm:
         ... ['a', 'b', 'c']}}}}) #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
         InvalidLanguageException
+
         """
         err_msg = 'InvalidLanguageException: Erroneous default language.\n' \
                   'The default language \'{}\' was not found in the \'{}\' ' \
@@ -261,6 +268,7 @@ class OdkForm:
         Returns:
             bool: True if any language field in worksheet has generic language
             field. Otherwise returns False.
+
         """
         for dummy, v in ws_lang_fields.items():
             if v['has_generic_language_field'] is True:
@@ -277,6 +285,7 @@ class OdkForm:
 
         Returns:
             list: An alphabetically sorted list of languages.
+
         """
         return sorted(ws_lang_fields['label']['language_list'])
 
@@ -331,6 +340,7 @@ class OdkForm:
         ... folder='exceptions/language/')  #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
         AmbiguousLanguageError
+
         """
         self.check_for_bad_default_language(
             default_lang=self.languages['default_language'],
@@ -362,8 +372,8 @@ class OdkForm:
             pass
 
     @staticmethod
-    def get_languages(settings_default, survey_header):
-        """Get survey languages.
+    def get_languages(settings_default, survey_header):  # noqa: D207
+        r"""Get survey languages.
 
         Args:
             settings_default (str): Default language of form, if specified.
@@ -378,6 +388,7 @@ class OdkForm:
         ... odk.metadata['raw_data']['survey'][0])
         ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo', 'Lusoga', \
 'Ngakarimojong', 'Runyankole-Rukiga', 'Runyoro-Rutoro']
+
         """
         langs = set()
         for field in survey_header:
@@ -417,9 +428,10 @@ class OdkForm:
         ... ['a', 'b', 'c', 'd', 'e']) #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
         InvalidLanguageException
+
         """
         default = settings_default \
-            if settings_default is not None and settings_default is not '' \
+            if settings_default and settings_default is not None \
             else language_list[0]
         # if not default:  # - Note: Check removed. Will allow.
         #     msg = 'InvalidLanguageException: \'default_language\' cannot ' \
@@ -446,6 +458,7 @@ class OdkForm:
 
         Returns:
             str: Total time taken to convert form.
+
         """
         self.metadata['conversion_time'] = \
             str(self.metadata['conversion_end'] - self.metadata[
@@ -461,6 +474,7 @@ class OdkForm:
 
         Returns:
             str: The full string of the XLSForm, ready to print or save.
+
         """
         lang = kwargs['lang'] if 'lang' in kwargs \
             else self.languages['language_list']['default_language']
@@ -486,6 +500,7 @@ class OdkForm:
     #
     #     Returns:
     #         dict: A full dictionary representation of the XLSForm.
+    #
     #     """
     #     lang = lang if lang \
     #         else self.languages['language_list']['default_language']
@@ -506,6 +521,7 @@ class OdkForm:
 
         Returns:
             json: A full JSON representation of the XLSForm.
+
         """
         import json
         # lang = lang if lang \
@@ -517,10 +533,13 @@ class OdkForm:
                 continue
             raw_survey.append({str(k): str(v) for k, v in zip(header, row)})
 
-        if pretty:
-            return json.dumps(raw_survey, indent=2)
-        else:
-            return json.dumps(raw_survey)
+        # - Note: Why 'Unnecessary "else" after "return" (no-else-return)'?
+        # if pretty:
+        #     return json.dumps(raw_survey, indent=2)
+        # else:
+        #     return json.dumps(raw_survey)
+        return json.dumps(raw_survey, indent=2) if pretty \
+            else json.dumps(raw_survey)
 
     def to_html(self, **kwargs):
         """Get the JSON representation of an entire XLSForm.
@@ -534,6 +553,7 @@ class OdkForm:
 
         Returns:
             str: A full HTML representation of the XLSForm.
+
         """
         # *(1) Currently not logging conversion time.
         # conversion_start = datetime.datetime.now()  # (1)
@@ -573,11 +593,10 @@ class OdkForm:
                 html_questionnaire += item.to_html(lang, kwargs['highlight'])
             prev_item = item
         # self.set_conversion_end()  # (1)
-        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
-            else 'false'
+        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
 
         OdkForm.conversion_info = {} \
-            if OdkForm.conversion_info is 'false' else 'false'  # (1)
+            if OdkForm.conversion_info == 'false' else 'false'  # (1)
         # else OdkForm.conversion_info  # (1)
         # self.get_running_conversion_time()  # (1)
         # conversion_time = str(self.metadata['conversion_time'])  # (1)
@@ -612,6 +631,7 @@ class OdkForm:
         Raises:
             OdkFormError: If the row is not select_[one|multiple](_external)?
             KeyError: If the select question's choice list is not found.
+
         """
         simple_row = {'token_type': 'prompt'}
         simple_type = 'select_one'
@@ -654,6 +674,7 @@ class OdkForm:
 
         Raises:
             OdkFormError: If type is not begin/end group/repeat.
+
         """
         row_type = row['type']
         token_type = row_type
@@ -678,6 +699,7 @@ class OdkForm:
 
         Returns:
             A dictionary with the simple information about this prompt.
+
         """
         simple_row = {
             'token_type': 'prompt',
@@ -699,6 +721,7 @@ class OdkForm:
 
         Returns:
             dict: simple_row information from parsing.
+
         """
         row_type = row['type']
         simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
@@ -737,6 +760,7 @@ class OdkForm:
                 or repeat groups, errors when appending to groups or repeat
                 groups, erroneously formed tables, duplicate context group
                 names, and groups nested within a field-list group.
+
         """
         context = OdkForm.ConversionContext()
         try:
@@ -796,6 +820,7 @@ class OdkForm:
                 repeats.
             group_stack (list): A stck for tracking nested groups and context
                 groups.
+
         """
 
         def __init__(self):
@@ -812,6 +837,7 @@ class OdkForm:
 
             Args:
                 prompt (OdkPrompt): A prompt to add.
+
             """
             if self.pending_stack:
                 self.pending_stack[-1].add(prompt)
@@ -831,6 +857,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last = self.pending_stack[-1]
@@ -845,6 +872,7 @@ class OdkForm:
 
             Context groups are tracked only to help popping groups correctly
             from the pending stack.
+
             """
             self.group_stack.append(None)
 
@@ -861,6 +889,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack.pop()
@@ -885,6 +914,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.group_stack:
                 last_group = self.group_stack.pop()
@@ -906,6 +936,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if not self.pending_stack:
                 self.pending_stack.append(repeat)
@@ -921,6 +952,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack.pop()
@@ -945,6 +977,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack[-1]

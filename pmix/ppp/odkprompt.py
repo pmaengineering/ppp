@@ -24,6 +24,7 @@ class OdkPrompt:
         response_types (tuple): Prompt types which can accept data and do not
             include a list of choices.
         non_response_types (tuple): Prompt types which do not accept data.
+
     """
 
     select_types = (
@@ -53,6 +54,7 @@ class OdkPrompt:
                 class member variables `select_types`, `response_types`, or
                 `non_response_types`.
             choices (OdkChoices): Answer choices, if applicable.
+
         """
         self.row = row
         self.choices = choices
@@ -77,6 +79,7 @@ class OdkPrompt:
 
         Returns:
             str: Truncated text.
+
         """
         if len(text) > 100:
             text = text[0:98] + ' …'
@@ -94,6 +97,7 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation.
+
         """
         for k, v in row.items():
             # if k.startswith('label' or 'hint' or 'constraint_message'):
@@ -116,6 +120,7 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation.
+
         """
         new_row = row.copy()
         for field in LANGUAGE_DEPENDENT_FIELDS:
@@ -139,12 +144,13 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation.
+
         """
         fields_to_add = []
         new_row = row.copy()
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
-                if key.startswith(field) and len(val) > 0:
+                if key.startswith(field) and val:
                     if field not in row:
                         fields_to_add.append(field)
                     if field.startswith(prefix):
@@ -155,7 +161,7 @@ class OdkPrompt:
 
         for field in fields_to_add:
             row[field] = ''
-        if len(fields_to_add) > 0:
+        if fields_to_add:
             row['media'] = []
         return row
 
@@ -168,6 +174,7 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation of prompt.
+
         """
         new_row = row.copy()
         for key, val in new_row.items():
@@ -192,6 +199,7 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation of prompt.
+
         """
         new_row = row.copy()
         for field in TRUNCATABLE_FIELDS:
@@ -207,14 +215,15 @@ class OdkPrompt:
 
         Returns:
             dict: Reformatted representation.
+
         """
         arbitrary_media_prefix = 'media::'
         new_row = self.create_additional_media_fields(row,
                                                       arbitrary_media_prefix)
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
-                if key.startswith(field) and len(val) > 0:
-                    if val[0] is not '[' and val[-1] is not ']':
+                if key.startswith(field) and val:
+                    if val[0] != '[' and val[-1] != ']':
                         formatted_media_label = '[' + val + ']'
                     row[field] = formatted_media_label
                     row[key] = formatted_media_label
@@ -235,6 +244,7 @@ class OdkPrompt:
 
         Returns:
             str: The value found from this row.
+
         """
         value = None
         try:
@@ -259,6 +269,7 @@ class OdkPrompt:
 
         Returns:
             str: The text representation of the relevant.
+
         """
         formatted_relevant = None
         relevant_text = self.text_field('relevant_text', lang)
@@ -278,6 +289,7 @@ class OdkPrompt:
 
         Returns:
             str: The text representation of the response entry field.
+
         """
         text_str = None
         if self.odktype == 'select_multiple':
@@ -320,6 +332,7 @@ class OdkPrompt:
 
         Returns:
             str or dict: The representation of the entry field.
+
         """
         field = None
         if self.odktype in ['select_multiple', 'select_one']:
@@ -336,6 +349,7 @@ class OdkPrompt:
 
         Returns:
             str: The text from all parts of the prompt.
+
         """
         # Note: May not need 'relevant_text'.
         # relevant_text = self.text_field('relevant_text', lang)
@@ -362,6 +376,7 @@ class OdkPrompt:
 
         Returns:
             dict: The text from all parts of the prompt.
+
         """
         # TODO: Refactor so that the dict row is only looped through once
         # to make all of the changes below.
@@ -388,6 +403,7 @@ class OdkPrompt:
 
         Returns:
             str: A rendered html template.
+
         """
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\

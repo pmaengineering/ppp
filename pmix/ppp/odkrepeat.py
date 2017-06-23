@@ -12,6 +12,7 @@ class OdkRepeat:
     Attributes:
         opener (dict): A dictionary row representing first row of repeat group.
         data (list): A list of repeat group components.
+
     """
 
     def __init__(self, opener):
@@ -20,6 +21,7 @@ class OdkRepeat:
         Args:
             opener (dict): A dictionary row representing first row of group.
                 In ODK Specification, this would be of 'begin repeat' type.
+
         """
         self.opener = opener
         self.data = []
@@ -43,6 +45,7 @@ class OdkRepeat:
 
         Returns:
             str: A rendered html representation of repeat group header.
+
         """
         # pylint: disable=no-member
         html = TEMPLATE_ENV.get_template('content/repeat/repeat-opener.html')\
@@ -61,6 +64,7 @@ class OdkRepeat:
 
         Returns:
             str: A rendered html representation of repeat group footer.
+
         """
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/repeat/repeat-closer.html')\
@@ -73,6 +77,7 @@ class OdkRepeat:
 
         Args:
             obj (OdkPrompt or OdkGroup): Item to add.
+
         """
         self.data.append(obj)
 
@@ -84,6 +89,7 @@ class OdkRepeat:
 
         Returns:
             str: The text for this repeat.
+
         """
         obj_texts = (d.to_text(lang) for d in self.data)
         sep = '\n\n{}\n\n'.format('=' * 50)
@@ -100,6 +106,7 @@ class OdkRepeat:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     repeat = []
     #     return repeat
@@ -114,6 +121,7 @@ class OdkRepeat:
 
         Returns:
             str: A rendered html concatenation of component templates.
+
         """
         html = ''
         html += self.render_header(self.opener, lang, highlighting)

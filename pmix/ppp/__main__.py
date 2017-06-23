@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """CLI for PPP package."""
+import sys
 import argparse
 from pmix.ppp.error import OdkFormError, OdkChoicesError, \
     InvalidLanguageException
@@ -57,6 +58,7 @@ def cli():
             debug=args.debug, highlight=args.highlight)
     except (OdkFormError, InvalidLanguageException, OdkChoicesError) as err:
         print(err)
+        print(err, file=sys.stderr)
 
 
 if __name__ == '__main__':

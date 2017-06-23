@@ -77,9 +77,14 @@ class OdkForm:
                 settings_default=settings_default,
                 language_list=self.languages['language_list'])}
         }
-        self.check_for_bad_default_language(
-            default_lang=self.languages['default_language'],
-            ws_info=self.languages['general_language_info']['worksheets'])
+        lang_error_funcs = [
+            self.check_for_bad_default_language(
+                default_lang=self.languages['default_language'],
+                ws_info=self.languages['general_language_info']['worksheets'])
+        ]
+        self.check_language_exceptions(settings=self.settings,
+                                       languages=self.languages,
+                                       funcs=lang_error_funcs)
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -118,7 +123,7 @@ class OdkForm:
             wb (Workbook): A workbook object representing ODK form.
 
         Returns:
-            dict: Form settings.:
+            dict: Form settings.
         """
         settings_dict = {}
         try:
@@ -219,15 +224,13 @@ class OdkForm:
         InvalidLanguageException
         """
         err_msg = 'InvalidLanguageException: Erroneous default language.\n\n' \
-                  ' The \'default_language\' listed in the \'settings\'' \
+                  'The \'default_language\' listed in the \'settings\'' \
                   ' worksheet was not found in one or more language ' \
                   'dependent fields in one or more language pertinent ' \
-                  'worksheets.\n\nLanguage-dependent fields: {}\n' \
-                  'Language-pertinent worksheets: {}'\
+                  'worksheets.\n* Language-dependent fields: {}\n' \
+                  '* Language-pertinent worksheets: {}'\
             .format(LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_PERTINENT_WORKSHEETS)
         for worksheet in ws_info:
-            # print(worksheet)
-            # print('hi')
             if worksheet in LANGUAGE_PERTINENT_WORKSHEETS:
                 for dummy, field \
                         in ws_info[worksheet]['language_fields'].items():
@@ -295,9 +298,6 @@ class OdkForm:
         # * Inconsistent 'label' 'label::' in worksheets.
 
         wb = self.metadata['raw_data']
-        settings_default = self.settings['default_language'] \
-            if 'default_language' in self.settings \
-               and self.settings['default_language'] is not '' else None
         workbook_languages = {'worksheets': {}}
 
         # I. Set self.languages['general_language_info']
@@ -321,9 +321,25 @@ class OdkForm:
                 self.languages['has_generic_language_field'] = True
                 break
 
-        # III. Catch exceptions.
+        return workbook_languages
+
+    # III. Catch exceptions.
+    @staticmethod
+    def check_language_exceptions(settings, languages, funcs):
+        """
+
+
+        :param settings:
+        :param languages:
+        :return:
+        """
+        map(funcs, func, func())
+
+        settings_default = settings['default_language'] \
+            if 'default_language' in settings \
+               and settings['default_language'] is not '' else None
         if settings_default:
-            if workbook_languages['has_generic_language_field']:
+            if languages['has_generic_language_field']:
                 msg = 'InvalidLanguageException: Ambiguous default language.' \
                       ' A \'default_language\' has been specified in the ' \
                       'form settings, but one or more worksheets contains ' \
@@ -334,14 +350,11 @@ class OdkForm:
                       'agnostic language-dependent fields.\n\n' \
                       'Language-dependent fields: ' + LANGUAGE_DEPENDENT_FIELDS
                 raise InvalidLanguageException(msg)
-            pass
-        else:
+        else:  # TODO: More exceptions.
             # * A 'label' field by itself on both sheets.
             # * A 'label' field with 'label::' fields on both sheets.
             # * Inconsistent 'label' 'label::' in worksheets.
             pass
-
-        return workbook_languages
 
     @staticmethod
     def get_languages(settings_default, survey_header):

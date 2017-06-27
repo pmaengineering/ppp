@@ -42,6 +42,7 @@ class OdkForm:
             file (str): The path for the source file of the ODK form,
                 typically an '.xlsx' file meeting the XLSForm specification.
             wb (Workbook): A Workbook object meeting XLSForm specification.
+
         Raises:
             OdkformError: No ODK form is supplied.
 

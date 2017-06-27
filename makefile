@@ -1,9 +1,9 @@
 PYTHON_JKP=./env/bin/python3
 PYTHON_JEF=python3
 TEST_DIR=test/
-SRC=pmaapi/
+SRC=pmix/
 
-.PHONY: lint tags ltags test flint go_lint go_code go_doc server serve
+.PHONY: lint tags ltags test flint lint_all codestyle docstyle server serve lint_src lint_test
 
 lint:
 	${PYTHON_JKP} -m pylint --output-format=colorized --reports=n ${SRC} && \
@@ -18,15 +18,21 @@ flint:
 	${PYTHON_JEF} -m pycodestyle ${TEST_DIR} && \
 	${PYTHON_JEF} -m pydocstyle ${TEST_DIR}
 
-go_lint:
+lint_all:
 	${PYTHON_JEF} -m pylint --output-format=colorized --reports=n ${SRC} && \
 	${PYTHON_JEF} -m pylint --output-format=colorized --reports=n ${TEST_DIR}
 
-go_code:
+lint_src:
+	${PYTHON_JEF} -m pylint --output-format=colorized --reports=n ${SRC}
+
+lint_test:
+	${PYTHON_JEF} -m pylint --output-format=colorized --reports=n ${TEST_DIR}
+
+codestyle:
 	${PYTHON_JEF} -m pycodestyle ${SRC} && \
 	${PYTHON_JEF} -m pycodestyle ${TEST_DIR}
 
-go_doc:
+docstyle:
 	${PYTHON_JEF} -m pydocstyle ${SRC} && \
 	${PYTHON_JEF} -m pydocstyle ${TEST_DIR}
 

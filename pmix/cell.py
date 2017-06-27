@@ -17,6 +17,7 @@ class Cell:
 
         Args:
             value: The value of the cell. Defaults to None for a blank cell.
+
         """
         self.value = value
         self.highlight = None

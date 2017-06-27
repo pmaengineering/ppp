@@ -293,11 +293,9 @@ class OdkForm:
         """Consolidate language information for ODK form.
 
         Consolidate pertinent language information, such as languages list for
-        relevant worksheets.
-
-        Side Effects:
-            self.languages['generic_language_fields_present']: True if generic
-            language field is found in any language field.
+        relevant worksheets. Side Effects are (1) self.
+        languages['generic_language_fields_present']: True if generic, (2)
+        language field is found in any language field.
 
         Returns:
             dict: Dictionary of general information on form language.
@@ -533,13 +531,9 @@ class OdkForm:
                 continue
             raw_survey.append({str(k): str(v) for k, v in zip(header, row)})
 
-        # - Note: Why 'Unnecessary "else" after "return" (no-else-return)'?
-        # if pretty:
-        #     return json.dumps(raw_survey, indent=2)
-        # else:
-        #     return json.dumps(raw_survey)
-        return json.dumps(raw_survey, indent=2) if pretty \
-            else json.dumps(raw_survey)
+        if pretty:
+            return json.dumps(raw_survey, indent=2)
+        return json.dumps(raw_survey)
 
     def to_html(self, **kwargs):
         """Get the JSON representation of an entire XLSForm.

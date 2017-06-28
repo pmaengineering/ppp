@@ -51,10 +51,10 @@ fest:
 	${PYTHON_JEF} -m unittest discover -v
 
 doctest:
-	${PYTHON_JEF} -m test.test_ppp
+	${PYTHON_JEF} -m test.test_ppp --doctests-only
 
 docfest:
-	${PYTHON_JEF} -m test.test_ppp
+	${PYTHON_JEF} -m test.test_ppp --doctests-only
 
 server:
 	gunicorn pmaapi.__main__:APP

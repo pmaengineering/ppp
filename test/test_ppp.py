@@ -17,45 +17,22 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 TEST_FILES_DIR = TEST_DIR + 'files/'
 
 
+# # Mock Objects
 class MockForm(OdkForm):
     """Mock object of OdkForm"""
 
     def __init__(self, mock_file, mock_dir=None):
-        """Run mock form.
+        """Initialize mock form.
 
         Args:
             mock_file (str): File name.
             mock_dir (str): Directory.
-
-        Returns:
-            OdkForm: OdkForm instance.
         """
         path = mock_dir + mock_file if mock_dir else TEST_FILES_DIR + mock_file
         super().__init__(file=path)
 
 
-# def run_mock_form(file_name, folder=None):
-#     """Run mock form.
-#
-#     Args:
-#         file_name (str): File name.
-#         folder (str): Directory.
-#
-#     Returns:
-#         OdkForm: OdkForm instance.
-#
-#     >>> from test.test_ppp import run_mock_form
-#     >>> form = run_mock_form(file_name='no-errors')
-#     >>> isinstance(form, OdkForm)
-#     True
-#
-#     """
-#     # TODO finish above docstring test.
-#     path = TEST_FILES_DIR + folder + file_name + '.xlsx' if folder \
-#         else TEST_FILES_DIR + file_name + '.xlsx'
-#     return OdkForm(path)
-
-
+# # Unit Tests
 # pylint: disable=too-few-public-methods
 # PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
 class PppTest:
@@ -315,66 +292,65 @@ class OdkFormTest(unittest.TestCase, PppTest):
         test_get_label_language_list()
 
 
+def get_args():
+    """CLI for PPP test runner."""
+    desc = 'Run tests for PPP package.'
+    parser = ArgumentParser(description=desc)
+    doctests_only_help = 'Specifies whether to run doctests only, as ' \
+                         'opposed to doctests with unittests. Default is' \
+                         ' False.'
+    parser.add_argument('-d', '--doctests-only', action='store_true',
+                        help=doctests_only_help)
+    args = parser.parse_args()
+    return args
+
+
+def get_test_modules(test_package):
+    """Get files to test.
+
+    Args:
+        test_package (str): The package containing modules to test.
+
+    Returns:
+        list: List of all python modules in package.
+
+    """
+    if test_package == 'pmix.ppp':  # TODO: Make dynamic.
+        root_dir = TEST_DIR + "../" + "pmix/ppp"
+    elif test_package == 'test':
+        root_dir = TEST_DIR
+    else:
+        raise Exception('Test package not found.')
+
+    test_modules = []
+    for dummy, dummy, filenames in os.walk(root_dir):
+        for file in filenames:
+            if file.endswith('.py'):
+                file = file[:-3]
+                test_module = test_package + '.' + file
+                test_modules.append(test_module)
+    return test_modules
+
+
+def get_test_suite(test_packages):
+    """Get suite to test.
+
+    Returns:
+        TestSuite: Suite to test.
+
+    """
+    suite = unittest.TestSuite()
+    for package in test_packages:
+        pkg_modules = get_test_modules(test_package=package)
+        for pkg_module in pkg_modules:
+            suite.addTest(doctest.DocTestSuite(pkg_module))
+    return suite
+
+
 if __name__ == '__main__':
-    def get_args():
-        """CLI for PPP test runner."""
-        desc = 'Run tests for PPP package.'
-        parser = ArgumentParser(description=desc)
-        doctests_only_help = 'Specifies whether to run doctests only, as ' \
-                             'opposed to doctests with unittests. Default is' \
-                             ' False.'
-        parser.add_argument('-d', '--doctests-only', action='store_true',
-                            help=doctests_only_help)
-        args = parser.parse_args()
-        return args
-
-    def get_test_modules(test_package):
-        """Get files to test.
-
-        Args:
-            test_package (str): The package containing modules to test.
-
-        Returns:
-            list: List of all python modules in package.
-
-        """
-        if test_package == 'pmix.ppp':  # TODO: Make dynamic.
-            root_dir = TEST_DIR + "../" + "pmix/ppp"
-        elif test_package == 'test':
-            root_dir = TEST_DIR
-        else:
-            raise Exception('Test package not found.')
-
-        test_modules = []
-        for dummy, dummy, filenames in os.walk(root_dir):
-            for file in filenames:
-                if file.endswith('.py'):
-                    file = file[:-3]
-                    test_module = test_package + '.' + file
-                    test_modules.append(test_module)
-        return test_modules
-
-    def get_test_suite(test_packages):
-        """Get suite to test.
-
-        Returns:
-            TestSuite: Suite to test.
-
-        """
-        suite = unittest.TestSuite()
-        for package in test_packages:
-            pkg_modules = get_test_modules(test_package=package)
-            for pkg_module in pkg_modules:
-                suite.addTest(doctest.DocTestSuite(pkg_module))
-        return suite
-
     PARAMS = get_args()
     TEST_SUITE = get_test_suite(TEST_PACKAGES)
     unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
-    if PARAMS.doctests_only:  # - For dev testing needs. Refactor.
-        pass
-        # TEST_SUITE = get_test_suite()
-        # unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
-    else:
+
+    if not PARAMS.doctests_only:
         unittest.main()
-        # pass

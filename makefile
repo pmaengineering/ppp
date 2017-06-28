@@ -1,7 +1,9 @@
+SRC=pmix/
+
 PYTHON_JKP=./env/bin/python3
 PYTHON_JEF=python3
 TEST_DIR=test/
-SRC=pmix/
+
 
 .PHONY: lint tags ltags test flint lint_all codestyle docstyle server serve lint_src lint_test
 

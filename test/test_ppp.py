@@ -17,26 +17,43 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 TEST_FILES_DIR = TEST_DIR + 'files/'
 
 
-def run_mock_form(file_name, folder=None):
-    """Run mock form.
+class MockForm(OdkForm):
+    """Mock object of OdkForm"""
 
-    Args:
-        file_name (str): File name.
-        folder (str): Directory.
+    def __init__(self, mock_file, mock_dir=None):
+        """Run mock form.
 
-    Returns:
-        OdkForm: OdkForm instance.
+        Args:
+            mock_file (str): File name.
+            mock_dir (str): Directory.
 
-    >>> from test.test_ppp import run_mock_form
-    >>> form = run_mock_form(file_name='no-errors')
-    >>> isinstance(form, OdkForm)
-    True
+        Returns:
+            OdkForm: OdkForm instance.
+        """
+        path = mock_dir + mock_file if mock_dir else TEST_FILES_DIR + mock_file
+        super().__init__(file=path)
 
-    """
-    # TODO finish above docstring test.
-    path = TEST_FILES_DIR + folder + file_name + '.xlsx' if folder \
-        else TEST_FILES_DIR + file_name + '.xlsx'
-    return OdkForm(path)
+
+# def run_mock_form(file_name, folder=None):
+#     """Run mock form.
+#
+#     Args:
+#         file_name (str): File name.
+#         folder (str): Directory.
+#
+#     Returns:
+#         OdkForm: OdkForm instance.
+#
+#     >>> from test.test_ppp import run_mock_form
+#     >>> form = run_mock_form(file_name='no-errors')
+#     >>> isinstance(form, OdkForm)
+#     True
+#
+#     """
+#     # TODO finish above docstring test.
+#     path = TEST_FILES_DIR + folder + file_name + '.xlsx' if folder \
+#         else TEST_FILES_DIR + file_name + '.xlsx'
+#     return OdkForm(path)
 
 
 # pylint: disable=too-few-public-methods
@@ -359,5 +376,5 @@ if __name__ == '__main__':
         # TEST_SUITE = get_test_suite()
         # unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
     else:
-        # unittest.main()
-        pass
+        unittest.main()
+        # pass

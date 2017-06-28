@@ -54,17 +54,6 @@ class OdkForm:
 
         self.settings = {str(k): str(v) for k, v in
                          self.get_settings(wb).items()}
-        # settings_default = self.settings['default_language'] \
-        #     if 'default_language' in self.settings \
-        #        and self.settings['default_language'] is not '' else None
-
-        # settings_default = self.settings['default_language'] \
-        #     if 'default_language' in self.settings else None
-
-        # settings_default = self.settings['default_language'] \
-        #     if 'default_language' in self.settings \
-        #        and self.settings['default_language'] else None
-
         settings_default = self.settings['default_language'] \
             if 'default_language' in self.settings \
                and self.settings['default_language'] else None
@@ -300,12 +289,10 @@ class OdkForm:
 
         Returns:
             dict: Dictionary of general information on form language.
-
         """
         wb = self.metadata['raw_data']
         workbook_languages = {'worksheets': {}}
 
-        # * Set self.languages['general_language_info']
         for ws in LANGUAGE_PERTINENT_WORKSHEETS:
             if ws in [ws.name for ws in wb.data]:
                 workbook_languages['worksheets'][ws] = {
@@ -334,12 +321,12 @@ class OdkForm:
         Raises:
             InvalidLanguageException: Various.
 
-        >>> from test.test_ppp import run_mock_form
-        >>> run_mock_form(file_name='ambiguous-default-language',
-        ... folder='exceptions/language/')  #doctest: +IGNORE_EXCEPTION_DETAIL
+        >>> from test.test_ppp import MockForm
+        >>> MockForm(
+        ... mock_file='exceptions/language/ambiguous-default-language.xlsx'
+        ... ) #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):
         AmbiguousLanguageError
-
         """
         self.check_for_bad_default_language(
             default_lang=self.languages['default_language'],
@@ -381,13 +368,11 @@ class OdkForm:
         Returns:
             list: An alphabetically sorted list of languages in the form.
 
-        >>> from test.test_ppp import run_mock_form
-        >>> odk = run_mock_form(file_name='no-errors')
-        >>> odk.get_languages(settings_default='English', survey_header=
-        ... odk.metadata['raw_data']['survey'][0])
-        ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo', 'Lusoga', \
-'Ngakarimojong', 'Runyankole-Rukiga', 'Runyoro-Rutoro']
-
+        >>> from test.test_ppp import MockForm
+        >>> form = MockForm(mock_file='no-errors.xlsx')
+        >>> form.get_languages(settings_default='English', survey_header=
+        ... form.metadata['raw_data']['survey'][0])  #doctest: +ELLIPSIS
+        ['Ateso', 'English', 'Luganda', ... 'Runyoro-Rutoro']
         """
         langs = set()
         for field in survey_header:

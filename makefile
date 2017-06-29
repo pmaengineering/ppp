@@ -7,6 +7,9 @@ TEST_DIR=test/
 
 .PHONY: lint tags ltags test flint lint_all codestyle docstyle server serve lint_src lint_test fest doctest docfest
 
+targets:
+	echo 'Targets: lint tags ltags test flint lint_all codestyle docstyle server serve lint_src lint_test fest doctest docfest'
+
 lint:
 	${PYTHON_JKP} -m pylint --output-format=colorized --reports=n ${SRC} && \
 	${PYTHON_JKP} -m pycodestyle ${SRC} && \

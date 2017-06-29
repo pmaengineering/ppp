@@ -32,7 +32,6 @@ class OdkTable:
 
         Args:
             odkprompt (OdkPrompt): ODK table row.
-
         """
         self.data.append(odkprompt)
 
@@ -41,7 +40,6 @@ class OdkTable:
 
         Args:
             lang (str): The language.
-
         """
         for i in self.data:
             i.row['in_group'] = True
@@ -124,7 +122,6 @@ class OdkTable:
 
         Returns:
             str: A rendered html template.
-
         """
         self.set_header_and_contents(lang)
         table = list()

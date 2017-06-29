@@ -16,7 +16,6 @@ class OdkChoices:
 
         Args:
             list_name (str): The name of the choice list.
-
         """
         self.list_name = list_name
         self.data = []
@@ -35,7 +34,6 @@ class OdkChoices:
 
         Args:
             choice (dict): A single choice row.
-
         """
         self.data.append(choice)
 
@@ -52,7 +50,6 @@ class OdkChoices:
             InvalidLanguageException: Language parameter not found in choice
                 list.
             InvalidLanguageException: No languages found in choice list.
-
         """
         choice_langs = self.choice_langs()
         if lang not in choice_langs:
@@ -80,7 +77,6 @@ class OdkChoices:
 
         Returns:
             list: Choice variable names and associated labels for choice list.
-
         """
         # 1. 'label' / all language fields alone needs to be supported if no
         # default language specified in form and no language passed.
@@ -107,7 +103,6 @@ class OdkChoices:
         Raises:
             InvalidLanguageException: If choice languages differe from survey
                 languages.
-
         """
         langs = set()
         for datum in self.data:

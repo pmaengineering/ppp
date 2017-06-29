@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 """A package for converting ODK forms."""
 from pmix.ppp.odkform import OdkForm
-from pmix.ppp.error import OdkFormError, OdkChoicesError, \
-    InvalidLanguageException, AmbiguousLanguageError
+from pmix.ppp.error import OdkException, InvalidLanguageException
 
 
 def run(in_file, language=None, output_format=None, out_file=None,
@@ -22,7 +21,6 @@ def run(in_file, language=None, output_format=None, out_file=None,
         InvalidLanguageException: Language related.
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
-
     """
     form = OdkForm(file=in_file)
     try:
@@ -36,8 +34,6 @@ def run(in_file, language=None, output_format=None, out_file=None,
                 file.write(output)
         else:
             print(output)
-    except AmbiguousLanguageError as err:
-        raise AmbiguousLanguageError(err)
     except InvalidLanguageException as err:
         if str(err):
             raise InvalidLanguageException(err)
@@ -53,7 +49,5 @@ def run(in_file, language=None, output_format=None, out_file=None,
             for lang in form.languages:
                 msg += '  * ' + lang + '\n'
             raise InvalidLanguageException(msg[0:-1])
-    except OdkChoicesError as err:
-        raise OdkChoicesError(err)
-    except OdkFormError as err:
-        raise OdkFormError(err)
+    except OdkException as err:
+        raise OdkException(err)

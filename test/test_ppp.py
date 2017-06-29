@@ -234,7 +234,6 @@ class OdkFormTest(unittest.TestCase, PppTest):
 
     def test_questionnaire(self):
         """Test expected results of converted questionnaire based on position.
-
         """
         forms = self.get_forms(self.data)
         for i, expected_output in self.data:

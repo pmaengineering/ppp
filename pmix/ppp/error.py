@@ -1,19 +1,24 @@
 """Error classes for package."""
 
+class OdkException(Exception):
+    """General ODK exception."""
 
-class OdkFormError(Exception):
+    pass
+
+
+class OdkFormError(OdkException):
     """General OdkForm error."""
 
     pass
 
 
-class OdkChoicesError(Exception):
+class OdkChoicesError(OdkException):
     """General OdkChoices error."""
 
     pass
 
 
-class InvalidLanguageException(OdkFormError):
+class InvalidLanguageException(OdkException):
     """General error related to language of ODK form."""
 
     pass
@@ -21,5 +26,11 @@ class InvalidLanguageException(OdkFormError):
 
 class AmbiguousLanguageError(InvalidLanguageException):
     """Ambiguous language error."""
+
+    pass
+
+
+class InconsistentLabelLanguage(InvalidLanguageException):
+    """Inconsistent label language error."""
 
     pass

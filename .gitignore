@@ -3,8 +3,7 @@ env/
 __pycache__
 test/files/ignored/*
 */test/files/ignored/*
-test/files/~$*
-*/test/files/~$*
+*~$*
 *.DS_Store
 dist/
 build

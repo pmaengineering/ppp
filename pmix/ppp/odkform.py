@@ -89,18 +89,16 @@ class OdkForm:
             'info': None,
             'raw_data': wb
         }
+
         self.languages = {
             'general_language_info':
-                self.get_general_language_info(),
+                self.get_general_language_info(wb),
             'has_generic_language_field': bool(),
             'language_list': [],
             'default_language': settings_default
         }
         self.languages['language_list'] = self.get_languages(
             settings_default=settings_default, wb=wb)
-        # self.languages['language_list'] = self.get_languages(
-        #     settings_default=settings_default,
-        #     lang_info=self.languages['general_language_info'])
         self.languages = {
             **self.languages,
             **{
@@ -111,6 +109,7 @@ class OdkForm:
                     settings_default=settings_default,
                     language_list=self.languages['language_list'])}
         }
+
         self.check_language_exceptions(settings=self.settings,
                                        languages=self.languages)
         self.choices = self.get_choices(wb, 'choices')
@@ -209,7 +208,7 @@ class OdkForm:
         """Get worksheet languages.
 
         Args:
-            header (list): Worksheet header.
+            header (list): Worksheet header; list of Cell objects.
 
         Returns:
             list: An alphabetically sorted list of languages.
@@ -243,7 +242,8 @@ class OdkForm:
             ws_info (dict): Parsed information on XlsForm worksheets.
 
         Raises:
-             InvalidLanguageException: If erroneous default language.
+            InvalidLanguageException: If erroneous default language.
+
         >>> from pmix.ppp.odkform import OdkForm
         >>> OdkForm.check_for_bad_default_language(default_lang='Huh?',
         ... ws_info={'choices': {'language_fields': {'label': {'language_list':
@@ -298,7 +298,7 @@ class OdkForm:
         """
         return sorted(ws_lang_fields['label']['language_list'])
 
-    def get_general_language_info(self):
+    def get_general_language_info(self, wb):
         """Consolidate language information for ODK form.
 
         Consolidate pertinent language information, such as languages list for
@@ -306,10 +306,12 @@ class OdkForm:
         languages['generic_language_fields_present']: True if generic, (2)
         language field is found in any language field.
 
+        Args:
+            wb (Workbook): Wb.
+
         Returns:
             dict: Dictionary of general information on form language.
         """
-        wb = self.metadata['raw_data']
         workbook_languages = {'worksheets': {}}
 
         for ws in LANGUAGE_PERTINENT_WORKSHEETS:
@@ -317,7 +319,7 @@ class OdkForm:
                 workbook_languages['worksheets'][ws] = {
                     'language_fields': self.get_worksheet_languages(wb[ws][0]),
                     'label_language_list': [],
-                    'has_generic_language_field': False
+                    'has_generic_language_field': bool()
                 }
                 ws_data = workbook_languages['worksheets'][ws]
                 wslf = ws_data['language_fields']
@@ -373,8 +375,12 @@ class OdkForm:
             # TODO: presence of 'default_language', and (2) not.
             # * A 'label' field by itself on both sheets.
             #   * w/ no default lang given and lang specifics in other fields
-            # * A 'label' field with 'label::' fields on both sheets.
             # * Inconsistent 'label' 'label::' in worksheets.
+            # * A 'label' field when default_language is listed. Did I do yet?
+            #
+            # * A 'label' field with 'label::' fields on both sheets, and
+            # there is no default language.
+            #    * ODK should allow this. So this is ok.
             pass
 
     @staticmethod
@@ -388,16 +394,14 @@ class OdkForm:
 
         Returns:
             list: An alphabetically sorted list of languages in the form.
-
-        Raises:
-            InconsistentLabelLanguage: Label languages not match between WS.
-
         >>> from test.test_ppp import MockForm
         >>> form = MockForm(mock_file='no-errors.xlsx')
         >>> form.get_languages(settings_default='English', wb=
         ... form.metadata['raw_data']) #doctest: +ELLIPSIS
         ['Ateso', 'English', 'Luganda', ... 'Runyoro-Rutoro']
 
+        Raises:
+            InconsistentLabelLanguage: Label languages not match between WS.
         >>> from test.test_ppp import MockForm
         >>> MockForm(mock_file=
         ... 'exceptions/language/InconsistentLabelLanguage.xlsx'
@@ -459,18 +463,18 @@ class OdkForm:
 
         Returns:
             str: The default language of the form.
-
-        Raises:
-            InvalidLanguageException: Default language not found in survey
-            worksheet.
-
+        # If default language in form settings.
         >>> from pmix.ppp.odkform import OdkForm
         >>> OdkForm.get_default_language(settings_default='Russian',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
         'Russian'
+        # If no default language in form settings.
         >>> OdkForm.get_default_language(settings_default='',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
         'Ateso'
+
+        Raises:
+            InvalidLanguageException: Default language not found in survey WS.
         >>> OdkForm.get_default_language(settings_default='z', language_list=
         ... ['a', 'b', 'c', 'd', 'e']) #doctest: +IGNORE_EXCEPTION_DETAIL
         Traceback (most recent call last):

@@ -10,7 +10,7 @@ from pmix.ppp.odkprompt import OdkPrompt
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
-TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__))
+TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__)) + '/files'
 
 
 # pylint: disable=too-few-public-methods

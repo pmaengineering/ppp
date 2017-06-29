@@ -1,8 +1,8 @@
 .idea
 env/
 __pycache__
-test/files/ignored*
-*/test/files/ignored*
+test/files/ignored/*
+*/test/files/ignored/*
 test/~$*
 */test/~$*
 *.DS_Store
@@ -15,4 +15,3 @@ tags
 *.swp
 /*.html
 pmix.egg-info
-MANIFEST

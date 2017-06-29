@@ -1,8 +1,8 @@
 .idea
 env/
 __pycache__
-test/files/*
-*/test/files/*
+test/files/ignored*
+*/test/files/ignored*
 test/~$*
 */test/~$*
 *.DS_Store

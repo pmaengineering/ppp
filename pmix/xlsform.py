@@ -34,8 +34,8 @@ class Xlsform(Workbook):
             local_settings = self['settings']
             headers = local_settings[0]
             values = local_settings[1]
-            self.settings = {str(k): v for k, v in zip(headers, values) if
-                             not k.is_blank()}
+            self.settings = {str(k): str(v) for k, v in zip(headers, values) if
+                             not k.is_blank() and not v.is_blank()}
         except (KeyError, IndexError):
             self.settings = {}
 
@@ -44,14 +44,41 @@ class Xlsform(Workbook):
         """Return form_id setting value."""
         self.init_settings()
         form_id = self.settings['form_id']
-        return str(form_id)
+        return form_id
 
     @property
     def form_title(self):
         """Return form_title setting value."""
         self.init_settings()
         form_title = self.settings['form_title']
-        return str(form_title)
+        return form_title
+
+    @property
+    def settings_language(self):
+        """Return default language from settings or None if not found."""
+        self.init_settings()
+        default_language = self.settings.get('default_language', None)
+        return default_language
+
+    @property
+    def form_language(self):
+        """Return default language for a form.
+
+        Considers settings tab first, then gets language from survey tab.
+
+        Returns:
+            A string for the default language or None if there is no language
+            specified.
+        """
+        language = self.settings_language
+        if language is None:
+            try:
+                survey_languages = self['survey'].sheet_languages()
+                language = survey_languages[0]
+            except KeyError:
+                # Keep language as None
+                pass
+        return language
 
     def add_language(self, language):
         """Add appropriate language columns to an Xlsform.

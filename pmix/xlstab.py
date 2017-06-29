@@ -232,6 +232,42 @@ class Xlstab(Worksheet):
             lang = header.split('::', maxsplit=1)[1]
         return lang
 
+    def sheet_languages(self):
+        """Get the sorted languages from headers.
+
+        Examines each header in the sheet and compares against a list of
+        pre-known translatable headers. If a header is translatable, then the
+        language is determined. All languages found are put in a list and
+        sorted.
+
+        Args:
+            headers (list of str): The headers for this sheet
+
+        Returns:
+            A list of languages found, sorted alphabetically. None is first if
+            it is found.
+        """
+        translate_columns = ()
+        if self.name == 'survey':
+            translate_columns = self.SURVEY_TRANSLATIONS
+        elif self.name in ('choices', 'external_choices'):
+            translate_columns = self.CHOICES_TRANSLATIONS
+        headers = self.column_headers()
+        languages = set()
+        for header in headers:
+            for translatable in translate_columns:
+                if header.startswith(translatable):
+                    language = self.get_lang(header)
+                    languages.add(language)
+        has_none = False
+        if None in languages:
+            has_none = True
+            languages.remove(None)
+        sorted_languages = sorted(list(languages))
+        if has_none:
+            sorted_languages.insert(0, None)
+        return sorted_languages
+
     def merge_translations(self, translations, ignore=None, base='English',
                            carry=False):
         """Merge translations from a TranslationDict.

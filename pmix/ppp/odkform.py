@@ -468,6 +468,7 @@ class OdkForm:
         >>> OdkForm.get_default_language(settings_default='Russian',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])
         'Russian'
+
         # If no default language in form settings.
         >>> OdkForm.get_default_language(settings_default='',
         ... language_list=['Ateso', 'English', 'Luganda', 'Luo', 'Russian'])

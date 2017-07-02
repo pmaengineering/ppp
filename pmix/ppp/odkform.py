@@ -17,11 +17,9 @@ class OdkForm:
     """Class to represent an entire XLSForm.
 
     Attributes:
-        settings (dict): A dictionary represetnation of the original 'settings'
+        settings (dict): A dictionary representation of the original 'settings'
             worksheet of an ODK XLSForm.
         title (str): Title of the ODK form.
-        languages (list): List of languages used in the ODK form. This is taken
-            from the 'survey' worksheet.
         choices (dict): A list of rows from the 'choices' worksheet.
         ext_choices (dict): A list of rows from the 'external_choices'
             worksheet.
@@ -31,30 +29,6 @@ class OdkForm:
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
 
     """
-
-    languages_template = {
-        'general_language_info': {
-            'worksheets': {
-                '<worksheet>': {
-                    'language_fields': {
-                        'has_generic_language_field': bool(),
-                        'label_language_list': [
-                            '<language>',
-                        ],
-                        '<field>': {
-                            'has_generic_language_field': bool(),
-                            'language_list': [
-                                '<language>',
-                            ],
-                        },
-                    }
-                }
-            }
-        },
-        'default_language': None,
-        'has_generic_language_field': bool(),
-        'language_list': [],
-    }
 
     def __init__(self, file=None, wb=None):
         """Initialize the OdkForm.
@@ -77,9 +51,6 @@ class OdkForm:
 
         self.settings = {str(k): str(v) for k, v in
                          self.get_settings(wb).items()}
-        settings_default = self.settings['default_language'] \
-            if 'default_language' in self.settings \
-               and self.settings['default_language'] else None
 
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.metadata = {  # TODO Finish filling this out.
@@ -89,29 +60,6 @@ class OdkForm:
             'info': None,
             'raw_data': wb
         }
-
-        self.languages = {
-            'general_language_info':
-                self.get_general_language_info(wb),
-            'has_generic_language_field': bool(),
-            'language_list': [],
-            'default_language': settings_default
-        }
-        self.languages['language_list'] = self.get_languages(
-            settings_default=settings_default, wb=wb)
-        self.languages = {
-            **self.languages,
-            **{
-                'has_generic_language_field':
-                    self.check_generic_language_fields(
-                        self.languages['general_language_info']['worksheets']),
-                'default_language': self.get_default_language(
-                    settings_default=settings_default,
-                    language_list=self.languages['language_list'])}
-        }
-
-        self.check_language_exceptions(settings=self.settings,
-                                       languages=self.languages)
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
         conversion_start = datetime.datetime.now()
@@ -334,7 +282,7 @@ class OdkForm:
         """Check for various language related exceptions.
 
         Args:
-            settings (dict): A dictionary represetnation of the original
+            settings (dict): A dictionary representation of the original
             'settings' worksheet of an ODK XLSForm.
             languages (dict): Form language information rendered on
                 initialization.
@@ -350,9 +298,9 @@ class OdkForm:
         AmbiguousLanguageError
         """
         self.check_for_bad_default_language(
-            default_lang=self.languages['default_language'],
-            ws_info=self.languages['general_language_info']['worksheets'])
-
+            default_lang=languages['default_language'],
+            ws_info=languages['general_language_info']['worksheets'])
+        
         settings_default = settings['default_language'] \
             if 'default_language' in settings \
                and settings['default_language'] else None
@@ -490,6 +438,71 @@ class OdkForm:
             raise InvalidLanguageException(msg)
         return default
 
+    # languages_template = {
+    #     'general_language_info': {
+    #         'worksheets': {
+    #             '<worksheet>': {
+    #                 'language_fields': {
+    #                     'has_generic_language_field': bool(),
+    #                     'label_language_list': [
+    #                         '<language>',
+    #                     ],
+    #                     '<field>': {
+    #                         'has_generic_language_field': bool(),
+    #                         'language_list': [
+    #                             '<language>',
+    #                         ],
+    #                     },
+    #                 }
+    #             }
+    #         }
+    #     },
+    #     'default_language': None,
+    #     'has_generic_language_field': bool(),
+    #     'language_list': [],
+    # }
+
+    def get_language(self, requested_lang, settings):
+        """Determine form language to convert.
+
+        Args:
+            requested_lang (str): Requested langauge, else None.
+            settings (dict): A dictionary representation of the original 
+                'settings'
+            worksheet of an ODK XLSForm.
+
+        Returns:
+            str: Determined language for conversion.
+        """
+        settings_default = settings['default_language'] \
+            if 'default_language' in settings \
+               and settings['default_language'] else None
+
+        languages = {
+            'general_language_info':
+                self.get_general_language_info(wb),
+            'has_generic_language_field': bool(),
+            'language_list': [],
+            'default_language': settings_default
+        }
+        languages['language_list'] = self.get_languages(
+            settings_default=settings_default, wb=wb)
+        languages = {
+            **languages,
+            **{
+                'has_generic_language_field':
+                    self.check_generic_language_fields(
+                        languages['general_language_info']['worksheets']),
+                'default_language': self.get_default_language(
+                    settings_default=settings_default,
+                    language_list=languages['language_list'])}
+        }
+
+        self.check_language_exceptions(settings=settings,
+                                       languages=languages)
+
+        return requested_lang  # TODO: Return determined language.
+
     # Currently unused.
     # def set_conversion_end(self):
     #     """Set conversion end time."""
@@ -520,8 +533,11 @@ class OdkForm:
         Returns:
             str: The full string of the XLSForm, ready to print or save.
         """
-        lang = kwargs['lang'] if 'lang' in kwargs \
-            else self.languages['default_language']
+        # lang = kwargs['lang'] if 'lang' in kwargs \
+        #     else self.languages['default_language']
+        requested_lang = kwargs['lang'] if 'lang' in kwargs else None
+        language = get_language(requested_lang)
+
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -529,7 +545,7 @@ class OdkForm:
         )
         title_box = '\n'.join(title_lines)
 
-        q_text = (q.to_text(lang) for q in self.questionnaire)
+        q_text = (q.to_text(language) for q in self.questionnaire)
         sep = '\n\n' + '=' * 52 + '\n\n'
         result = sep.join(q_text)
         return title_box + sep + result + sep  # TODO: Finish below to_dict or
@@ -595,8 +611,12 @@ class OdkForm:
         """
         # *(1) Currently not logging conversion time.
         # conversion_start = datetime.datetime.now()  # (1)
-        lang = kwargs['lang'] if 'lang' in kwargs else \
-            self.languages['default_language']
+        # lang = kwargs['lang'] if 'lang' in kwargs else \
+        #     self.languages['default_language']
+        requested_lang = kwargs['lang'] if 'lang' in kwargs else None
+        language = self.get_language(requested_lang=requested_lang,
+                                     settings=self.settings)
+
         html_questionnaire = ''
         data = {
             'header': {
@@ -617,6 +637,7 @@ class OdkForm:
             .get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
         prev_item = None
+        hlt = kwargs['highlight']
         for index, item in enumerate(data['questionnaire']):
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
@@ -625,10 +646,10 @@ class OdkForm:
                 html_questionnaire += grp_spc
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += item.to_html(lang, kwargs['highlight'],
-                                                   bottom_border=True)
+                html_questionnaire += \
+                    item.to_html(language, hlt, bottom_border=True)
             else:
-                html_questionnaire += item.to_html(lang, kwargs['highlight'])
+                html_questionnaire += item.to_html(language, hlt)
             prev_item = item
         # self.set_conversion_end()  # (1)
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'

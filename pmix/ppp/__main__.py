@@ -59,7 +59,6 @@ def cli():
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
             .format(args.xlsxfile, err)
         print(err, file=sys.stderr)
-        print(err)
 
 
 if __name__ == '__main__':

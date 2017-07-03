@@ -213,7 +213,6 @@ def get_languages(settings_default, wb):  # noqa: D207
     Traceback (most recent call last):
     InconsistentLabelLanguage
     """
-
     def get_ws_langs(a_wb, an_lpws):
         """Get WS languages.
 

@@ -1,11 +1,12 @@
 """Module for the OdkForm class."""
 import datetime
 import os.path
-from pmix.ppp.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
-    LANGUAGE_DEPENDENT_FIELDS
+# from pmix.ppp.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
+#     LANGUAGE_DEPENDENT_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError, InvalidLanguageException, \
-    AmbiguousLanguageError, InconsistentLabelLanguage
+from pmix.ppp.error import OdkFormError, InvalidLanguageException
+# from pmix.ppp.error import OdkFormError, InvalidLanguageException, \
+#     AmbiguousLanguageError, InconsistentLabelLanguage
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
@@ -153,46 +154,56 @@ class OdkForm:
             pass
         return formatted_choices
 
-    def get_language(self, requested_lang, settings, wb):
+    @staticmethod
+    # def get_language(self, requested_lang, settings, wb):
+    def get_language(requested_lang, wb):
         """Determine form language to convert.
 
         Args:
             requested_lang (str): Requested langauge, else None.
-            settings (dict): A dictionary representation of the original
-                'settings' worksheet of an ODK XLSForm.
             wb (Xlsform): A Xlsform object representing an XLSForm.
 
         Returns:
             str: Determined language for conversion.
         """
-        settings_default = settings['default_language'] \
-            if 'default_language' in settings \
-               and settings['default_language'] else None
+        #   settings (dict): A dictionary representation of the original
+        #        'settings' worksheet of an ODK XLSForm.
+        # settings_default = wb.settings_language
 
-        languages = {
-            'general_language_info':
-                self.get_general_language_info(wb),
-            'has_generic_language_field': bool(),
-            'language_list': [],
-            'default_language': settings_default
-        }
-        languages['language_list'] = self.get_languages(
-            settings_default=settings_default, wb=wb)
-        languages = {
-            **languages,
-            **{
-                'has_generic_language_field':
-                    self.check_generic_language_fields(
-                        languages['general_language_info']['worksheets']),
-                'default_language': self.get_default_language(
-                    settings_default=settings_default,
-                    language_list=languages['language_list'])}
-        }
+        # languages = {
+        #     'general_language_info':
+        #         self.get_general_language_info(wb),
+        #     'has_generic_language_field': bool(),
+        #     'language_list': [],
+        #     'default_language': settings_default
+        # }
+        # languages['language_list'] = self.get_languages(
+        #     settings_default=settings_default, wb=wb)
+        # languages = {
+        #     **languages,
+        #     **{
+        #         'has_generic_language_field':
+        #             self.check_generic_language_fields(
+        #                 languages['general_language_info']['worksheets']),
+        #         'default_language': self.get_default_language(
+        #             settings_default=settings_default,
+        #             language_list=languages['language_list'])}
+        # }
+        #
+        # self.check_language_exceptions(settings=settings,
+        #                                languages=languages)
 
-        self.check_language_exceptions(settings=settings,
-                                       languages=languages)
+        if requested_lang and requested_lang not in wb.survey_languages:
+            msg = 'InvalidLanguageException: The language requested for ' \
+                  'conversion was not found in \'survey\' worksheet.\n' \
+                  '* Language Requested: {}\n' \
+                  '* Survey Languages: {}'.format(requested_lang,
+                                                  wb.survey_languages)
+            raise InvalidLanguageException(msg)
+        determined_language = requested_lang if requested_lang \
+            else wb.form_language
 
-        return requested_lang  # TODO: Return determined language.
+        return determined_language
 
     # Currently unused.
     # def set_conversion_end(self):
@@ -228,7 +239,6 @@ class OdkForm:
         #     else self.languages['default_language']
         # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
         language = self.get_language(requested_lang=language,
-                                     settings=self.settings,
                                      wb=self.metadata['raw_data'])
 
         title_lines = (
@@ -308,7 +318,6 @@ class OdkForm:
         #     self.languages['default_language']
         # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
         language = self.get_language(requested_lang=language,
-                                     settings=self.settings,
                                      wb=self.metadata['raw_data'])
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''

@@ -1,7 +1,8 @@
+"""Tests for Xlsform module."""
 import os.path
 import unittest
-
 from pmix.xlsform import Xlsform
+
 
 class XlsFormLanguageTest(unittest.TestCase):
     """Unit tests for testing form languages in Xlsform and Xlstab."""

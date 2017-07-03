@@ -26,9 +26,9 @@ def run(in_file, language=None, output_format=None, out_file=None,
     try:
         output = None
         if output_format == 'text':
-            output = form.to_text(**kwargs)
+            output = form.to_text(language=language, **kwargs)
         elif output_format == 'html' or not output_format:
-            output = form.to_html(**kwargs)
+            output = form.to_html(language=language, **kwargs)
         if out_file:
             with open(out_file, mode='w', encoding='utf-8') as file:
                 file.write(output)
@@ -42,12 +42,5 @@ def run(in_file, language=None, output_format=None, out_file=None,
                   'attempting to convert form. If a language was not ' \
                   'supplied, please supply and try again.'
             raise InvalidLanguageException(msg)
-        elif language not in form.languages:
-            msg = 'Specified language not found in form: ' + language
-            msg += '\n\nThe form \'{}\' contains the following languages' \
-                   '.\n'.format(in_file)
-            for lang in form.languages:
-                msg += '  * ' + lang + '\n'
-            raise InvalidLanguageException(msg[0:-1])
     except OdkException as err:
         raise OdkException(err)

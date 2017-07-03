@@ -300,7 +300,7 @@ class OdkForm:
         self.check_for_bad_default_language(
             default_lang=languages['default_language'],
             ws_info=languages['general_language_info']['worksheets'])
-        
+
         settings_default = settings['default_language'] \
             if 'default_language' in settings \
                and settings['default_language'] else None
@@ -462,14 +462,13 @@ class OdkForm:
     #     'language_list': [],
     # }
 
-    def get_language(self, requested_lang, settings):
+    def get_language(self, requested_lang, settings, wb):
         """Determine form language to convert.
 
         Args:
             requested_lang (str): Requested langauge, else None.
-            settings (dict): A dictionary representation of the original 
-                'settings'
-            worksheet of an ODK XLSForm.
+            settings (dict): A dictionary representation of the original
+                'settings' worksheet of an ODK XLSForm.
 
         Returns:
             str: Determined language for conversion.
@@ -524,19 +523,21 @@ class OdkForm:
 
         return self.metadata['conversion_time']
 
-    def to_text(self, **kwargs):
+    def to_text(self, language=None):
         """Get the text representation of an entire XLSForm.
 
         Args:
-            **lang (str): The language.
+            language (str): The language.
 
         Returns:
             str: The full string of the XLSForm, ready to print or save.
         """
         # lang = kwargs['lang'] if 'lang' in kwargs \
         #     else self.languages['default_language']
-        requested_lang = kwargs['lang'] if 'lang' in kwargs else None
-        language = get_language(requested_lang)
+        # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
+        language = self.get_language(requested_lang=language,
+                                     settings=self.settings,
+                                     wb=self.metadata['raw_data'])
 
         title_lines = (
             '+{:-^50}+'.format(''),
@@ -596,11 +597,11 @@ class OdkForm:
             return json.dumps(raw_survey, indent=2)
         return json.dumps(raw_survey)
 
-    def to_html(self, **kwargs):
+    def to_html(self, language=None, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
         Args:
-            **lang (str): The language.
+            language (str): The language.
             **highlight (bool): For color highlighting of various components
                 of html template.
             **debug (bool): For inclusion of debug information to be printed
@@ -613,9 +614,10 @@ class OdkForm:
         # conversion_start = datetime.datetime.now()  # (1)
         # lang = kwargs['lang'] if 'lang' in kwargs else \
         #     self.languages['default_language']
-        requested_lang = kwargs['lang'] if 'lang' in kwargs else None
-        language = self.get_language(requested_lang=requested_lang,
-                                     settings=self.settings)
+        # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
+        language = self.get_language(requested_lang=language,
+                                     settings=self.settings,
+                                     wb=self.metadata['raw_data'])
 
         html_questionnaire = ''
         data = {

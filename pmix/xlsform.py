@@ -78,7 +78,7 @@ class Xlsform(Workbook):
         language = self.settings_language
         if language is None:
             try:
-                language = self.survey_languages()[0]
+                language = self.survey_languages[0]
             except KeyError:
                 # Keep language as None
                 pass

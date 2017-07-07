@@ -38,8 +38,7 @@ class Cell:
         """Return unicode representation of cell."""
         if self.value is None:
             return ''
-        else:
-            return str(self.value)
+        return str(self.value)
 
     def __repr__(self):
         """Return a representation of the cell."""

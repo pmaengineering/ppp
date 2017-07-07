@@ -117,8 +117,7 @@ class Worksheet:
         """
         if self.data:
             return tuple(str(i) for i in self.data[0])
-        else:
-            return ()
+        return ()
 
     def column_pairs(self, indices=None, base=None, start=0):
         """Iterate over pairs within the same row for all rows.

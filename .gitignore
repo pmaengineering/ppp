@@ -7,8 +7,7 @@ test/files/ignored/*
 *.DS_Store
 dist/
 build
-.dev
-dev
+*.dev
 MANIFEST
 tags
 *.swp

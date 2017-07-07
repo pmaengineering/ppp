@@ -1,4 +1,4 @@
-"""This module defines the Worksheet class."""
+"""Module for Worksheet class."""
 import csv
 
 from pmix.cell import Cell
@@ -6,7 +6,7 @@ from pmix.error import SpreadsheetError
 
 
 class Worksheet:
-    """This module represents a worksheet in a spreadsheet.
+    """Representative class for a worksheet in a given spreadsheet workbook.
 
     A Worksheet is always supposed to have rectangular dimensions. It should
     not ever become a ragged array.

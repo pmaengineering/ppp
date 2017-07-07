@@ -1,4 +1,4 @@
-"""This module defines the Xlsform class to work with ODK XLSForms."""
+"""Module defining Xlsform class to work with ODK XLSForms."""
 
 from pmix.xlstab import Xlstab
 from pmix.workbook import Workbook
@@ -62,7 +62,7 @@ class Xlsform(Workbook):
 
     @property
     def survey_languages(self):
-        """Retur sorted languages from headers for survey worksheet. """
+        """Retur sorted languages from headers for survey worksheet."""
         return self['survey'].sheet_languages()
 
     @property

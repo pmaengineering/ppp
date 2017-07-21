@@ -11,9 +11,9 @@ def run(in_file, language=None, output_format=None, out_file=None,
 
     Args:
         in_file (str): Path to load source file.
+        language (str): Language to render form.
         output_format (str): File format to be output.
         out_file (str): Path to save converted file.
-        **language (str): Language to render form.
         **debug (bool): Debugging on or off.
         **highlight (bool): Highlighting on or off.
 
@@ -22,7 +22,7 @@ def run(in_file, language=None, output_format=None, out_file=None,
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
     """
-    form = OdkForm(file=in_file)
+    form = OdkForm.from_file(in_file)
     try:
         output = None
         if output_format == 'text':

@@ -32,26 +32,18 @@ class OdkForm:
 
     """
 
-    def __init__(self, file=None, wb=None):
+    def __init__(self, wb):
         """Initialize the OdkForm.
 
         Create an instance of an ODK form, including survey representation,
         choice options, settings, and metadata.
 
         Args:
-            file (str): The path for the source file of the ODK form,
-                typically an '.xlsx' file meeting the XLSForm specification.
             wb (Xlsform): A Xlsform object meeting XLSForm specification.
 
         Raises:
             OdkformError: No ODK form is supplied.
         """
-        if file is None and wb is None:
-            raise OdkFormError
-        elif file is not None:
-            # wb = Workbook(file)  # TODO
-            wb = Xlsform(file)
-
         self.settings = {str(k): str(v) for k, v in
                          self.get_settings(wb).items()}
 
@@ -92,6 +84,20 @@ class OdkForm:
          'hidden geopoint']
     warnings = None
     conversion_info = None
+
+    @classmethod
+    def from_file(cls, path):
+        """Create Odkform object from file in path.
+
+        Args:
+            path (str): The path for the source file of the ODK form,
+                typically an '.xlsx' file meeting the XLSForm specification.
+        Returns:
+            Odkform
+        """
+        xlsform = Xlsform(path)
+        return cls(xlsform)
+
 
     @staticmethod
     def get_settings(wb):

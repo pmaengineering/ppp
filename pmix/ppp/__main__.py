@@ -15,6 +15,24 @@ def cli():
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
 
+    language_help = 'Language to write the paper version in. If not ' \
+                    'specified, the \'default_language\' in the \'settings\'' \
+                    ' worksheet is used. If that is not specified and more' \
+                    ' than one language is in the XLSForm, the language that' \
+                    ' comes first alphabetically will be used.'
+    parser.add_argument('-l', '--language', help=language_help)
+
+    format_help = ('Format to generate. Currently "text" and "html" are '
+                   'supported. Future formats include "pdf". If this flag is'
+                   ' not supplied, output is html by default.')
+    parser.add_argument('-f', '--format',
+                        choices=('html', 'text', 'pdf', 'doc'), # TODO: doc.
+                        default='html', const='html', nargs='?',
+                        help=format_help)
+
+        
+
+    # <Unnecessary for web interface...
     debug_help = 'Turns on debug mode. Currently only works for \'html\' ' \
                  'format. Only feature of debug mode currently is that it ' \
                  'prints a stringified JSON representation of survey to the ' \
@@ -26,23 +44,10 @@ def cli():
     parser.add_argument('-H', '--highlight', action='store_true',
                         help=highlighting_help)
 
-    language_help = 'Language to write the paper version in. If not ' \
-                    'specified, the \'default_language\' in the \'settings\'' \
-                    ' worksheet is used. If that is not specified and more' \
-                    ' than one language is in the XLSForm, the language that' \
-                    ' comes first alphabetically will be used.'
-    parser.add_argument('-l', '--language', help=language_help)
-
-    format_help = ('Format to generate. Currently "text" and "html" are '
-                   'supported. Future formats include "pdf". If this flag is'
-                   ' not supplied, output is html by default.')
-    parser.add_argument('-f', '--format', choices=('html', 'text', 'pdf'),
-                        default='html', const='html', nargs='?',
-                        help=format_help)
-
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'STDOUT is used.')
     parser.add_argument('-o', '--outpath', help=out_help)
+    # ...unnecessary for web interface/>
 
     args = parser.parse_args()
 

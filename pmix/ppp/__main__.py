@@ -8,7 +8,15 @@ from pmix.ppp import run
 
 
 def cli():
-    """Command line interface for package."""
+    """Command line interface for package.
+
+    Command Syntax: python3 -m pmix.ppp <file> <options>
+
+    Examples:
+        # Creates a 'myFile.html' in English with component highlighting.
+        python3 -m pmix.ppp myFile.xlsx -l 'English' -h > myFile.html
+
+    """
     prog_desc = 'Convert XLSForm to Paper version.'
     parser = argparse.ArgumentParser(description=prog_desc)
 

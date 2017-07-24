@@ -29,7 +29,8 @@ class MockForm(OdkForm):
             mock_dir (str): Directory.
         """
         path = mock_dir + mock_file if mock_dir else TEST_FILES_DIR + mock_file
-        super().__init__(file=path)
+        form = super().from_file(path)
+        super().__init__(form)
 
 
 # # Unit Tests
@@ -49,7 +50,7 @@ class PppTest:
             except KeyError:
                 file = datum['inputs']['file']
             if file not in forms:
-                forms[file] = OdkForm(file=TEST_FILES_DIR + file)
+                forms[file] = OdkForm.from_file(TEST_FILES_DIR + file)
         return forms
 
 
@@ -283,11 +284,11 @@ class OdkFormTest(unittest.TestCase, PppTest):
     #                 'language_list': ['English']
     #             }
     #         }
-    #         expected_output = ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo',
-    #                            'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
+    #       expected_output = ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo',
+    #                           'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
     #                            'Runyoro-Rutoro']
     #         self.assertTrue(
-    #             OdkForm.get_label_language_list(test_input) == expected_output)
+    #           OdkForm.get_label_language_list(test_input) == expected_output)
     #     test_get_label_language_list()
 
 

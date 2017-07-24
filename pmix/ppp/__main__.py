@@ -73,7 +73,7 @@ def cli():
     parser.add_argument('-i', '--input-replacement', action='store_true',
                         help=input_replacement_help)
 
-    # II.B.1 Exclusion
+    # II.B.2 Exclusion
     #     type='boolean', default:'TRUE if public else FALSE if internal else
     #     FALSE if developer
     exclusion_help = \
@@ -85,7 +85,7 @@ def cli():
     parser.add_argument('-e', '--exclusion', action='store_true',
                         help=exclusion_help)
 
-    # II.B.1 Human-readable relevant text
+    # II.B.3 Human-readable relevant text
     #     type='boolean', default:'TRUE if public else TRUE if internal else
     #     FALSE if developer
     hr_relevant_help = \
@@ -95,7 +95,7 @@ def cli():
     parser.add_argument('-r', '--hr-relevant', action='store_true',
                         help=hr_relevant_help)
 
-    # II.B.1 Human-readable constraint text
+    # II.B.4 Human-readable constraint text
     #     type='boolean', default:'TRUE if public else FALSE if internal else
     #     FALSE if developer
     hr_constraint_help = \
@@ -105,7 +105,7 @@ def cli():
     parser.add_argument('-c', '--hr-constraint', action='store_true',
                         help=hr_constraint_help)
 
-    # II.B.1 No constraint text
+    # II.B.5 No constraint text
     #     type='boolean', default:'FALSE if public else FALSE if internal else
     #     FALSE if developer
     no_constraint_help = \
@@ -114,7 +114,7 @@ def cli():
     parser.add_argument('-C', '--no-constraint', action='store_true',
                         help=no_constraint_help)
 
-    # II.B.1 General text replacements
+    # II.B.6 General text replacements
     #     type='boolean', default:'TRUE if public else TRUE if internal else
     #     FALSE if developer
     text_replacements_help = \

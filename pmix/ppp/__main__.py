@@ -53,7 +53,7 @@ def cli():
     parser.add_argument('-l', '--language', help=language_help)
 
     # II.A.2. Output Format
-    #     type='single selection', default:'pdf'
+    #     type='single selection', default:'html'
     format_help = ('Format to generate. Currently "text" and "html" are '
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')

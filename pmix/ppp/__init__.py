@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """A package for converting ODK forms."""
+from signal import signal, SIGPIPE, SIG_DFL
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.error import OdkException, InvalidLanguageException
 
@@ -33,7 +34,11 @@ def run(in_file, language=None, output_format=None, out_file=None,
             with open(out_file, mode='w', encoding='utf-8') as file:
                 file.write(output)
         else:
-            print(output)
+            try:
+                print(output)
+            except BrokenPipeError:  # If output is piped.
+                signal(SIGPIPE, SIG_DFL)
+                print(output)
     except InvalidLanguageException as err:
         if str(err):
             raise InvalidLanguageException(err)

@@ -39,6 +39,7 @@ class OdkForm:
             OdkformError: No ODK form is supplied.
         """
         self.settings = wb.settings
+        self.language = wb.form_language
 
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.metadata = {  # TODO Finish filling this out.
@@ -222,6 +223,7 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
+        language = language if language else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
         data = {

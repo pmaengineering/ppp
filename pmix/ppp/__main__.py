@@ -7,19 +7,7 @@ from pmix.ppp.error import OdkException, OdkFormError
 from pmix.ppp import run
 
 
-def cli():
-    """Command line interface for package.
-
-    Command Syntax: python3 -m pmix.ppp <file> <options>
-
-    Examples:
-        # Creates a 'myFile.html' in English with component highlighting.
-        python3 -m pmix.ppp myFile.xlsx -l 'English' -h > myFile.html
-
-    """
-    prog_desc = 'Convert XLSForm to Paper version.'
-    parser = argparse.ArgumentParser(description=prog_desc)
-
+def _required_fields():
     # # I. Required Fields # #
     #   I.A. File
     #     type:'string'
@@ -37,11 +25,12 @@ def cli():
          '\'internal\' optoin, only with sensitive information removed.')
     parser.add_argument('-p', '--preset',
                         choices=('public', 'internal', 'developer'),
-                        default='developer', const='developer', nargs='?',
-                        help=presets_help)
+                        default='developer', help=presets_help)
 
+
+def _non_preset_optional_fields():
     # # II. Optional Fields # #
-    #   II.A. Non-bundled options
+    #   II.A. Non-Preset options
     #     II.A.1. Language
     #       #type:'single selection', default:''
     language_help = \
@@ -58,20 +47,22 @@ def cli():
                    ' not supplied, output is html by default.')
     parser.add_argument('-f', '--format',
                         choices=('html', 'text', 'pdf', 'doc'),  # TODO: doc.
-                        default='html', const='html', nargs='?',
-                        help=format_help)
+                        default='html', help=format_help)
 
-    #   II.B. Bundled options
-    #     note:'These options are all boolean toggles. Their value
-    #     should automatically update based on the bundle option preset
-    #     selected. Also, they should either (a) greyed out unless the 'custom'
-    #     bundle option preset is selected, or (b) if a bundle option preset
-    #     other than 'custom' is selected, the bundle option preset should
-    #     automatically change to 'custom' if any of the options are changed.'
-    #
-    #     II.B.1 Input replacement
-    #       type='boolean', default:'TRUE if public else FALSE if internal else
-    #       FALSE if developer'
+
+def _preset_optional_fields():
+    """Preset options.
+
+    These options are all boolean toggles. Their value should automatically
+    update based on the bundle option preset selected. Also, they should either
+    (a) greyed out unless the 'custom bundle option preset is selected, or (b)
+    if a bundle option preset other than 'custom' is selected, the bundle
+    option preset should automatically change to 'custom' if any of the
+    options are changed.
+    """
+    # Input replacement
+    #   type='boolean', default:'TRUE if public else FALSE if internal else
+    #   FALSE if developer'
     input_replacement_help = \
         ('Adding this option will toggle replacement of visible choice '
          'options in input fields. Instead of the normal choice options, '
@@ -80,9 +71,9 @@ def cli():
     parser.add_argument('-i', '--input-replacement', action='store_true',
                         help=input_replacement_help)
 
-    #     II.B.2 Exclusion
-    #       type='boolean', default:'TRUE if public else FALSE if internal else
-    #       FALSE if developer
+    # Exclusion
+    #   type='boolean', default:'TRUE if public else FALSE if internal else
+    #   FALSE if developer
     exclusion_help = \
         ('Adding this option will toggle exclusion of certain survey form '
          'compoments from the rendered form. This can be used to remove '
@@ -92,9 +83,9 @@ def cli():
     parser.add_argument('-e', '--exclusion', action='store_true',
                         help=exclusion_help)
 
-    #     II.B.3 Human-readable relevant text
-    #       type='boolean', default:'TRUE if public else TRUE if internal else
-    #       FALSE if developer
+    # Human-readable relevant text
+    #   type='boolean', default:'TRUE if public else TRUE if internal else
+    #   FALSE if developer
     hr_relevant_help = \
         ('Adding this option will toggle display of human readable '
          '\'relevant\' text, rather than the syntax-heavy codified logic of '
@@ -102,9 +93,9 @@ def cli():
     parser.add_argument('-r', '--hr-relevant', action='store_true',
                         help=hr_relevant_help)
 
-    #     II.B.4 Human-readable constraint text
-    #       type='boolean', default:'TRUE if public else FALSE if internal else
-    #       FALSE if developer
+    # Human-readable constraint text
+    #   type='boolean', default:'TRUE if public else FALSE if internal else
+    #   FALSE if developer
     hr_constraint_help = \
         ('Adding this option will toggle display of human readable '
          '\'constraint\' text, rather than the syntax-heavy codified logic of '
@@ -112,18 +103,18 @@ def cli():
     parser.add_argument('-c', '--hr-constraint', action='store_true',
                         help=hr_constraint_help)
 
-    #     II.B.5 No constraint text
-    #       type='boolean', default:'FALSE if public else FALSE if internal
-    #       else FALSE if developer
+    # No constraint text
+    #   type='boolean', default:'FALSE if public else FALSE if internal
+    #   else FALSE if developer
     no_constraint_help = \
         ('Adding this option will toggle removal of all constraints from the '
          'rendered form.')
     parser.add_argument('-C', '--no-constraint', action='store_true',
                         help=no_constraint_help)
 
-    #     II.B.6 General text replacements
-    #       type='boolean', default:'TRUE if public else TRUE if internal else
-    #       FALSE if developer
+    # General text replacements
+    #   type='boolean', default:'TRUE if public else TRUE if internal else
+    #   FALSE if developer
     text_replacements_help = \
         ('Adding this option will toggle text replacements as shown in the '
          '\'text_replacements\' worksheet of the XlsForm. The most common '
@@ -133,24 +124,45 @@ def cli():
     parser.add_argument('-t', '--text-replacements', action='store_true',
                         help=text_replacements_help)
 
-    #   II.C. CLI-only
-    #     II.C.1. Debug
+
+def _cli_only_fields():
+    """CLI-only fields."""
+    # Debug
     debug_help = \
         'Turns on debug mode. Currently only works for \'html\' format. Only' \
         ' feature of debug mode currently is that it prints a stringified ' \
         'JSON representation of survey to the JavaScript console.'
     parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
 
-    #     II.C.2. Component Highlighting
+    # Survey Form Component Highlighting
     highlighting_help = 'Turns on highlighting of various portions of survey' \
                         ' components. Useful to assess positioning.'
     parser.add_argument('-H', '--highlight', action='store_true',
                         help=highlighting_help)
 
-    #     II.C.3. Out path
+    # Out path
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'STDOUT is used.')
     parser.add_argument('-o', '--outpath', help=out_help)
+
+
+def cli():
+    """Command line interface for package.
+
+    Command Syntax: python3 -m pmix.ppp <file> <options>
+
+    Examples:
+        # Creates a 'myFile.html' in English with component highlighting.
+        python3 -m pmix.ppp myFile.xlsx -l 'English' -h > myFile.html
+
+    """
+    prog_desc = 'Convert XLSForm to Paper version.'
+    parser = argparse.ArgumentParser(description=prog_desc)
+
+    _required_fields()
+    _preset_optional_fields()
+    _non_preset_optional_fields()
+    _cli_only_fields()
 
     args = parser.parse_args()
 

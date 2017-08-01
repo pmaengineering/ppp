@@ -26,7 +26,7 @@ def cli():
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
     # I.B. Bundled Option Presets
-    #     type:'single selection', options:'custom, developer, internal,
+    #     # type:'single selection', options:'custom, developer, internal,
     #     public', default:'public', note:'the CLI does not have 'custom'.
     #     Leaving this option blank in the CLI os the same as 'custom'.'
     presets_help = \
@@ -44,7 +44,7 @@ def cli():
     # # II. Optional Fields # #
     # - II.A. Non-bundled options
     # II.A.1. Language
-    #     type:'single selection', default:''
+    #     #type:'single selection', default:''
     language_help = \
         ('Language to write the paper version in. If not specified, the '
          '\'default_language\' in the \'settings\' worksheet is used. If that '

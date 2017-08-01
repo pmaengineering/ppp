@@ -21,11 +21,11 @@ def cli():
     parser = argparse.ArgumentParser(description=prog_desc)
 
     # # I. Required Fields # #
-    # I.A. File
+    #   I.A. File
     #     type:'string'
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
-    # I.B. Bundled Option Presets
+    #   I.B. Bundled Option Presets
     #     # type:'single selection', options:'custom, developer, internal,
     #     public', default:'public', note:'the CLI does not have 'custom'.
     #     Leaving this option blank in the CLI os the same as 'custom'.'
@@ -40,11 +40,10 @@ def cli():
                         default='developer', const='developer', nargs='?',
                         help=presets_help)
 
-
     # # II. Optional Fields # #
-    # - II.A. Non-bundled options
-    # II.A.1. Language
-    #     #type:'single selection', default:''
+    #   II.A. Non-bundled options
+    #     II.A.1. Language
+    #       #type:'single selection', default:''
     language_help = \
         ('Language to write the paper version in. If not specified, the '
          '\'default_language\' in the \'settings\' worksheet is used. If that '
@@ -52,38 +51,38 @@ def cli():
          'language that comes first alphabetically will be used.')
     parser.add_argument('-l', '--language', help=language_help)
 
-    # II.A.2. Output Format
-    #     type='single selection', default:'html'
+    #     II.A.2. Output Format
+    #       type='single selection', default:'html'
     format_help = ('Format to generate. Currently "text" and "html" are '
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')
     parser.add_argument('-f', '--format',
-                        choices=('html', 'text', 'pdf', 'doc'), # TODO: doc.
+                        choices=('html', 'text', 'pdf', 'doc'),  # TODO: doc.
                         default='html', const='html', nargs='?',
                         help=format_help)
 
-
-    # - II.B. Bundled options
+    #   II.B. Bundled options
     #     note:'These options are all boolean toggles. Their value
     #     should automatically update based on the bundle option preset
     #     selected. Also, they should either (a) greyed out unless the 'custom'
     #     bundle option preset is selected, or (b) if a bundle option preset
     #     other than 'custom' is selected, the bundle option preset should
     #     automatically change to 'custom' if any of the options are changed.'
-    # II.B.1 Input replacement
-    #     type='boolean', default:'TRUE if public else FALSE if internal else
-    #     FALSE if developer'
+    #
+    #     II.B.1 Input replacement
+    #       type='boolean', default:'TRUE if public else FALSE if internal else
+    #       FALSE if developer'
     input_replacement_help = \
         ('Adding this option will toggle replacement of visible choice '
-        'options in input fields. Instead of the normal choice options, '
-        'whatever has been placed in the \'ppp_input\' field of the XlsForm '
-        'will be used. This is normally to hide sensitive information.')
+         'options in input fields. Instead of the normal choice options, '
+         'whatever has been placed in the \'ppp_input\' field of the XlsForm '
+         'will be used. This is normally to hide sensitive information.')
     parser.add_argument('-i', '--input-replacement', action='store_true',
                         help=input_replacement_help)
 
-    # II.B.2 Exclusion
-    #     type='boolean', default:'TRUE if public else FALSE if internal else
-    #     FALSE if developer
+    #     II.B.2 Exclusion
+    #       type='boolean', default:'TRUE if public else FALSE if internal else
+    #       FALSE if developer
     exclusion_help = \
         ('Adding this option will toggle exclusion of certain survey form '
          'compoments from the rendered form. This can be used to remove '
@@ -93,9 +92,9 @@ def cli():
     parser.add_argument('-e', '--exclusion', action='store_true',
                         help=exclusion_help)
 
-    # II.B.3 Human-readable relevant text
-    #     type='boolean', default:'TRUE if public else TRUE if internal else
-    #     FALSE if developer
+    #     II.B.3 Human-readable relevant text
+    #       type='boolean', default:'TRUE if public else TRUE if internal else
+    #       FALSE if developer
     hr_relevant_help = \
         ('Adding this option will toggle display of human readable '
          '\'relevant\' text, rather than the syntax-heavy codified logic of '
@@ -103,9 +102,9 @@ def cli():
     parser.add_argument('-r', '--hr-relevant', action='store_true',
                         help=hr_relevant_help)
 
-    # II.B.4 Human-readable constraint text
-    #     type='boolean', default:'TRUE if public else FALSE if internal else
-    #     FALSE if developer
+    #     II.B.4 Human-readable constraint text
+    #       type='boolean', default:'TRUE if public else FALSE if internal else
+    #       FALSE if developer
     hr_constraint_help = \
         ('Adding this option will toggle display of human readable '
          '\'constraint\' text, rather than the syntax-heavy codified logic of '
@@ -113,18 +112,18 @@ def cli():
     parser.add_argument('-c', '--hr-constraint', action='store_true',
                         help=hr_constraint_help)
 
-    # II.B.5 No constraint text
-    #     type='boolean', default:'FALSE if public else FALSE if internal else
-    #     FALSE if developer
+    #     II.B.5 No constraint text
+    #       type='boolean', default:'FALSE if public else FALSE if internal
+    #       else FALSE if developer
     no_constraint_help = \
         ('Adding this option will toggle removal of all constraints from the '
          'rendered form.')
     parser.add_argument('-C', '--no-constraint', action='store_true',
                         help=no_constraint_help)
 
-    # II.B.6 General text replacements
-    #     type='boolean', default:'TRUE if public else TRUE if internal else
-    #     FALSE if developer
+    #     II.B.6 General text replacements
+    #       type='boolean', default:'TRUE if public else TRUE if internal else
+    #       FALSE if developer
     text_replacements_help = \
         ('Adding this option will toggle text replacements as shown in the '
          '\'text_replacements\' worksheet of the XlsForm. The most common '
@@ -134,28 +133,26 @@ def cli():
     parser.add_argument('-t', '--text-replacements', action='store_true',
                         help=text_replacements_help)
 
-
-    # - II.C. CLI-only
-    # II.C.1. Debug
+    #   II.C. CLI-only
+    #     II.C.1. Debug
     debug_help = \
         'Turns on debug mode. Currently only works for \'html\' format. Only' \
         ' feature of debug mode currently is that it prints a stringified ' \
         'JSON representation of survey to the JavaScript console.'
     parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
 
-    # II.C.2. Component Highlighting
+    #     II.C.2. Component Highlighting
     highlighting_help = 'Turns on highlighting of various portions of survey' \
                         ' components. Useful to assess positioning.'
     parser.add_argument('-H', '--highlight', action='store_true',
                         help=highlighting_help)
 
-    # II.C.3. Out path
+    #     II.C.3. Out path
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'STDOUT is used.')
     parser.add_argument('-o', '--outpath', help=out_help)
 
     args = parser.parse_args()
-
 
     if args.highlight and args.format and args.format not in ['html', 'pdf']:
         msg = 'Can only specify highlighting when using the following ' \

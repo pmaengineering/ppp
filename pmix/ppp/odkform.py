@@ -76,6 +76,7 @@ class OdkForm:
         Args:
             path (str): The path for the source file of the ODK form,
                 typically an '.xlsx' file meeting the XLSForm specification.
+
         Returns:
             Odkform
         """

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""A package for converting ODK forms."""
+"""Common executional entry point from interfaces."""
 from signal import signal, SIGPIPE, SIG_DFL
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.error import OdkException, InvalidLanguageException

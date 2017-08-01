@@ -1,17 +1,11 @@
 """Module for the OdkForm class."""
-import datetime
 import os.path
-# from pmix.ppp.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
-#     LANGUAGE_DEPENDENT_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError, InvalidLanguageException
-# from pmix.ppp.error import OdkFormError, InvalidLanguageException, \
-#     AmbiguousLanguageError, InconsistentLabelLanguage
+from pmix.ppp.error import OdkFormError
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkrepeat import OdkRepeat
-# from pmix.workbook import Workbook  # TODO
 from pmix.xlsform import Xlsform
 
 
@@ -44,8 +38,7 @@ class OdkForm:
         Raises:
             OdkformError: No ODK form is supplied.
         """
-        self.settings = {str(k): str(v) for k, v in
-                         self.get_settings(wb).items()}
+        self.settings = wb.settings
 
         self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
         self.metadata = {  # TODO Finish filling this out.
@@ -57,7 +50,6 @@ class OdkForm:
         }
         self.choices = self.get_choices(wb, 'choices')
         self.ext_choices = self.get_choices(wb, 'external_choices')
-        conversion_start = datetime.datetime.now()
         self.metadata = {
             **self.metadata,
             **{
@@ -66,13 +58,6 @@ class OdkForm:
                 'country': self.settings.get('form_id')[3:5],
                 'round': self.settings.get('form_id')[6:7],
                 'type_of_form': self.settings.get('form_id')[0:2],
-                'conversion_start': conversion_start,
-                'conversion_start_formatted':
-                    str(conversion_start.date()) +
-                    ' ' + str(conversion_start.time())[0:8],
-                'conversion_end': None,
-                'conversion_end_formatted': None,
-                'conversion_time': None
             }
         }
         self.questionnaire = self.convert_survey(wb, self.choices,
@@ -83,7 +68,6 @@ class OdkForm:
          'phonenumber', 'hidden', 'hidden string', 'hidden int',
          'hidden geopoint']
     warnings = None
-    conversion_info = None
 
     @classmethod
     def from_file(cls, path):
@@ -97,7 +81,6 @@ class OdkForm:
         """
         xlsform = Xlsform(path)
         return cls(xlsform)
-
 
     @staticmethod
     def get_settings(wb):
@@ -160,78 +143,6 @@ class OdkForm:
             pass
         return formatted_choices
 
-    @staticmethod
-    # def get_language(self, requested_lang, settings, wb):
-    def get_language(requested_lang, wb):
-        """Determine form language to convert.
-
-        Args:
-            requested_lang (str): Requested langauge, else None.
-            wb (Xlsform): A Xlsform object representing an XLSForm.
-
-        Returns:
-            str: Determined language for conversion.
-        """
-        #   settings (dict): A dictionary representation of the original
-        #        'settings' worksheet of an ODK XLSForm.
-        # settings_default = wb.settings_language
-
-        # languages = {
-        #     'general_language_info':
-        #         self.get_general_language_info(wb),
-        #     'has_generic_language_field': bool(),
-        #     'language_list': [],
-        #     'default_language': settings_default
-        # }
-        # languages['language_list'] = self.get_languages(
-        #     settings_default=settings_default, wb=wb)
-        # languages = {
-        #     **languages,
-        #     **{
-        #         'has_generic_language_field':
-        #             self.check_generic_language_fields(
-        #                 languages['general_language_info']['worksheets']),
-        #         'default_language': self.get_default_language(
-        #             settings_default=settings_default,
-        #             language_list=languages['language_list'])}
-        # }
-        #
-        # self.check_language_exceptions(settings=settings,
-        #                                languages=languages)
-
-        if requested_lang and requested_lang not in wb.survey_languages:
-            msg = 'InvalidLanguageException: The language requested for ' \
-                  'conversion was not found in \'survey\' worksheet.\n' \
-                  '* Language Requested: {}\n' \
-                  '* Survey Languages: {}'.format(requested_lang,
-                                                  wb.survey_languages)
-            raise InvalidLanguageException(msg)
-        determined_language = requested_lang if requested_lang \
-            else wb.form_language
-
-        return determined_language
-
-    # Currently unused.
-    # def set_conversion_end(self):
-    #     """Set conversion end time."""
-    #     # self.metadata['conversion_end'] = datetime.datetime.now()
-    #     # self.metadata['conversion_end_formatted'] = \
-    #     #     str(self.metadata['conversion_end'].date()) + ' ' + \
-    #     #     str(self.metadata['conversion_end'].time())[0:8]
-    #     pass
-
-    def get_running_conversion_time(self):
-        """Get running conversion time at this point in time.
-
-        Returns:
-            str: Total time taken to convert form.
-        """
-        self.metadata['conversion_time'] = \
-            str(self.metadata['conversion_end'] - self.metadata[
-                'conversion_start'])[5:10] + ' ' + 'seconds'
-
-        return self.metadata['conversion_time']
-
     def to_text(self, language=None):
         """Get the text representation of an entire XLSForm.
 
@@ -241,12 +152,6 @@ class OdkForm:
         Returns:
             str: The full string of the XLSForm, ready to print or save.
         """
-        # lang = kwargs['lang'] if 'lang' in kwargs \
-        #     else self.languages['default_language']
-        # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
-        language = self.get_language(requested_lang=language,
-                                     wb=self.metadata['raw_data'])
-
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -318,13 +223,6 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
-        # *(1) Currently not logging conversion time.
-        # conversion_start = datetime.datetime.now()  # (1)
-        # lang = kwargs['lang'] if 'lang' in kwargs else \
-        #     self.languages['default_language']
-        # requested_lang = kwargs['lang'] if 'lang' in kwargs else None
-        language = self.get_language(requested_lang=language,
-                                     wb=self.metadata['raw_data'])
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
         data = {
@@ -358,19 +256,10 @@ class OdkForm:
             else:
                 html_questionnaire += item.to_html(language, hlt)
             prev_item = item
-        # self.set_conversion_end()  # (1)
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
-
-        OdkForm.conversion_info = {} \
-            if OdkForm.conversion_info == 'false' else 'false'  # (1)
-        # else OdkForm.conversion_info  # (1)
-        # self.get_running_conversion_time()  # (1)
-        # conversion_time = str(self.metadata['conversion_time'])  # (1)
-        conversion_time = "some time"
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
-            .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,
-                    conversion_time=conversion_time,
+            .render(info=None, warnings=OdkForm.warnings,
                     data=data['footer']['data'])
         html_questionnaire += footer
         return html_questionnaire

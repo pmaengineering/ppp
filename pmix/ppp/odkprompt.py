@@ -97,7 +97,6 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            # if k.startswith('label' or 'hint' or 'constraint_message'):
             if k.startswith('label') or k.startswith('hint') \
                     or k.startswith('constraint_message'):
                 if v:
@@ -179,9 +178,8 @@ class OdkPrompt:
         return new_row
 
     @staticmethod
-    def text_relevant():
+    def text_relevant():  # TODO: Create this method.
         # def text_relevant(self, lang):
-        # TODO: Create this method.
         """Find the relevant text for this row."""
         pass
 
@@ -247,8 +245,8 @@ class OdkPrompt:
                 first = sorted(keys)[0]
                 value = self.row[first]
         except (KeyError, IndexError):
-            # KeyError: self.row does not have the key '{}::{}'
-            # IndexError: `keys` (filtered by field) is empty list
+            # KeyError: self.row does not have the key '{}::{}'.
+            # IndexError: `keys` (filtered by field) is empty list.
             pass
         return value
 
@@ -300,7 +298,7 @@ class OdkPrompt:
         #     question_type = self.odktype in Odkprompt.response_types or \
         #                     self.odktype in Odkprompt.select_types
         #     if text_str and self.row['read_only'] and question_type:
-        #         # TODO fix read_only lookup
+        #         # TODO: Fix read_only lookup.
         #         text_str = '\n'.join(('[Read only]', text_str))
         # except KeyError:  # Unable to find 'read_only'
         #     pass
@@ -364,8 +362,7 @@ class OdkPrompt:
         Returns:
             dict: The text from all parts of the prompt.
         """
-        # TODO: Refactor so that the dict row is only looped through once
-        # to make all of the changes below.
+        # TODO: Refactor so that the dict row is only looped through once.
         prompt = self.format_media_labels(self.row)
         prompt = self.set_grouped_media_field(prompt)
         prompt = self.reformat_default_lang_vars(prompt, lang)

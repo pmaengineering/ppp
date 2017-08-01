@@ -198,8 +198,6 @@ class OdkForm:
             json: A full JSON representation of the XLSForm.
         """
         import json
-        # lang = lang if lang \
-        #     else self.languages['language_list']['default_language']
         raw_survey = []
         header = self.metadata['raw_data']['survey'][0]
         for i, row in enumerate(self.metadata['raw_data']['survey']):
@@ -449,10 +447,10 @@ class OdkForm:
                     context.add_table(this_prompt)
                 elif token['token_type'] == 'unhandled':
                     # Intentionally no handling for these types.
-                    # possibly start logging
+                    # TODO: Possibly start logging?
                     pass
                 else:
-                    # make an error
+                    # TODO: Make an error?
                     pass
         except KeyError:  # No survey found.
             pass

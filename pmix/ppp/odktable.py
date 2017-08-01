@@ -94,20 +94,6 @@ class OdkTable:
         result = 'ODK TABLE TEXT'  # Placeholder
         return result
 
-    # TODO: Finish this or change debug feature.
-    # def to_dict(self, lang):
-    #     """Format components of a table.
-    #
-    #     Args:
-    #         lang (str): The language.
-    #
-    #     Returns:
-    #         list: A list of reformatted components.
-    #
-    #     """
-    #     table = []
-    #     return table
-
     def to_html(self, lang, highlighting):
         """Convert to html.
 

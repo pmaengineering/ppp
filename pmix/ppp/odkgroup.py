@@ -96,21 +96,6 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    # TODO: Finish this or change debug feature.
-    # def to_dict(self, lang):
-    #     """Format components of a group.
-    #
-    #     Args:
-    #         lang (str): The language.
-    #
-    #     Returns:
-    #         list: A list of reformatted components.
-    #
-    #     """
-    #     group = []
-    #     # header = self.format_header(self.opener, lang, highlighting)
-    #     return group
-
     def to_html(self, lang, highlighting):
         """Convert group components to html and return concatenation.
 

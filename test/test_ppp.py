@@ -8,9 +8,9 @@ from argparse import ArgumentParser
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkgroup import OdkGroup
-# from pmix.odkchoices import OdkChoices
-# from pmix.odkrepeat import OdkRepeat
-# from pmix.odktable import OdkTable
+# from pmix.odkchoices import OdkChoices  # TODO
+# from pmix.odkrepeat import OdkRepeat  # TODO
+# from pmix.odktable import OdkTable  # TODO
 
 TEST_PACKAGES = ['pmix.ppp', 'test']
 TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
@@ -35,7 +35,7 @@ class MockForm(OdkForm):
 
 # # Unit Tests
 # pylint: disable=too-few-public-methods
-# PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
+# - PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
 class PppTest:
     """Base class for PPP package tests."""
 
@@ -64,6 +64,7 @@ class OdkPromptTest(unittest.TestCase, PppTest):
     arbitrary_language_param = 'English'
 
     def setUp(self):
+        """Set up."""
         self.data = (
             ({'inputs': {
                 'file': 'FQ.xlsx'
@@ -128,6 +129,7 @@ class OdkGroupTest(unittest.TestCase):
     """Unit tests for the OdkGroup class."""
 
     def setUp(self):
+        """Set up."""
         self.data = (
             ({'inputs': {'type': 'begin group', 'name': 'date_group',
                          'label::English': '', 'hint::English': '',
@@ -181,6 +183,7 @@ class OdkFormTest(unittest.TestCase, PppTest):
     """Unit tests for the OdkForm class."""
 
     def setUp(self):
+        """Set up."""
         self.data = (
             ({'file': 'FQ.xlsx', 'position': 0},
              {'class': OdkGroup,
@@ -241,55 +244,6 @@ class OdkFormTest(unittest.TestCase, PppTest):
             output = forms[i['file']].questionnaire[i['position']]
             self.assertTrue(str(output) == expected_output['repr'])
             self.assertTrue(isinstance(output, expected_output['class']))
-
-    # def test_languages(self):
-    #     """Language based tests."""
-    #     def test_get_label_language_list():
-    #         """Test OdkForm.get_label_language_list()."""
-    #         test_input = {
-    #             'audio': {
-    #                 'has_generic_language_field': True,
-    #                 'language_list': []
-    #             },
-    #             'constraint_message': {
-    #                 'has_generic_language_field': False,
-    #                 'language_list': ['Ateso', 'English', 'Luganda',
-    #                                   'Lugbara', 'Luo', 'Lusoga',
-    #                                   'Ngakarimojong', 'Runyankole-Rukiga',
-    #                                   'Runyoro-Rutoro']
-    #             },
-    #             'hint': {
-    #                 'has_generic_language_field': False,
-    #                 'language_list': ['Ateso', 'English', 'Luganda',
-    #                                   'Lugbara', 'Luo', 'Lusoga',
-    #                                   'Ngakarimojong', 'Runyankole-Rukiga',
-    #                                   'Runyoro-Rutoro']
-    #             },
-    #             'image': {
-    #                 'has_generic_language_field': False,
-    #                 'language_list': ['Ateso', 'English', 'Luganda',
-    #                                   'Lugbara', 'Luo', 'Lusoga',
-    #                                   'Ngakarimojong', 'Runyankole-Rukiga',
-    #                                   'Runyoro-Rutoro']
-    #             },
-    #             'label': {
-    #                 'has_generic_language_field': False,
-    #                 'language_list': ['Ateso', 'English', 'Luganda',
-    #                                   'Lugbara', 'Luo', 'Lusoga',
-    #                                   'Ngakarimojong', 'Runyankole-Rukiga',
-    #                                   'Runyoro-Rutoro']
-    #             },
-    #             'media::video': {
-    #                 'has_generic_language_field': False,
-    #                 'language_list': ['English']
-    #             }
-    #         }
-    #       expected_output = ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo',
-    #                           'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
-    #                            'Runyoro-Rutoro']
-    #         self.assertTrue(
-    #           OdkForm.get_label_language_list(test_input) == expected_output)
-    #     test_get_label_language_list()
 
 
 def get_args():

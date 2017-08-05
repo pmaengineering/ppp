@@ -197,9 +197,9 @@ def _add_arguments(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    d, c, b, a = _cli_only_fields, _non_preset_optional_fields, \
-        _preset_optional_fields, _required_fields
-    return d(c(b(a(copy(parser)))))
+    return (lambda d, c, b, a: d(c(b(a(copy(parser))))))\
+        (_cli_only_fields, _non_preset_optional_fields,
+         _preset_optional_fields, _required_fields)
 
 
 def cli():

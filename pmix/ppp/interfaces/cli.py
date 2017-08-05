@@ -179,6 +179,15 @@ def _cli_only_fields(parser):
     return parser
 
 
+# TODO: Try recursion.
+# def _add_arguments(parser, adders):
+#     if adders:
+#         updated_parser = adders.pop(0)(parser)
+#         _add_arguments(updated_parser, adders)
+#     else:
+#         return parser
+
+
 def _add_arguments(parser):
     """Add arguments to parser.
 
@@ -188,15 +197,9 @@ def _add_arguments(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    return copy(_cli_only_fields(
-        copy(_non_preset_optional_fields(
-            copy(_preset_optional_fields(
-                copy(_required_fields(
-                    copy(parser)
-                ))
-            ))
-        ))
-    ))
+    d, c, b, a = _cli_only_fields, _non_preset_optional_fields, \
+        _preset_optional_fields, _required_fields
+    return d(c(b(a(copy(parser)))))
 
 
 def cli():
@@ -213,6 +216,10 @@ def cli():
     prog_desc = 'Convert XLSForm to Paper version.'
 
     new_parser = ArgumentParser(description=prog_desc)
+    # TODO: Try recursion.
+    # adders = [_cli_only_fields, _non_preset_optional_fields,
+    #           _preset_optional_fields, _required_fields]
+    # parser = _add_arguments(copy(new_parser), adders)
     parser = _add_arguments(copy(new_parser))
     args = parser.parse_args()
 

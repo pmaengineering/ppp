@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Command Line Interface."""
-from sys import stderr
-from copy import copy
 from argparse import ArgumentParser
-from pmix.ppp.error import OdkException, OdkFormError
+from sys import stderr
+
+from copy import copy
+
 from pmix.ppp import run
+from pmix.ppp.definitions.abstractions import chain
+from pmix.ppp.definitions.error import OdkException, OdkFormError
 
 
 def _required_fields(parser):
-    """Required fields.
+    """Add required fields to parser.
 
     Args:
         parser (ArgumentParser): Argparse object.
@@ -39,7 +42,7 @@ def _required_fields(parser):
 
 
 def _non_preset_optional_fields(parser):
-    """Non-preset optional fields.
+    """Add non-preset optional fields to parser.
 
     Args:
         parser (ArgumentParser): Argparse object.
@@ -62,13 +65,13 @@ def _non_preset_optional_fields(parser):
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')
     parser.add_argument('-f', '--format',
-                        choices=('html', 'text', 'pdf', 'doc'),  # TODO: doc.
+                        choices=('html', 'text', 'pdf', 'doc'),  # `TODO: doc.
                         default='html', help=format_help)
     return parser
 
 
 def _preset_optional_fields(parser):
-    """Preset options.
+    """Add preset options to parser.
 
     These options are all boolean toggles. Their value should automatically
     update based on the bundle option preset selected. Also, they should either
@@ -151,7 +154,7 @@ def _preset_optional_fields(parser):
 
 
 def _cli_only_fields(parser):
-    """CLI-only fields.
+    """Add CLI-only fields to parser.
 
     Args:
         parser (ArgumentParser): Argparse object.
@@ -179,15 +182,6 @@ def _cli_only_fields(parser):
     return parser
 
 
-# TODO: Try recursion.
-# def _add_arguments(parser, adders):
-#     if adders:
-#         updated_parser = adders.pop(0)(parser)
-#         _add_arguments(updated_parser, adders)
-#     else:
-#         return parser
-
-
 def _add_arguments(parser):
     """Add arguments to parser.
 
@@ -197,9 +191,8 @@ def _add_arguments(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    return (lambda d, c, b, a: d(c(b(a(copy(parser))))))\
-        (_cli_only_fields, _non_preset_optional_fields,
-         _preset_optional_fields, _required_fields)
+    return chain(parser, funcs=[_cli_only_fields, _non_preset_optional_fields,
+                                _preset_optional_fields, _required_fields])
 
 
 def cli():
@@ -215,12 +208,8 @@ def cli():
     """
     prog_desc = 'Convert XLSForm to Paper version.'
 
-    new_parser = ArgumentParser(description=prog_desc)
-    # TODO: Try recursion.
-    # adders = [_cli_only_fields, _non_preset_optional_fields,
-    #           _preset_optional_fields, _required_fields]
-    # parser = _add_arguments(copy(new_parser), adders)
-    parser = _add_arguments(copy(new_parser))
+    argeparser = ArgumentParser(description=prog_desc)
+    parser = _add_arguments(copy(argeparser))
     args = parser.parse_args()
 
     if args.highlight and args.format and args.format not in ['html', 'pdf']:
@@ -236,6 +225,7 @@ def cli():
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
             .format(args.xlsxfile, err)
         print(err, file=stderr)
+
 
 if __name__ == '__main__':
     cli()

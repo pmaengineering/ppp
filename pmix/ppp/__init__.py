@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """Common executional entry point from interfaces."""
 from signal import signal, SIGPIPE, SIG_DFL
+
+from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
 from pmix.ppp.odkform import OdkForm
-from pmix.ppp.error import OdkException, InvalidLanguageException
 
 
 def run(in_file, language=None, output_format=None, out_file=None,

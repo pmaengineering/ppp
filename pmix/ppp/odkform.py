@@ -1,7 +1,8 @@
 """Module for the OdkForm class."""
 import os.path
+
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError
+from pmix.ppp.definitions.error import OdkFormError
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt

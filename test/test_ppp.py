@@ -277,11 +277,12 @@ def get_test_modules(test_package):
         raise Exception('Test package not found.')
 
     test_modules = []
-    for dummy, dummy, filenames in os.walk(root_dir):
-        for file in filenames:
-            if file.endswith('.py'):
-                file = file[:-3]
-                test_module = test_package + '.' + file
+    for dirpath, dummy, filenames in os.walk(root_dir):
+        for filename in filenames:
+            if filename.endswith('.py'):
+                filename = filename[:-3]
+                sub_pkg = dirpath.replace(root_dir, '').replace('/', '.')
+                test_module = test_package + sub_pkg + '.' + filename
                 test_modules.append(test_module)
     return test_modules
 

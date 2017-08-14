@@ -51,6 +51,11 @@ codeall: code codetest
 doc:
 	${DOC_SRC}
 
+# Testing
+test_all: unittest doctest
+unittest: test
+test:
+	${PYTHON} -m unittest discover -v
 doctest:
 	${DOC_TEST}
 

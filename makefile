@@ -56,15 +56,21 @@ doc:
 test:
 	${PYTHON} -m unittest discover -v
 
+
 testdoc:
 	${PYTHON} -m test.test --doctests-only
 
-test_all: unittest doctest
+test_all: test testdoc
 
 
 # SERVER MANAGEMENT
 ssh:
 	ssh root@192.155.80.11
+
+
+# TESTING
+test:
+	${PYTHON} -m unittest discover -v
 
 
 # CTAGS

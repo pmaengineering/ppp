@@ -224,6 +224,63 @@ class OdkPrompt:
                         row[non_prefixed_mf] = formatted_media_label
         return row
 
+    @staticmethod
+    def handle_preset(prompt, preset):
+        """Handle preset.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+            preset (str): The preset supplied.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        # TODO: (jef 2017.09.24) Human readable: hint variables.
+        # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
+        field_exclusions = {
+            'developer': ('', ),
+            'internal': ('', ),
+            'minimal': ('constraint', 'constraint_message', 'name', 'type'),
+            'public': ('', )
+        }
+        other_exclusions = {
+            'developer': ('', ),
+            'internal': ('', ),
+            'minimal': ('choice names', ),
+            'public': ('', )
+        }
+        field_replacements = {
+            'developer': ('',),
+            'internal': ('', ),
+            'minimal': ('label', 'relevant'),
+            'public': ('', )
+        }
+        for key in prompt:
+            for exclusion in field_exclusions[preset]:
+                if key.startswith(exclusion):
+                    prompt[key] = ''
+                    continue
+
+            for to_replace in field_replacements[preset]:
+                if key.startswith('ppp_' + to_replace):
+                    new = ''
+                    if prompt[key]:
+                        if to_replace.startswith('label'):
+                            new = [prompt[key]]
+                        if to_replace.startswith('relevant'):
+                            new = prompt[key]
+                    prompt[to_replace] = new
+
+            if 'choice names' in other_exclusions[preset]:
+                if key == 'input_field' and prompt['simple_type'] in \
+                        ('select_one', 'select_multiple'):
+                    prompt['input_field'] = [
+                        {'name': '', 'label': i['label']}
+                        for i in prompt['input_field']
+                    ]
+
+        return prompt
+
     def text_field(self, field, lang):
         """Find a row value given a field and language.
 
@@ -374,6 +431,8 @@ class OdkPrompt:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
+        if 'preset' in kwargs:
+            prompt = self.handle_preset(prompt, kwargs['preset'])
         return prompt
 
     def to_html(self, lang, highlighting, **kwargs):
@@ -391,4 +450,4 @@ class OdkPrompt:
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
             .render(question=self.to_dict(lang=lang, **kwargs),
-                    highlighting=highlighting, preset=kwargs['preset'])
+                    highlighting=highlighting, **kwargs)

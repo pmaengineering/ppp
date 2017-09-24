@@ -94,7 +94,7 @@ class OdkTable:
         result = 'ODK TABLE TEXT'  # Placeholder
         return result
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert to html.
 
         Args:
@@ -116,5 +116,5 @@ class OdkTable:
             table.append(i.row)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
-            .render(table=table,
-                    lang=lang, highlighting=highlighting)
+            .render(table=table, lang=lang, highlighting=highlighting,
+                    **kwargs)

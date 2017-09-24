@@ -96,7 +96,7 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert group components to html and return concatenation.
 
         Args:
@@ -110,18 +110,18 @@ class OdkGroup:
         html = ''
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
-            .render()
+            .render(**kwargs)
         header = self.format_header(self.opener)
-        html += OdkPrompt(header).to_html(lang, highlighting)
+        html += OdkPrompt(header).to_html(lang, highlighting, **kwargs)
         for i in self.data:
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat
                 i.row['in_group'] = True
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = self.in_repeat
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
-            .render()
+            .render(**kwargs)
         return html

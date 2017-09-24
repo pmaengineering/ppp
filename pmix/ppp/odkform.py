@@ -238,7 +238,7 @@ class OdkForm:
         }
         # pylint: disable=no-member
         header = TEMPLATE_ENV.get_template('header.html')\
-            .render(data=data['header'])
+            .render(data=data['header'], **kwargs)
         # pylint: disable=no-member
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()
@@ -254,15 +254,15 @@ class OdkForm:
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
                 html_questionnaire += \
-                    item.to_html(language, hlt, bottom_border=True)
+                    item.to_html(language, hlt, **kwargs, bottom_border=True)
             else:
-                html_questionnaire += item.to_html(language, hlt)
+                html_questionnaire += item.to_html(language, hlt, **kwargs)
             prev_item = item
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=None, warnings=OdkForm.warnings,
-                    data=data['footer']['data'])
+                    data=data['footer']['data'], **kwargs)
         html_questionnaire += footer
         return html_questionnaire
 

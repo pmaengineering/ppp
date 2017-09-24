@@ -78,4 +78,4 @@ ltags:
 
 # AD HOC
 minimal_test:
-	${PYTHON} -m pmix.ppp test/files/IQ-schisto.xlsx -p minimal > output/IQ-schisto.html
+	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -p minimal > output/FQ-generic.html

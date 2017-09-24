@@ -391,4 +391,4 @@ class OdkPrompt:
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
             .render(question=self.to_dict(lang=lang, **kwargs),
-                    highlighting=highlighting)
+                    highlighting=highlighting, preset=kwargs['preset'])

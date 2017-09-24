@@ -68,14 +68,14 @@ ssh:
 	ssh root@192.155.80.11
 
 
-# TESTING
-test:
-	${PYTHON} -m unittest discover -v
-
-
 # CTAGS
 tags:
 	ctags -R --python-kinds=-i .
 
 ltags:
 	ctags -R --python-kinds=-i ./${CODE_SRC}
+
+
+# AD HOC
+minimal_test:
+	${PYTHON} -m pmix.ppp test/files/IQ-schisto.xlsx -p minimal > output/IQ-schisto.html

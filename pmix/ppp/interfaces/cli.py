@@ -36,7 +36,7 @@ def _required_fields(parser):
          'of sensitive information. The \'public\' option is like the '
          '\'internal\' optoin, only with sensitive information removed.')
     parser.add_argument('-p', '--preset',
-                        choices=('public', 'internal', 'developer'),
+                        choices=('public', 'internal', 'developer', 'minimal'),
                         default='developer', help=presets_help)
     return parser
 
@@ -220,7 +220,7 @@ def cli():
     try:
         run(in_file=args.xlsxfile, language=args.language,
             output_format=args.format, out_file=args.outpath,
-            debug=args.debug, highlight=args.highlight)
+            debug=args.debug, highlight=args.highlight, preset=args.preset)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
             .format(args.xlsxfile, err)

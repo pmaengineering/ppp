@@ -224,6 +224,9 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
+        from sys import stderr
+        print(kwargs['preset'], file=stderr)
+
         language = language if language else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''

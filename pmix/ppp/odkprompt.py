@@ -146,12 +146,11 @@ class OdkPrompt:
         new_row = row.copy()
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
-                if key.startswith(field) and val:
+                if key.startswith(field):
                     if field not in row:
                         fields_to_add.append(field)
                     if field.startswith(prefix):
-                        non_prefixed_mf = field.replace(
-                            prefix, '')
+                        non_prefixed_mf = field.replace(prefix, '')
                         if non_prefixed_mf not in row:
                             fields_to_add.append(non_prefixed_mf)
 
@@ -210,8 +209,8 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         arbitrary_media_prefix = 'media::'
-        new_row = self.create_additional_media_fields(row,
-                                                      arbitrary_media_prefix)
+        new_row = \
+            self.create_additional_media_fields(row, arbitrary_media_prefix)
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
                 if key.startswith(field) and val:

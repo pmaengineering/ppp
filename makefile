@@ -68,11 +68,6 @@ ssh:
 	ssh root@192.155.80.11
 
 
-# TESTING
-test:
-	${PYTHON} -m unittest discover -v
-
-
 # CTAGS
 tags:
 	ctags -R --python-kinds=-i .

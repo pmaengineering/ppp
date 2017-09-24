@@ -16,7 +16,7 @@ DOC_SRC=${PYDOCSTYLE} ${SRC}
 DOC_TEST=${PYDOCSTYLE} ${TEST}
 
 
-.PHONY: lint tags ltags test all lint_all codestyle docstyle server serve lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test
+.PHONY: lint linttest lintall pylint pylinttest pylintall code codetest codeall doc test testdoc test_all ssh tags ltags
 
 # ALL LINTING
 lint:
@@ -51,16 +51,6 @@ codeall: code codetest
 doc:
 	${DOC_SRC}
 
-# Testing
-test_all: unittest doctest
-unittest: test
-test:
-	${PYTHON} -m unittest discover -v
-doctest:
-	${DOC_TEST}
-
-docall: doc doctest
-
 
 # TESTING
 test:
@@ -71,8 +61,10 @@ testdoc:
 
 test_all: unittest doctest
 
-# SERVER MANAGEMENT
 
+# SERVER MANAGEMENT
+ssh:
+	ssh root@192.155.80.11
 
 
 # CTAGS

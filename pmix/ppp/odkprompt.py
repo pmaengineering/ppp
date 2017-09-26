@@ -262,7 +262,7 @@ class OdkPrompt:
                     continue
 
             for to_replace in field_replacements[preset]:
-                if key.startswith('ppp_' + to_replace):
+                if key.startswith('ppp_' + to_replace) and prompt[key]:
                     new = ''
                     if prompt[key]:
                         if to_replace.startswith('label'):

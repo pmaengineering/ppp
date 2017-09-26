@@ -61,3 +61,8 @@ doctest:
 serve:server
 server:
 	gunicorn pmaapi.__main__:APP
+
+
+# AD HOC
+test_feature:
+	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx > output/FQ-generic.html

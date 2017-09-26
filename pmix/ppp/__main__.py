@@ -3,7 +3,7 @@
 """CLI for PPP package."""
 import sys
 import argparse
-from pmix.ppp.error import OdkException, OdkFormError
+from pmix.ppp.definitions.error import OdkException, OdkFormError
 from pmix.ppp import run
 
 

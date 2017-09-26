@@ -1,16 +1,18 @@
 """Module for the OdkForm class."""
 import datetime
 import os.path
-from pmix.ppp.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
+
+from pmix.workbook import Workbook
+from pmix.ppp.definitions.constants import LANGUAGE_PERTINENT_WORKSHEETS, \
     LANGUAGE_DEPENDENT_FIELDS
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError, InvalidLanguageException, \
+from pmix.ppp.definitions.error import OdkFormError, InvalidLanguageException, \
     AmbiguousLanguageError, InconsistentLabelLanguage
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkrepeat import OdkRepeat
-from pmix.workbook import Workbook
+from pmix.ppp.definitions.utils import exclusion
 
 
 class OdkForm:
@@ -597,6 +599,7 @@ class OdkForm:
         # conversion_start = datetime.datetime.now()  # (1)
         lang = kwargs['lang'] if 'lang' in kwargs else \
             self.languages['default_language']
+
         html_questionnaire = ''
         data = {
             'header': {
@@ -609,6 +612,8 @@ class OdkForm:
             },
             'questionnaire': self.questionnaire
         }
+
+        # - Render Header
         # pylint: disable=no-member
         header = TEMPLATE_ENV.get_template('header.html')\
             .render(data=data['header'])
@@ -616,8 +621,14 @@ class OdkForm:
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
+
+        # - Render Body
         prev_item = None
         for index, item in enumerate(data['questionnaire']):
+
+            if exclusion(item=item, settings=kwargs):
+                continue
+
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
             elif isinstance(prev_item, OdkGroup) \
@@ -630,21 +641,24 @@ class OdkForm:
             else:
                 html_questionnaire += item.to_html(lang, kwargs['highlight'])
             prev_item = item
+
+        # - Render Footer
         # self.set_conversion_end()  # (1)
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
-
         OdkForm.conversion_info = {} \
             if OdkForm.conversion_info == 'false' else 'false'  # (1)
         # else OdkForm.conversion_info  # (1)
         # self.get_running_conversion_time()  # (1)
         # conversion_time = str(self.metadata['conversion_time'])  # (1)
         conversion_time = "some time"
+
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,
                     conversion_time=conversion_time,
                     data=data['footer']['data'])
         html_questionnaire += footer
+
         return html_questionnaire
 
     @staticmethod

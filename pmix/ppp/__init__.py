@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """A package for converting ODK forms."""
 from pmix.ppp.odkform import OdkForm
-from pmix.ppp.error import OdkException, InvalidLanguageException
+from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
 
 
 def run(in_file, language=None, output_format=None, out_file=None,

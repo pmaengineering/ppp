@@ -77,5 +77,5 @@ ltags:
 
 
 # AD HOC
-minimal_test:
+test_feature:
 	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -p minimal > output/FQ-generic.html

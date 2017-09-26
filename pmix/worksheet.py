@@ -61,19 +61,21 @@ class Worksheet:
             return 0
 
     @classmethod
-    def from_sheet(cls, sheet, datemode=None):
+    def from_sheet(cls, sheet, datemode=None, stripstr=True):
         """Create Worksheet from xlrd Sheet object.
 
         Args:
             sheet (xlrd.Sheet): A sheet instance to copy over
             datemode (int): The date mode of the Excel workbook
+            stripstr (bool): Remove trailing / leading whitespace from text?
 
         Returns:
             An initialized Worksheet object
         """
         worksheet = cls(name=sheet.name)
         for i in range(sheet.nrows):
-            cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
+            cur_row = [Cell.from_cell(c, datemode, stripstr) for c in
+                       sheet.row(i)]
             worksheet.data.append(cur_row)
         return worksheet
 
@@ -217,6 +219,11 @@ class Worksheet:
                 else:
                     values = [cell.value for cell in row]
                 csv_writer.writerow(values)
+
+    def cell_iter(self):
+        """Iterate over the cells of a worksheet."""
+        for row in self:
+            yield from row
 
     def __iter__(self):
         """Return an iterator on the rows of this Worksheet."""

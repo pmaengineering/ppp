@@ -1,12 +1,14 @@
 """This module defines a Workbook class to represent Excel files."""
 
+import itertools
 import os.path
 import argparse
 
 import xlrd
 import xlsxwriter
 
-from pmix import wbformat
+import pmix.utils as utils
+import pmix.wbformat as wbformat
 from pmix.worksheet import Worksheet
 
 
@@ -64,6 +66,11 @@ class Workbook:
             formats[k] = this_format
         return formats
 
+    def cell_iter(self):
+        """Iterate over the cells of the workbook."""
+        sheet_iters = [sheet.cell_iter() for sheet in self]
+        return itertools.chain(*sheet_iters)
+
     def write_out(self, path, strings=False):
         """Write this Workbook out to file.
 
@@ -91,11 +98,12 @@ class Workbook:
                         ws.write(i, j, this_value, this_format)
 
     @staticmethod
-    def data_from_excel(path):
+    def data_from_excel(path, stripstr=True):
         """Get data from Excel through xlrd.
 
         Args:
             path (str): The path where to find the Excel file.
+            stripstr (bool): Remove trailing / leading whitespace from text?
 
         Returns:
             A list of worksheets, matching the source Excel file.
@@ -105,7 +113,7 @@ class Workbook:
             datemode = book.datemode
             for i in range(book.nsheets):
                 ws = book.sheet_by_index(i)
-                my_ws = Worksheet.from_sheet(ws, datemode)
+                my_ws = Worksheet.from_sheet(ws, datemode, stripstr)
                 result.append(my_ws)
         return result
 
@@ -143,6 +151,23 @@ class Workbook:
             raise TypeError(key)
 
 
+def remove_extra_whitespace(inpath, outpath):
+    """Remove trailing and leading whitespace of newlines and text.
+
+    Args:
+        inpath (str): The path where to find the source file.
+        outpath (str): The path where to write the CSV
+    """
+    wb = Workbook(inpath)
+    for cell in wb.cell_iter():
+        old_value = str(cell)
+        new_value = utils.clean_string(old_value)
+        if old_value != new_value:
+            cell.value = new_value
+            cell.highlight = 'HL_YELLOW'
+    wb.write_out(outpath)
+
+
 def write_sheet_to_csv(inpath, outpath, sheet=0):
     """Write a worksheet of a workbook to CSV.
 
@@ -165,6 +190,10 @@ def workbook_cli():
     file_help = 'Path to source XLSForms containing translations.'
     parser.add_argument('xlsxfile', help=file_help)
 
+    ws_help = ('Remove trailing and leading whitespace of text and newlines.')
+    parser.add_argument('-w', '--whitespace', help=ws_help,
+                        action='store_true')
+
     csv_help = ('Write a worksheet to CSV. Supply the worksheet name here.')
     parser.add_argument('-c', '--csv', help=csv_help)
 
@@ -174,7 +203,15 @@ def workbook_cli():
 
     args = parser.parse_args()
 
-    if args.csv is not None:
+    if args.whitespace:
+        filename, extension = os.path.splitext(args.xlsxfile)
+        if args.outpath is None:
+            outpath = os.path.join(filename+'-rmws'+extension)
+        else:
+            outpath = args.outpath
+        remove_extra_whitespace(args.xlsxfile, outpath)
+        print('Cleaned whitespace and wrote file to "{}"'.format(outpath))
+    elif args.csv is not None:
         base = os.path.split(args.xlsxfile)[0]
         sheet_name = args.csv
         if args.outpath is not None:

@@ -225,11 +225,12 @@ class OdkPrompt:
         return row
 
     @staticmethod
-    def handle_preset(prompt, preset):
+    def handle_preset(prompt, lang, preset):
         """Handle preset.
 
         Args:
             prompt (dict): Dictionary representation of prompt.
+            lang (str): The language.
             preset (str): The preset supplied.
 
         Returns
@@ -262,7 +263,7 @@ class OdkPrompt:
                     continue
 
             for to_replace in field_replacements[preset]:
-                if key.startswith('ppp_' + to_replace) and prompt[key]:
+                if key == 'ppp_'+to_replace+lang and prompt[key]:
                     new = ''
                     if prompt[key]:
                         if to_replace.startswith('label'):
@@ -432,7 +433,8 @@ class OdkPrompt:
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
         if 'preset' in kwargs:
-            prompt = self.handle_preset(prompt, kwargs['preset'])
+            prompt = self.handle_preset(prompt, lang, kwargs['preset'])
+
         return prompt
 
     def to_html(self, lang, highlighting, **kwargs):

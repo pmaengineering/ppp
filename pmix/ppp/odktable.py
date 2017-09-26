@@ -1,7 +1,7 @@
 """Module for the OdkTable class."""
-
 from pmix.ppp.config import TEMPLATE_ENV
-# from pmix.ppp.error import OdkformError
+from pmix.ppp.definitions.utils import exclusion
+# from pmix.ppp.definitions.error import OdkformError
 
 
 class OdkTable:
@@ -109,11 +109,19 @@ class OdkTable:
         Returns:
             str: A rendered html template.
         """
+        # - Render header
         self.set_header_and_contents(lang)
         table = list()
         table.append(self.header.row)
+
+        # - Render body
         for i in self.contents:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             table.append(i.row)
+
+        # - Render footer
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
             .render(table=table, lang=lang, highlighting=highlighting,

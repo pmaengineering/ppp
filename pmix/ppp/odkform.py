@@ -7,6 +7,7 @@ from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkrepeat import OdkRepeat
+from pmix.ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
 
@@ -236,6 +237,8 @@ class OdkForm:
             },
             'questionnaire': self.questionnaire
         }
+
+        # - Render Header
         # pylint: disable=no-member
         header = TEMPLATE_ENV.get_template('header.html')\
             .render(data=data['header'], **kwargs)
@@ -243,9 +246,15 @@ class OdkForm:
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
+
+        # - Render Body
         prev_item = None
         hlt = kwargs['highlight'] if 'highlight' in kwargs else False
         for index, item in enumerate(data['questionnaire']):
+
+            if exclusion(item=item, settings=kwargs):
+                continue
+
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
             elif isinstance(prev_item, OdkGroup) \
@@ -259,11 +268,13 @@ class OdkForm:
                 html_questionnaire += item.to_html(language, hlt, **kwargs)
             prev_item = item
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
+
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=None, warnings=OdkForm.warnings,
                     data=data['footer']['data'], **kwargs)
         html_questionnaire += footer
+
         return html_questionnaire
 
     @staticmethod

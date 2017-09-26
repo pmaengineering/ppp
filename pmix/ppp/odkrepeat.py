@@ -4,6 +4,7 @@ from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odktable import OdkTable
+from pmix.ppp.definitions.utils import exclusion
 
 
 class OdkRepeat:
@@ -106,7 +107,7 @@ class OdkRepeat:
     #     repeat = []
     #     return repeat
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert repeat group components to html and return concatenation.
 
         Args:
@@ -118,8 +119,15 @@ class OdkRepeat:
             str: A rendered html concatenation of component templates.
         """
         html = ''
+
+        # - Render header
         html += self.render_header(self.opener, lang, highlighting)
+
+        # - Render body
         for i in self.data:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = True
                 html += i.to_html(lang, highlighting)
@@ -129,5 +137,8 @@ class OdkRepeat:
             elif isinstance(i, OdkTable):
                 i.in_repeat = True
                 html += i.to_html(lang, highlighting)
+
+        # - Render footer
         html += self.render_footer()
+
         return html

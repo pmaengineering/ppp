@@ -1,8 +1,4 @@
 """Utils."""
-from ..odkprompt import OdkPrompt
-from ..odkgroup import OdkGroup
-from ..odkrepeat import OdkRepeat
-from ..odktable import OdkTable
 from ..config import EXCLUSION_TOKEN
 from .constants import PRESETS
 
@@ -26,18 +22,23 @@ def exclusion(item, settings):
     """
     exclude = False
 
-    if 'exclusion' in settings or 'preset' in settings \
-            and PRESETS[settings['preset']['exlcusion']]:
+    # TODO: Temporarily here. Remove this after merging into new branch
+    # "minimal + excludes".
+    settings['preset'] = 'minimal'
 
-        item_data = ''
-        if isinstance(item, OdkPrompt):
+    if 'exclusion' in settings or 'preset' in settings \
+            and PRESETS[settings['preset']]['general_exclusions']:
+
+        if hasattr(item, 'row'):
             item_data = 'row'
-        elif isinstance(item, OdkGroup or OdkRepeat):
+        elif hasattr(item, 'opener'):
             item_data = 'opener'
-        elif isinstance(item, OdkTable):
-            return False  # TODO
-        exclude = \
-            getattr(item, item_data)['ppp_excludes'].lower() == \
-            EXCLUSION_TOKEN.lower()
+        else:
+            # Table; Rather than explicitly exluding a table, the group itself
+            #     should be excluded.
+            return False
+
+        token = EXCLUSION_TOKEN.lower()
+        exclude = getattr(item, item_data)['ppp_excludes'].lower() == token
 
     return exclude

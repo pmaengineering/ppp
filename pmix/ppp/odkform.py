@@ -636,8 +636,10 @@ class OdkForm:
                 html_questionnaire += grp_spc
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += item.to_html(lang, kwargs['highlight'],
-                                                   bottom_border=True)
+                kwargs['bottom_border'] = True
+                html_questionnaire += \
+                    item.to_html(lang=lang, highlighting=kwargs['highlight'],
+                                 **kwargs)
             else:
                 html_questionnaire += item.to_html(lang, kwargs['highlight'])
             prev_item = item

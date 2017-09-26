@@ -1,8 +1,8 @@
 """Module for the OdkGroup class."""
-
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odktable import OdkTable
+from pmix.ppp.definitions.utils import exclusion
 
 
 class OdkGroup:
@@ -111,7 +111,7 @@ class OdkGroup:
     #     # header = self.format_header(self.opener, lang, highlighting)
     #     return group
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert group components to html and return concatenation.
 
         Args:
@@ -124,11 +124,18 @@ class OdkGroup:
         """
         html = ''
         # pylint: disable=no-member
+
+        # - Render header
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
             .render()
         header = self.format_header(self.opener)
         html += OdkPrompt(header).to_html(lang, highlighting)
+
+        # - Render body
         for i in self.data:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat
                 i.row['in_group'] = True
@@ -136,7 +143,10 @@ class OdkGroup:
             elif isinstance(i, OdkTable):
                 i.in_repeat = self.in_repeat
                 html += i.to_html(lang, highlighting)
+
+        # - Render footer
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
             .render()
+
         return html

@@ -2,9 +2,8 @@
 import textwrap
 
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.definitions.constants import MEDIA_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, \
-    TRUNCATABLE_FIELDS
+from pmix.ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS
 from pmix.ppp.definitions.error import OdkChoicesError
 
 
@@ -238,31 +237,13 @@ class OdkPrompt:
         """
         # TODO: (jef 2017.09.24) Human readable: hint variables.
         # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
-        field_exclusions = {
-            'developer': ('', ),
-            'internal': ('', ),
-            'minimal': ('constraint', 'constraint_message', 'name', 'type'),
-            'public': ('', )
-        }
-        other_exclusions = {
-            'developer': ('', ),
-            'internal': ('', ),
-            'minimal': ('choice names', ),
-            'public': ('', )
-        }
-        field_replacements = {
-            'developer': ('',),
-            'internal': ('', ),
-            'minimal': ('label', 'relevant'),
-            'public': ('', )
-        }
         for key in prompt:
-            for exclusion in field_exclusions[preset]:
+            for exclusion in PRESETS[preset]['field_exclusions']:
                 if key.startswith(exclusion):
                     prompt[key] = ''
                     continue
 
-            for to_replace in field_replacements[preset]:
+            for to_replace in PRESETS[preset]['field_replacements']:
                 if key == 'ppp_'+to_replace+lang and prompt[key]:
                     new = ''
                     if prompt[key]:
@@ -272,7 +253,7 @@ class OdkPrompt:
                             new = prompt[key]
                     prompt[to_replace] = new
 
-            if 'choice names' in other_exclusions[preset]:
+            if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [

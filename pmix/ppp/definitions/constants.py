@@ -15,3 +15,30 @@ MEDIA_FIELDS = ('image', 'media::image', 'audio', 'media::audio',
 LANGUAGE_DEPENDENT_FIELDS = \
     ('label', 'hint', 'constraint_message', 'ppp_input') + MEDIA_FIELDS
 TRUNCATABLE_FIELDS = ('constraint', 'relevant')
+PRESETS = {
+    'developer': {
+        'field_replacements': (),
+        'field_exclusions': (),
+        'other_specific_exclusions': (),
+        'general_exclusions': False
+    },
+    'internal': {
+        'field_replacements': (),
+        'field_exclusions': (),
+        'other_specific_exclusions': (),
+        'general_exclusions': False
+    },
+    'minimal': {
+        'field_replacements': ('label', 'relevant'),
+        'field_exclusions':
+            ('constraint', 'constraint_message', 'name', 'type'),
+        'other_specific_exclusions': ('choice names',),
+        'general_exclusions': True
+    },
+    'public': {
+        'field_replacements': (),
+        'field_exclusions': (),
+        'other_specific_exclusions': (),
+        'general_exclusions': False
+    },
+}

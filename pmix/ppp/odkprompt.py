@@ -244,14 +244,13 @@ class OdkPrompt:
                     continue
 
             for to_replace in PRESETS[preset]['field_replacements']:
-                if key == 'ppp_'+to_replace+lang and prompt[key]:
-                    new = ''
-                    if prompt[key]:
-                        if to_replace.startswith('label'):
-                            new = [prompt[key]]
-                        if to_replace.startswith('relevant'):
-                            new = prompt[key]
-                    prompt[to_replace] = new
+                replace_with = 'ppp_'+to_replace+'::'+lang
+
+                if key == replace_with and prompt[replace_with]:
+                    if to_replace.startswith('label'):
+                        prompt[to_replace] = [prompt[replace_with]]
+                    elif to_replace.startswith('relevant'):
+                        prompt[to_replace] = prompt[replace_with]
 
             if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \

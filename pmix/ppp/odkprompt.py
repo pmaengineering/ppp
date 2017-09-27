@@ -417,6 +417,22 @@ class OdkPrompt:
 
         return prompt
 
+    @staticmethod
+    def html_options(self, **kwargs):
+        """HTML options.
+
+        Args:
+            **kwargs (dict): Keyword arguments.
+
+        Returns:
+            dict: Modified settings based on keyword arguments.
+        """
+        if 'preset' not in kwargs:
+            return kwargs
+        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']:
+            kwargs[k] = v
+        return kwargs
+
     def to_html(self, lang, highlighting, **kwargs):
         """Convert to html.
 
@@ -429,7 +445,8 @@ class OdkPrompt:
         Returns:
             str: A rendered html template.
         """
+        settings = self.html_options(kwargs)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=self.to_dict(lang=lang, **kwargs),
-                    highlighting=highlighting, **kwargs)
+            .render(question=self.to_dict(lang=lang, **settings),
+                    highlighting=highlighting, **settings)

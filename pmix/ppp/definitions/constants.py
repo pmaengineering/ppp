@@ -20,25 +20,45 @@ PRESETS = {
         'field_replacements': (),
         'field_exclusions': (),
         'other_specific_exclusions': (),
-        'general_exclusions': False
+        'general_exclusions': False,
+        'render_settings': {
+            'html': {
+                'side_letters': True
+            }
+        }
     },
     'internal': {
         'field_replacements': (),
         'field_exclusions': (),
         'other_specific_exclusions': (),
-        'general_exclusions': False
+        'general_exclusions': False,
+        'render_settings': {
+            'html': {
+                'side_letters': True
+            }
+        }
     },
     'minimal': {
         'field_replacements': ('label', 'relevant'),
         'field_exclusions':
             ('constraint', 'constraint_message', 'name', 'type'),
         'other_specific_exclusions': ('choice names',),
-        'general_exclusions': True
+        'general_exclusions': True,
+        'render_settings': {
+            'html': {
+                'side_letters': False
+            }
+        }
     },
     'public': {
         'field_replacements': (),
         'field_exclusions': (),
         'other_specific_exclusions': (),
-        'general_exclusions': False
+        'general_exclusions': False,
+        'render_settings': {
+            'html': {
+                'side_letters': True
+            }
+        }
     },
 }

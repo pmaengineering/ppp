@@ -3,10 +3,10 @@
 """Command Line Interface."""
 from argparse import ArgumentParser
 from sys import stderr
-
 from copy import copy
 
 from pmix.ppp import run
+from pmix.ppp.definitions.constants import SUPPORTED_FORMATS
 from pmix.ppp.definitions.abstractions import chain
 from pmix.ppp.definitions.error import OdkException, OdkFormError
 
@@ -65,8 +65,8 @@ def _non_preset_optional_fields(parser):
                    'supported. Future formats include "pdf". If this flag is'
                    ' not supplied, output is html by default.')
     parser.add_argument('-f', '--format',
-                        choices=('html', 'text', 'pdf', 'doc'),  # `TODO: doc.
-                        default='html', help=format_help)
+                        choices=SUPPORTED_FORMATS, default='html',
+                        help=format_help)
     return parser
 
 
@@ -212,7 +212,7 @@ def cli():
     parser = _add_arguments(copy(argeparser))
     args = parser.parse_args()
 
-    if args.highlight and args.format and args.format not in ['html', 'pdf']:
+    if args.highlight and args.format and args.format not in SUPPORTED_FORMATS:
         msg = 'Can only specify highlighting when using the following ' \
               'formats: \'html\', \'pdf\'.'
         raise OdkFormError(msg)

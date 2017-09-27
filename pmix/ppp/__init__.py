@@ -7,8 +7,7 @@ from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
 from pmix.ppp.odkform import OdkForm
 
 
-def run(in_file, language=None, output_format=None, out_file=None,
-        **kwargs):
+def run(in_file, language=None, out_file=None, **kwargs):
     """Run ODK form conversion.
 
     Args:
@@ -25,11 +24,15 @@ def run(in_file, language=None, output_format=None, out_file=None,
         OdkFormError: General form related exception.
     """
     form = OdkForm.from_file(in_file)
+
+
+
     try:
         output = None
+        output_format = kwargs['output_format']
         if output_format == 'text':
             output = form.to_text(language=language, **kwargs)
-        elif output_format == 'html' or not output_format:
+        elif output_format in ('html', 'doc') or not output_format:
             output = form.to_html(language=language, **kwargs)
         if out_file:
             with open(out_file, mode='w', encoding='utf-8') as file:

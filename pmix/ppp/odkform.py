@@ -252,6 +252,7 @@ class OdkForm:
         hlt = kwargs['highlight'] if 'highlight' in kwargs else False
         for index, item in enumerate(data['questionnaire']):
 
+
             if exclusion(item=item, settings=kwargs):
                 continue
 

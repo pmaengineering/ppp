@@ -23,10 +23,6 @@ def exclusion(item, settings):
     try:
         exclude = False
 
-        # TODO: Temporarily here. Remove this after merging into new branch
-        # "minimal + excludes".
-        settings['preset'] = 'minimal'
-
         if 'exclusion' in settings or 'preset' in settings \
                 and PRESETS[settings['preset']]['general_exclusions']:
 

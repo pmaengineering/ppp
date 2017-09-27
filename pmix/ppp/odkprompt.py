@@ -418,7 +418,7 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
-    def html_options(self, **kwargs):
+    def html_options(**kwargs):
         """HTML options.
 
         Args:
@@ -429,7 +429,8 @@ class OdkPrompt:
         """
         if 'preset' not in kwargs:
             return kwargs
-        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']:
+        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']\
+                .items():
             kwargs[k] = v
         return kwargs
 
@@ -445,7 +446,7 @@ class OdkPrompt:
         Returns:
             str: A rendered html template.
         """
-        settings = self.html_options(kwargs)
+        settings = self.html_options(**kwargs)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
             .render(question=self.to_dict(lang=lang, **settings),

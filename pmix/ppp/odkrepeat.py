@@ -92,7 +92,7 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert repeat group components to html and return concatenation.
 
         Args:

@@ -16,7 +16,7 @@ DOC_SRC=${PYDOCSTYLE} ${SRC}
 DOC_TEST=${PYDOCSTYLE} ${TEST}
 
 
-.PHONY: lint linttest lintall pylint pylinttest pylintall code codetest codeall doc test testdoc test_all ssh tags ltags
+.PHONY: lint linttest lintall pylint pylinttest pylintall code codetest codeall doc test testdoc test_all ssh tags ltags test_feature test_feature_doc
 
 # ALL LINTING
 lint:
@@ -53,9 +53,16 @@ doc:
 
 
 # TESTING
+TEST_FEATURE_FILE=FQ_BFR5
 test:
 	${PYTHON} -m unittest discover -v
 
+test_feature:
+	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f html -p minimal > output/${TEST_FEATURE_FILE}.html
+
+test_feature_doc:
+	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f doc -p minimal > output/${TEST_FEATURE_FILE}.doc
+	open output/${TEST_FEATURE_FILE}.doc
 
 testdoc:
 	${PYTHON} -m test.test --doctests-only
@@ -74,14 +81,3 @@ tags:
 
 ltags:
 	ctags -R --python-kinds=-i ./${CODE_SRC}
-
-
-# AD HOC
-test_feature_html:
-	${PYTHON} -m pmix.ppp test/files/HQ_BFR5.xlsx -l English -f html -p minimal > output/HQ_BFR5.html
-#	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f html -p minimal > output/FQ-generic.html
-test_feature:
-	${PYTHON} -m pmix.ppp test/files/HQ_BFR5.xlsx -l English -f doc -p minimal > output/HQ_BFR5.doc
-	open output/HQ_BFR5.doc
-#	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f doc -p minimal > output/FQ-generic.doc
-#	open output/FQ-generic.doc

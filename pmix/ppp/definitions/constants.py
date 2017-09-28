@@ -9,6 +9,7 @@ TRUNCATABLE_FIELDS (tuple): Fields that should be limited to a specific
     length. Current limit is 100 chars, which is somewhat arbitrary but
     turns out good in converted forms.
 """
+IGNORE_RELEVANT_TOKEN = '#####'
 SUPPORTED_FORMATS = ('html', 'doc')
 LANGUAGE_PERTINENT_WORKSHEETS = ('survey', 'choices', 'external_choices')
 MEDIA_FIELDS = ('image', 'media::image', 'audio', 'media::audio',

@@ -3,7 +3,7 @@ import textwrap
 
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, PRESETS
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
 from pmix.ppp.definitions.error import OdkChoicesError
 
 
@@ -224,6 +224,26 @@ class OdkPrompt:
         return row
 
     @staticmethod
+    def _ignore_relevant(prompt):
+        """If applicable, ignores relevant, setting it to an empty string.
+
+         In cases where a preset is used which makes use of human-readable
+         relevants via the ppp_relevant::<language> field of an XlsForm, this
+         function looks for any IGNORE_RELEVANT_TOKEN present in the field and,
+         if present, sets it to an empty string.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        if prompt['relevant'] == IGNORE_RELEVANT_TOKEN:
+            prompt['relevant'] = ''
+        return prompt
+
+
+    @staticmethod
     def handle_preset(prompt, lang, preset):
         """Handle preset.
 
@@ -259,6 +279,8 @@ class OdkPrompt:
                         {'name': '', 'label': i['label']}
                         for i in prompt['input_field']
                     ]
+
+        OdkPrompt._ignore_relevant(prompt)
 
         return prompt
 

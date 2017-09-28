@@ -78,7 +78,10 @@ ltags:
 
 # AD HOC
 test_feature_html:
-	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f html -p minimal > output/FQ-generic.html
+	${PYTHON} -m pmix.ppp test/files/HQ_BFR5.xlsx -f html -p minimal > output/HQ_BFR5.html
+#	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f html -p minimal > output/FQ-generic.html
 test_feature:
-	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f doc -p minimal > output/FQ-generic.doc
-	open output/FQ-generic.doc
+	${PYTHON} -m pmix.ppp test/files/HQ_BFR5.xlsx -f doc -p minimal > output/HQ_BFR5.doc
+	open output/HQ_BFR5.doc
+#	${PYTHON} -m pmix.ppp test/files/FQ-generic.xlsx -f doc -p minimal > output/FQ-generic.doc
+#	open output/FQ-generic.doc

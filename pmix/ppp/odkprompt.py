@@ -213,6 +213,7 @@ class OdkPrompt:
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
                 if key.startswith(field) and val:
+                    formatted_media_label = val
                     if val[0] != '[' and val[-1] != ']':
                         formatted_media_label = '[' + val + ']'
                     row[field] = formatted_media_label

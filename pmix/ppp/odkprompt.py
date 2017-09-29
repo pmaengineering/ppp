@@ -243,7 +243,6 @@ class OdkPrompt:
             prompt['relevant'] = ''
         return prompt
 
-
     @staticmethod
     def handle_preset(prompt, lang, preset):
         """Handle preset.
@@ -430,7 +429,9 @@ class OdkPrompt:
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
+
         prompt['input_field'] = self.to_html_input_field(lang)
+
         if self.is_section_header:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:

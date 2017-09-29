@@ -35,7 +35,14 @@ class OdkTable:
         """
         self.data.append(odkprompt)
 
-    def set_header_and_contents(self, lang):
+    @staticmethod
+    def format_row(prompt, lang, **kwargs):
+        """Format row."""
+        settings = prompt.html_options(**kwargs)
+        table_row = prompt.to_dict(lang=lang, **settings)
+        return table_row
+
+    def set_header_and_contents(self, lang, **kwargs):
         """Set header and contents of table.
 
         Args:
@@ -43,9 +50,13 @@ class OdkTable:
         """
         for i in self.data:
             i.row['in_group'] = True
-            i.to_dict(lang)
+            i.row = self.format_row(prompt=i, lang=lang, **kwargs)
         self.header = self.data[0]
         self.contents = self.data[1:]
+
+        # - De-list labels
+        for c in self.contents:
+            c.row['label'] = c.row['label'][0]
 
     # Temporary noinspection until method is added.
     # noinspection PyUnusedLocal
@@ -110,7 +121,7 @@ class OdkTable:
             str: A rendered html template.
         """
         # - Render header
-        self.set_header_and_contents(lang)
+        self.set_header_and_contents(lang, **kwargs)
         table = list()
         table.append(self.header.row)
 
@@ -121,7 +132,6 @@ class OdkTable:
 
             table.append(i.row)
 
-        # - Render footer
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
             .render(table=table, lang=lang, highlighting=highlighting,

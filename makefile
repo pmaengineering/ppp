@@ -53,7 +53,7 @@ doc:
 
 
 # TESTING
-TEST_FEATURE_FILE=FQ_BFR5
+TEST_FEATURE_FILE=SQ_BFR5
 test:
 	${PYTHON} -m unittest discover -v
 

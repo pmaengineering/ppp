@@ -114,6 +114,12 @@ class OdkTable:
         table.append(self.header.row)
         for i in self.contents:
             table.append(i.row)
+
+        # TODO: Debugging
+        from sys import stderr
+        print(table, file=stderr)
+        # TODO: Debugging
+
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
             .render(table=table, lang=lang, highlighting=highlighting,

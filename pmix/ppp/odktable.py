@@ -12,7 +12,6 @@ class OdkTable:
         header (OdkPrompt): OdkPrompt representing table header.
         contents (list): List of OdkPrompts consisting of table rows.
         in_repeat (bool): Is this table part of a repeat group?
-
     """
 
     def __init__(self):
@@ -35,8 +34,18 @@ class OdkTable:
         """
         self.data.append(odkprompt)
 
-    def format_row(self, prompt, lang, **kwargs):
-        """Format row."""
+    @staticmethod
+    def format_row(prompt, lang, **kwargs):
+        """Format rows row based on HTML options determined by kwargs.
+
+        Args:
+            prompt (OdkPrompt): The row.
+            lang (str): The language.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            dict: Reformatted row.
+        """
         settings = prompt.html_options(**kwargs)
         table_row = prompt.to_dict(lang=lang, **settings)
         return table_row
@@ -46,6 +55,7 @@ class OdkTable:
 
         Args:
             lang (str): The language.
+            **kwargs: Keyword arguments
         """
         for i in self.data:
             i.row['in_group'] = True
@@ -110,11 +120,7 @@ class OdkTable:
         Args:
             lang (place): The language.
             highlighting (bool): Displays highlighted sub-sections if True.
-
-        Args:
-            lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
+            **kwargs: Keyword arguments.
 
         Returns:
             str: A rendered html template.

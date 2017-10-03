@@ -53,7 +53,7 @@ doc:
 
 
 # TESTING
-TEST_FEATURE_FILE=FQ_BFR5
+TEST_FEATURE_FILE=BFR5-Household-Questionnaire-v6-jef
 test:
 	${PYTHON} -m unittest discover -v
 

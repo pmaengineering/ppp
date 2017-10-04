@@ -43,7 +43,7 @@ class OdkForm:
         self.settings = wb.settings
         self.language = wb.form_language
 
-        self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
+        self.title = self.get_title(settings=self.settings, wb=wb)
         self.metadata = {  # TODO Finish filling this out.
             'last_author': str(),
             'last_updated': str(),
@@ -147,6 +147,23 @@ class OdkForm:
             pass
         return formatted_choices
 
+    @staticmethod
+    def get_title(settings, wb=None, lang=None):
+        """Get questionnaire title.
+
+        Args:
+        settings (dict): A dictionary represetnation of the original 'settings'
+            worksheet of an ODK XLSForm.
+        wb (Workbook): A Workbook object representing an XLSForm.
+        lang (str): The requested render lagnuage of the form.
+
+        Returns:
+            str: The title.
+        """
+        lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
+        backup_title = os.path.split(wb.file)[1] if wb else None
+        return settings.get(lookup_title, backup_title)
+
     def to_text(self, language=None):
         """Get the text representation of an entire XLSForm.
 
@@ -212,11 +229,11 @@ class OdkForm:
             return json.dumps(raw_survey, indent=2)
         return json.dumps(raw_survey)
 
-    def to_html(self, language=None, **kwargs):
+    def to_html(self, lang=None, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
         Args:
-            language (str): The language.
+            lang (str): The language.
             **highlight (bool): For color highlighting of various components
                 of html template.
             **debug (bool): For inclusion of debug information to be printed
@@ -225,12 +242,12 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
-        language = language if language else self.language
+        language = lang if lang else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
         data = {
             'header': {
-                'title': self.title
+                'title': self.get_title(settings=self.settings, lang=language)
             },
             'footer': {
                 'data': self.to_json(pretty=True) if debug else 'false'

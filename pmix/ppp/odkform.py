@@ -81,7 +81,7 @@ class OdkForm:
             if 'default_language' in self.settings \
                and self.settings['default_language'] else None
 
-        self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
+        self.title = self.get_title(settings=self.settings, wb=wb)
         self.metadata = {  # TODO Finish filling this out.
             'last_author': str(),
             'last_updated': str(),
@@ -232,6 +232,23 @@ class OdkForm:
         for field, data in lang_fields.items():
             data['language_list'] = sorted(data['language_list'])
         return lang_fields
+
+    @staticmethod
+    def get_title(settings, wb=None, lang=None):
+        """Get questionnaire title.
+
+        Args:
+        settings (dict): A dictionary represetnation of the original 'settings'
+            worksheet of an ODK XLSForm.
+        wb (Workbook): A Workbook object representing an XLSForm.
+        lang (str): The requested render lagnuage of the form.
+
+        Returns:
+            str: The title.
+        """
+        lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
+        backup_title = os.path.split(wb.file)[1] if wb else None
+        return settings.get(lookup_title, backup_title)
 
     @staticmethod
     def check_for_bad_default_language(default_lang, ws_info):
@@ -600,7 +617,7 @@ class OdkForm:
         html_questionnaire = ''
         data = {
             'header': {
-                'title': self.title
+                'title': self.get_title(settings=self.settings, lang=lang)
             },
             'footer': {
                 'data':

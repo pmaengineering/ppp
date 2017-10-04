@@ -244,6 +244,22 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
+    def set_descriptive_metadata(prompt):
+        """Set descriptive metadata.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        prompt['is_section'] = False
+        if prompt['simple_type'] == 'note' \
+                and prompt['name'].startswith('sect_'):
+            prompt['is_section'] = True
+        return prompt
+
+    @staticmethod
     def handle_preset(prompt, lang, preset):
         """Handle preset.
 
@@ -426,6 +442,7 @@ class OdkPrompt:
         # TODO: Refactor so that the dict row is only looped through once.
         prompt = self.format_media_labels(self.row)
         prompt = self.set_grouped_media_field(prompt)
+        prompt = self.set_descriptive_metadata(prompt)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)

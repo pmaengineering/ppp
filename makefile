@@ -16,7 +16,7 @@ DOC_SRC=${PYDOCSTYLE} ${SRC}
 DOC_TEST=${PYDOCSTYLE} ${TEST}
 
 
-.PHONY: lint linttest lintall pylint pylinttest pylintall code codetest codeall doc test testdoc test_all ssh tags ltags test_feature test_feature_doc
+.PHONY: lint linttest lintall pylint pylinttest pylintall code codetest codeall doc test testdoc test_all ssh tags ltags test_feature test_feature_doc paper
 
 # ALL LINTING
 lint:
@@ -36,6 +36,7 @@ pylinttest:
 	${LINT_TEST}
 
 pylintall: pylint pylinttest
+
 
 # PYCODESTYLE
 code:
@@ -81,3 +82,8 @@ tags:
 
 ltags:
 	ctags -R --python-kinds=-i ./${CODE_SRC}
+
+
+# Scripts
+paper:
+	sh ./scripts/generic_paper_questionnaires.sh

@@ -2,7 +2,7 @@ PYTHON=./env/bin/python3
 SRC=./pmix/
 TEST=./test/
 
-.PHONY: lint tags ltags test all lint_all codestyle docstyle server serve lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test
+.PHONY: lint tags ltags test all lint_all codestyle docstyle server serve lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test paper
 
 # Batched Commands
 all: linters_all test_all
@@ -61,3 +61,8 @@ doctest:
 serve:server
 server:
 	gunicorn pmaapi.__main__:APP
+
+
+# Scripts
+paper:
+	sh ./scripts/generic_paper_questionnaires.sh

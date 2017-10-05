@@ -148,7 +148,7 @@ class OdkForm:
         return formatted_choices
 
     @staticmethod
-    def get_title(settings, wb=None, lang=None):
+    def get_title(settings, wb, lang=None):
         """Get questionnaire title.
 
         Args:
@@ -161,7 +161,7 @@ class OdkForm:
             str: The title.
         """
         lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
-        backup_title = os.path.split(wb.file)[1] if wb else None
+        backup_title = os.path.split(wb.file)[1]
         return settings.get(lookup_title, backup_title)
 
     def to_text(self, language=None):
@@ -247,7 +247,9 @@ class OdkForm:
         html_questionnaire = ''
         data = {
             'header': {
-                'title': self.get_title(settings=self.settings, lang=language)
+                'title': self.get_title(settings=self.settings,
+                                        wb=self.metadata['raw_data'],
+                                        lang=lang)
             },
             'footer': {
                 'data': self.to_json(pretty=True) if debug else 'false'

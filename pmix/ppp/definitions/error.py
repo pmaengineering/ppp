@@ -1,5 +1,6 @@
 """Error classes for package."""
 
+
 class OdkException(Exception):
     """General ODK exception."""
 

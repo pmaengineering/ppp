@@ -1,11 +1,10 @@
-"""Module for the Cell class."""
+"""Module for Cell class."""
 import datetime
-
 import xlrd
 
 
 class Cell:
-    """This class represents a cell from a spreadsheet."""
+    """Representative class for spreadsheet cell."""
 
     def __init__(self, value=None):
         """Initialize cell to have value as Python object.
@@ -39,8 +38,7 @@ class Cell:
         """Return unicode representation of cell."""
         if self.value is None:
             return ''
-        else:
-            return str(self.value)
+        return str(self.value)
 
     def __repr__(self):
         """Return a representation of the cell."""

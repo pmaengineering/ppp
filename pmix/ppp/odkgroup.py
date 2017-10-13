@@ -1,8 +1,8 @@
 """Module for the OdkGroup class."""
-
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odktable import OdkTable
+from pmix.ppp.definitions.utils import exclusion
 
 
 class OdkGroup:
@@ -96,22 +96,7 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    # TODO: Finish this or change debug feature.
-    # def to_dict(self, lang):
-    #     """Format components of a group.
-    #
-    #     Args:
-    #         lang (str): The language.
-    #
-    #     Returns:
-    #         list: A list of reformatted components.
-    #
-    #     """
-    #     group = []
-    #     # header = self.format_header(self.opener, lang, highlighting)
-    #     return group
-
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert group components to html and return concatenation.
 
         Args:
@@ -124,19 +109,30 @@ class OdkGroup:
         """
         html = ''
         # pylint: disable=no-member
+
+        # - Render header
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
-            .render()
+            .render(**kwargs)
         header = self.format_header(self.opener)
-        html += OdkPrompt(header).to_html(lang, highlighting)
+
+        html += OdkPrompt(header).to_html(lang, highlighting, **kwargs)
+
+        # - Render body
         for i in self.data:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat
                 i.row['in_group'] = True
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = self.in_repeat
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
+
+        # - Render footer
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
-            .render()
+            .render(**kwargs)
+
         return html

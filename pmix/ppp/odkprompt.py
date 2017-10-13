@@ -1,9 +1,10 @@
 """Module for the OdkPrompt class."""
 import textwrap
-from pmix.ppp.constants import MEDIA_FIELDS, LANGUAGE_DEPENDENT_FIELDS, \
-    TRUNCATABLE_FIELDS
+
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkChoicesError
+from pmix.ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
+from pmix.ppp.definitions.error import OdkChoicesError
 
 
 class OdkPrompt:
@@ -97,7 +98,6 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            # if k.startswith('label' or 'hint' or 'constraint_message'):
             if k.startswith('label') or k.startswith('hint') \
                     or k.startswith('constraint_message'):
                 if v:
@@ -145,12 +145,11 @@ class OdkPrompt:
         new_row = row.copy()
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
-                if key.startswith(field) and val:
+                if key.startswith(field):
                     if field not in row:
                         fields_to_add.append(field)
                     if field.startswith(prefix):
-                        non_prefixed_mf = field.replace(
-                            prefix, '')
+                        non_prefixed_mf = field.replace(prefix, '')
                         if non_prefixed_mf not in row:
                             fields_to_add.append(non_prefixed_mf)
 
@@ -179,9 +178,8 @@ class OdkPrompt:
         return new_row
 
     @staticmethod
-    def text_relevant():
+    def text_relevant():  # TODO: Create this method.
         # def text_relevant(self, lang):
-        # TODO: Create this method.
         """Find the relevant text for this row."""
         pass
 
@@ -210,11 +208,12 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         arbitrary_media_prefix = 'media::'
-        new_row = self.create_additional_media_fields(row,
-                                                      arbitrary_media_prefix)
+        new_row = \
+            self.create_additional_media_fields(row, arbitrary_media_prefix)
         for key, val in new_row.items():
             for field in MEDIA_FIELDS:
                 if key.startswith(field) and val:
+                    formatted_media_label = val
                     if val[0] != '[' and val[-1] != ']':
                         formatted_media_label = '[' + val + ']'
                     row[field] = formatted_media_label
@@ -224,6 +223,82 @@ class OdkPrompt:
                             arbitrary_media_prefix, '')
                         row[non_prefixed_mf] = formatted_media_label
         return row
+
+    @staticmethod
+    def _ignore_relevant(prompt):
+        """If applicable, ignores relevant, setting it to an empty string.
+
+         In cases where a preset is used which makes use of human-readable
+         relevants via the ppp_relevant::<language> field of an XlsForm, this
+         function looks for any IGNORE_RELEVANT_TOKEN present in the field and,
+         if present, sets it to an empty string.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        if prompt['relevant'] == IGNORE_RELEVANT_TOKEN:
+            prompt['relevant'] = ''
+        return prompt
+
+    @staticmethod
+    def set_descriptive_metadata(prompt):
+        """Set descriptive metadata.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        prompt['is_section'] = False
+        if prompt['simple_type'] == 'note' \
+                and prompt['name'].startswith('sect_'):
+            prompt['is_section'] = True
+        return prompt
+
+    @staticmethod
+    def handle_preset(prompt, lang, preset):
+        """Handle preset.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+            lang (str): The language.
+            preset (str): The preset supplied.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        # TODO: (jef 2017.09.24) Human readable: hint variables.
+        # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
+        for key in prompt:
+            for exclusion in PRESETS[preset]['field_exclusions']:
+                if key.startswith(exclusion):
+                    prompt[key] = ''
+                    continue
+
+            for to_replace in PRESETS[preset]['field_replacements']:
+                replace_with = 'ppp_'+to_replace+'::'+lang
+
+                if key == replace_with and prompt[replace_with]:
+                    if to_replace.startswith('label'):
+                        prompt[to_replace] = [prompt[replace_with]]
+                    elif to_replace.startswith('relevant'):
+                        prompt[to_replace] = prompt[replace_with]
+
+            if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
+                if key == 'input_field' and prompt['simple_type'] in \
+                        ('select_one', 'select_multiple'):
+                    prompt['input_field'] = [
+                        {'name': '', 'label': i['label']}
+                        for i in prompt['input_field']
+                    ]
+
+        OdkPrompt._ignore_relevant(prompt)
+
+        return prompt
 
     def text_field(self, field, lang):
         """Find a row value given a field and language.
@@ -247,8 +322,8 @@ class OdkPrompt:
                 first = sorted(keys)[0]
                 value = self.row[first]
         except (KeyError, IndexError):
-            # KeyError: self.row does not have the key '{}::{}'
-            # IndexError: `keys` (filtered by field) is empty list
+            # KeyError: self.row does not have the key '{}::{}'.
+            # IndexError: `keys` (filtered by field) is empty list.
             pass
         return value
 
@@ -300,7 +375,7 @@ class OdkPrompt:
         #     question_type = self.odktype in Odkprompt.response_types or \
         #                     self.odktype in Odkprompt.select_types
         #     if text_str and self.row['read_only'] and question_type:
-        #         # TODO fix read_only lookup
+        #         # TODO: Fix read_only lookup.
         #         text_str = '\n'.join(('[Read only]', text_str))
         # except KeyError:  # Unable to find 'read_only'
         #     pass
@@ -364,19 +439,41 @@ class OdkPrompt:
         Returns:
             dict: The text from all parts of the prompt.
         """
-        # TODO: Refactor so that the dict row is only looped through once
-        # to make all of the changes below.
+        # TODO: Refactor so that the dict row is only looped through once.
         prompt = self.format_media_labels(self.row)
         prompt = self.set_grouped_media_field(prompt)
+        prompt = self.set_descriptive_metadata(prompt)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
+
         prompt['input_field'] = self.to_html_input_field(lang)
+
         if self.is_section_header:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
+        if 'preset' in kwargs:
+            prompt = self.handle_preset(prompt, lang, kwargs['preset'])
+
         return prompt
+
+    @staticmethod
+    def html_options(**kwargs):
+        """HTML options.
+
+        Args:
+            **kwargs (dict): Keyword arguments.
+
+        Returns:
+            dict: Modified settings based on keyword arguments.
+        """
+        if 'preset' not in kwargs:
+            return kwargs
+        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']\
+                .items():
+            kwargs[k] = v
+        return kwargs
 
     def to_html(self, lang, highlighting, **kwargs):
         """Convert to html.
@@ -390,7 +487,8 @@ class OdkPrompt:
         Returns:
             str: A rendered html template.
         """
+        settings = self.html_options(**kwargs)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=self.to_dict(lang=lang, **kwargs),
-                    highlighting=highlighting)
+            .render(question=self.to_dict(lang=lang, **settings),
+                    highlighting=highlighting, **settings)

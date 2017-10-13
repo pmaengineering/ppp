@@ -2,13 +2,17 @@
                               <table>
                                 <tr>
                                   {% if question.appearance == 'year' %}
-                                    {% set fields = ['Year'] %}
+                                    {# {% set fields = ['Year'] %} #}
+                                    {% set fields = ['Année'] %}
                                   {% elif question.appearance == 'month-year' %}
-                                    {% set fields = ['Month', 'Year'] %}
+                                    {# {% set fields = ['Month', 'Year'] %} #}
+                                    {% set fields = ['Mois', 'Année'] %}
                                   {% elif question.appearance == 'no-calendar' %}
-                                    {% set fields = ['Day', 'Month', 'Year'] %}
+                                    {# {% set fields = ['Day', 'Month', 'Year'] %} #}
+                                    {% set fields = ['Jour', 'Mois', 'Année'] %}
                                   {% else %}
-                                    {% set fields = ['Day', 'Month', 'Year'] %}
+                                    {# {% set fields = ['Day', 'Month', 'Year'] %} #}
+                                    {% set fields = ['Jour', 'Mois', 'Année'] %}
                                   {% endif %}
                                   {% for field in fields %}
                                   <td>

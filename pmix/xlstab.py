@@ -46,6 +46,11 @@ class Xlstab(Worksheet):
         super().__init__(data=data, name=name)
         self.assert_unique_cols()
 
+    def __repr__(self):
+        """Return formal representation of the Xlstab."""
+        msg = '<Xlstab(name="{}"), dim={}>'.format(self.name, self.dim())
+        return msg
+
     def assert_unique_cols(self):
         """Throw an error if non-empty column headers are not unique."""
         headers = self.column_headers()
@@ -239,9 +244,6 @@ class Xlstab(Worksheet):
         pre-known translatable headers. If a header is translatable, then the
         language is determined. All languages found are put in a list and
         sorted.
-
-        Args:
-            headers (list of str): The headers for this sheet
 
         Returns:
             A list of languages found, sorted alphabetically. None is first if

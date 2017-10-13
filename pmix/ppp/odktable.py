@@ -1,7 +1,7 @@
 """Module for the OdkTable class."""
-
 from pmix.ppp.config import TEMPLATE_ENV
-# from pmix.ppp.error import OdkformError
+from pmix.ppp.definitions.utils import exclusion
+# from pmix.ppp.definitions.error import OdkformError
 
 
 class OdkTable:
@@ -12,7 +12,6 @@ class OdkTable:
         header (OdkPrompt): OdkPrompt representing table header.
         contents (list): List of OdkPrompts consisting of table rows.
         in_repeat (bool): Is this table part of a repeat group?
-
     """
 
     def __init__(self):
@@ -35,17 +34,38 @@ class OdkTable:
         """
         self.data.append(odkprompt)
 
-    def set_header_and_contents(self, lang):
+    @staticmethod
+    def format_row(prompt, lang, **kwargs):
+        """Format rows row based on HTML options determined by kwargs.
+
+        Args:
+            prompt (OdkPrompt): The row.
+            lang (str): The language.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            dict: Reformatted row.
+        """
+        settings = prompt.html_options(**kwargs)
+        table_row = prompt.to_dict(lang=lang, **settings)
+        return table_row
+
+    def set_header_and_contents(self, lang, **kwargs):
         """Set header and contents of table.
 
         Args:
             lang (str): The language.
+            **kwargs: Keyword arguments
         """
         for i in self.data:
             i.row['in_group'] = True
-            i.to_dict(lang)
+            i.row = self.format_row(prompt=i, lang=lang, **kwargs)
         self.header = self.data[0]
         self.contents = self.data[1:]
+
+        # - De-list labels
+        for c in self.contents:
+            c.row['label'] = c.row['label'][0]
 
     # Temporary noinspection until method is added.
     # noinspection PyUnusedLocal
@@ -94,41 +114,30 @@ class OdkTable:
         result = 'ODK TABLE TEXT'  # Placeholder
         return result
 
-    # TODO: Finish this or change debug feature.
-    # def to_dict(self, lang):
-    #     """Format components of a table.
-    #
-    #     Args:
-    #         lang (str): The language.
-    #
-    #     Returns:
-    #         list: A list of reformatted components.
-    #
-    #     """
-    #     table = []
-    #     return table
-
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert to html.
 
         Args:
             lang (place): The language.
             highlighting (bool): Displays highlighted sub-sections if True.
-
-        Args:
-            lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
+            **kwargs: Keyword arguments.
 
         Returns:
             str: A rendered html template.
         """
-        self.set_header_and_contents(lang)
+        # - Render header
+        self.set_header_and_contents(lang, **kwargs)
         table = list()
         table.append(self.header.row)
+
+        # - Render body
         for i in self.contents:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             table.append(i.row)
+
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
-            .render(table=table,
-                    lang=lang, highlighting=highlighting)
+            .render(table=table, lang=lang, highlighting=highlighting,
+                    **kwargs)

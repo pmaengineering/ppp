@@ -4,6 +4,7 @@ from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odktable import OdkTable
+from pmix.ppp.definitions.utils import exclusion
 
 
 class OdkRepeat:
@@ -30,7 +31,7 @@ class OdkRepeat:
         return "<OdkRepeat {}: {}>".format(self.opener['name'], self.data)
 
     @staticmethod
-    def render_header(i, lang, highlighting):
+    def render_header(i, lang, highlighting, **kwargs):
         """Render repeat group header.
 
         A repeat group header consists of some opening html tags, followed by
@@ -41,6 +42,7 @@ class OdkRepeat:
             lang (str): The language.
             highlighting (bool): For color highlighting of various components
                 of html template.
+            **kwargs: Keyword arguments.
 
         Returns:
             str: A rendered html representation of repeat group header.
@@ -51,7 +53,7 @@ class OdkRepeat:
         i['simple_type'] = i['type']
         i['in_repeat'] = True
         i['is_repeat_header'] = True
-        html += OdkPrompt(i).to_html(lang, highlighting)
+        html += OdkPrompt(i).to_html(lang, highlighting, **kwargs)
         return html
 
     @staticmethod
@@ -92,42 +94,39 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    # TODO: Finish this or change debug feature.
-    # def to_dict(self, lang):
-    #     """Format components of a repeat.
-    #
-    #     Args:
-    #         lang (str): The language.
-    #
-    #     Returns:
-    #         list: A list of reformatted components.
-    #
-    #     """
-    #     repeat = []
-    #     return repeat
-
-    def to_html(self, lang, highlighting):
+    def to_html(self, lang, highlighting, **kwargs):
         """Convert repeat group components to html and return concatenation.
 
         Args:
             lang (str): The language.
             highlighting (bool): For color highlighting of various components
                 of html template.
+            **kwargs: Keyword arguments.
 
         Returns:
             str: A rendered html concatenation of component templates.
         """
         html = ''
-        html += self.render_header(self.opener, lang, highlighting)
+
+        # - Render header
+        html += self.render_header(self.opener, lang, highlighting, **kwargs)
+
+        # - Render body
         for i in self.data:
+            if exclusion(item=i, settings=kwargs):
+                continue
+
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = True
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
             elif isinstance(i, OdkGroup):
                 i.in_repeat = True
-                html += i.to_html(lang, highlighting)
+                html += i.to_html(lang, highlighting, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = True
-                html += i.to_html(lang, highlighting)
+
+        # - Render footer
+                html += i.to_html(lang, highlighting, **kwargs)
         html += self.render_footer()
+
         return html

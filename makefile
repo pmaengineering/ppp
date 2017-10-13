@@ -2,6 +2,7 @@ PYTHON=./env/bin/python3
 SRC=./pmix/
 TEST=./test/
 
+
 .PHONY: lint tags ltags test all lint_all codestyle docstyle server serve lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test paper
 
 # Batched Commands
@@ -47,21 +48,52 @@ tags:
 ltags:
 	${TAGS_BASE} ${SRC}
 
+codetest:
+	${CODE_TEST}
 
-# Testing
-test_all: unittest doctest
-unittest: test
+codeall: code codetest
+
+
+# PYDOCSTYLE
+doc:
+	${DOC_SRC}
+
+
+# TESTING
+TEST_FEATURE_FILE=BFR5-Household-Questionnaire-v8-jef
 test:
 	${PYTHON} -m unittest discover -v
-doctest:
-	${PYTHON} -m test.test_ppp --doctests-only
+
+test_feature:
+	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f html -p minimal > output/${TEST_FEATURE_FILE}.html
+
+test_feature_doc:
+	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f doc -p minimal > output/${TEST_FEATURE_FILE}.doc
+	open output/${TEST_FEATURE_FILE}.doc
+
+testdoc:
+	${PYTHON} -m test.test --doctests-only
+
+test_all: test testdoc
+
+
+# SERVER MANAGEMENT
+ssh:
+	ssh root@192.155.80.11
+
+
+# CTAGS
+tags:
+	ctags -R --python-kinds=-i .
+
+ltags:
+	ctags -R --python-kinds=-i ./${CODE_SRC}
 
 
 # Application Management
 serve:server
 server:
 	gunicorn pmaapi.__main__:APP
-
 
 # Scripts
 paper:

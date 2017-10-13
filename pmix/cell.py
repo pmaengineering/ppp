@@ -98,8 +98,15 @@ class Cell:
                 value = datetime.date(*date_tuple[:3])
             else:
                 value = datetime.datetime(*date_tuple)
+        elif cell.ctype == xlrd.XL_CELL_ERROR:
+            msg = 'Error cell found. Please correct or erase error cell from '\
+                  'file and try again.\n\nError cells are likely to be one of'\
+                  ' the following: #N/A, #NULL!, #DIV/0!, #VALUE!, #REF!, ' \
+                  '#NAME?, #NUM!, #GETTING_DATA'\
+                .format(cell.ctype, cell.value)
+            raise TypeError(msg)
         else:
-            msg = 'Unhandled cell type: {}. Value is: {}'
-            msg = msg.format(cell.ctype, cell.value)
+            msg = 'Unhandled cell exception.\nType: {}\nValue: {}'\
+                .format(cell.ctype, cell.value)
             raise TypeError(msg)
         return value

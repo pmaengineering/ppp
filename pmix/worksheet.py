@@ -11,7 +11,7 @@ class Worksheet:
     A Worksheet is always supposed to have rectangular dimensions. It should
     not ever become a ragged array.
 
-    Attributes:
+    Class Attributes:
         count (int): Keeps track of the sheets created without a name.
     """
 
@@ -43,7 +43,7 @@ class Worksheet:
         """Return the dimensions of this Worksheet as tuple (nrow, ncol)."""
         nrow = len(self)
         ncol = self.ncol()
-        return (nrow, ncol)
+        return nrow, ncol
 
     def ncol(self):
         """Return the number of columns for this Worksheet.
@@ -73,8 +73,12 @@ class Worksheet:
         """
         worksheet = cls(name=sheet.name)
         for i in range(sheet.nrows):
-            cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
-            worksheet.data.append(cur_row)
+            try:
+                cur_row = [Cell.from_cell(c, datemode) for c in sheet.row(i)]
+                worksheet.data.append(cur_row)
+            except TypeError as err:
+                err = str(err)+'\n\nError occurred in row: {}'.format(str(i+1))
+                raise TypeError(err)
         return worksheet
 
     def prepend_row(self, row=None):

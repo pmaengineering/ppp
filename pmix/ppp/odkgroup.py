@@ -14,6 +14,7 @@ class OdkGroup:
         pending_table (OdkTable): A variable for storing an OdkTable object as
             it is being constructed.
         in_repeat (bool): Is this group part of a repeat group?
+
     """
 
     def __init__(self, opener):
@@ -29,7 +30,7 @@ class OdkGroup:
         self.in_repeat = False
 
     def __repr__(self):
-        """Printed representation."""
+        """Print representation."""
         return "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
 
     @staticmethod
@@ -104,6 +105,7 @@ class OdkGroup:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     group = []
     #     # header = self.format_header(self.opener, lang, highlighting)

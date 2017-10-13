@@ -12,6 +12,7 @@ class OdkTable:
         header (OdkPrompt): OdkPrompt representing table header.
         contents (list): List of OdkPrompts consisting of table rows.
         in_repeat (bool): Is this table part of a repeat group?
+
     """
 
     def __init__(self):
@@ -46,6 +47,8 @@ class OdkTable:
         self.header = self.data[0]
         self.contents = self.data[1:]
 
+    # Temporary noinspection until method is added.
+    # noinspection PyUnusedLocal
     @staticmethod
     def to_text():
         """Get the text representation of the table."""
@@ -56,6 +59,7 @@ class OdkTable:
         #     lang (str): The language.
         # Returns:
         #     str: The text for this table.
+        #
         # """
         # choices = pmix.utils.d(self.choices, lang)
         #
@@ -99,6 +103,7 @@ class OdkTable:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     table = []
     #     return table

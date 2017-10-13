@@ -2,17 +2,37 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import unittest
-from os import path as os_path
+import doctest
+import os
+from argparse import ArgumentParser
 from pmix.ppp.odkform import OdkForm
-# from pmix.odkchoices import OdkChoices
-from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
+from pmix.ppp.odkgroup import OdkGroup
+# from pmix.odkchoices import OdkChoices
 # from pmix.odkrepeat import OdkRepeat
 # from pmix.odktable import OdkTable
 
-TEST_FORMS_DIRECTORY = os_path.dirname(os_path.realpath(__file__))
+TEST_PACKAGES = ['pmix.ppp', 'test']
+TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
+TEST_FILES_DIR = TEST_DIR + 'files/'
 
 
+# # Mock Objects
+class MockForm(OdkForm):
+    """Mock object of OdkForm"""
+
+    def __init__(self, mock_file, mock_dir=None):
+        """Initialize mock form.
+
+        Args:
+            mock_file (str): File name.
+            mock_dir (str): Directory.
+        """
+        path = mock_dir + mock_file if mock_dir else TEST_FILES_DIR + mock_file
+        super().__init__(file=path)
+
+
+# # Unit Tests
 # pylint: disable=too-few-public-methods
 # PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
 class PppTest:
@@ -29,7 +49,7 @@ class PppTest:
             except KeyError:
                 file = datum['inputs']['file']
             if file not in forms:
-                forms[file] = OdkForm(file=TEST_FORMS_DIRECTORY + '/' + file)
+                forms[file] = OdkForm(file=TEST_FILES_DIR + file)
         return forms
 
 
@@ -45,7 +65,7 @@ class OdkPromptTest(unittest.TestCase, PppTest):
     def setUp(self):
         self.data = (
             ({'inputs': {
-                 'file': 'FQ.xlsx'
+                'file': 'FQ.xlsx'
             }, 'expected_outputs': {
 
             }},
@@ -61,6 +81,25 @@ class OdkPromptTest(unittest.TestCase, PppTest):
         """Test to_dict method."""
         def test_media_fields_in_prompts():
             """Tests for media fields."""
+            def asserts(item_dict):
+                """Iterate through asserts."""
+                for key, val in item_dict.items():
+                    for media_type in OdkPromptTest.media_types:
+                        if key.startswith(media_type) and val:
+                            # A field such as 'media::image::English'
+                            # is formatted correctly.
+                            self.assertTrue(val[0] == lead_char and
+                                            val[-1] == end_char)
+                            # A field such as 'image' exists and is
+                            # formatted correctly.
+                            self.assertTrue(
+                                item_dict[media_type][0] == lead_char and
+                                item_dict[media_type][-1] == end_char)
+                            # No discrepancies between language based and non
+                            # language based media fields.
+                            self.assertTrue(item_dict[media_type] == val)
+                            # The field 'media' exists and formatted correct.
+                            self.assertTrue(item_dict['media'])
             lang = OdkPromptTest.arbitrary_language_param
             lead_char = OdkPromptTest.media_lead_char
             end_char = OdkPromptTest.media_end_char
@@ -69,34 +108,14 @@ class OdkPromptTest(unittest.TestCase, PppTest):
                 file_name = i['inputs']['file']
                 for item in forms[file_name].questionnaire:
                     if isinstance(item, OdkPrompt):
-                        item_dict = item.to_dict(lang)
-                        for key, val in item_dict.items():
-                            for media_type in OdkPromptTest.media_types:
-                                if key.startswith(media_type) and len(val) > 0:
-                                    # A field such as 'media::image::English'
-                                    # is formatted correctly.
-                                    self.assertTrue(val[0] == lead_char and
-                                                    val[-1] == end_char)
-                                    # A field such as 'image' exists and is
-                                    # formatted correctly.
-                                    self.assertTrue(
-                                        item_dict[media_type][0] == lead_char
-                                        and
-                                        item_dict[media_type][-1] == end_char)
-                                    # No discrepancies between language
-                                    # based and non-language based media
-                                    # fields.
-                                    self.assertTrue(
-                                        item_dict[media_type] == val)
-                                    # The field 'media' exists and is
-                                    # formatted correctly.
-                                    self.assertTrue(
-                                        len(item_dict['media']) > 0)
+                        asserts(item.to_dict(lang))
+
         test_media_fields_in_prompts()
 
     def test_initialization_has_choices(self):
+        """Test that choice list exists on initialization."""
         forms = self.get_forms(self.data)
-        for form_name, form in forms.items():
+        for dummy, form in forms.items():
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
                     if item.odktype in item.select_types:
@@ -157,7 +176,7 @@ class OdkGroupTest(unittest.TestCase):
             self.assertTrue(output == expected_output, msg=msg)
 
 
-class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
+class OdkFormTest(unittest.TestCase, PppTest):
     """Unit tests for the OdkForm class."""
 
     def setUp(self):
@@ -214,14 +233,123 @@ class OdkFormQuestionnaireTest(unittest.TestCase, PppTest):
         )
 
     def test_questionnaire(self):
-        """Test expected results of converted questionnaire based on
-        position."""
+        """Test expected results of converted questionnaire based on position.
+        """
         forms = self.get_forms(self.data)
         for i, expected_output in self.data:
             output = forms[i['file']].questionnaire[i['position']]
             self.assertTrue(str(output) == expected_output['repr'])
             self.assertTrue(isinstance(output, expected_output['class']))
 
+    def test_languages(self):
+        """Language based tests."""
+        def test_get_label_language_list():
+            """Test OdkForm.get_label_language_list()."""
+            test_input = {
+                'audio': {
+                    'has_generic_language_field': True,
+                    'language_list': []
+                },
+                'constraint_message': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'hint': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'image': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'label': {
+                    'has_generic_language_field': False,
+                    'language_list': ['Ateso', 'English', 'Luganda',
+                                      'Lugbara', 'Luo', 'Lusoga',
+                                      'Ngakarimojong', 'Runyankole-Rukiga',
+                                      'Runyoro-Rutoro']
+                },
+                'media::video': {
+                    'has_generic_language_field': False,
+                    'language_list': ['English']
+                }
+            }
+            expected_output = ['Ateso', 'English', 'Luganda', 'Lugbara', 'Luo',
+                               'Lusoga', 'Ngakarimojong', 'Runyankole-Rukiga',
+                               'Runyoro-Rutoro']
+            self.assertTrue(
+                OdkForm.get_label_language_list(test_input) == expected_output)
+        test_get_label_language_list()
+
+
+def get_args():
+    """CLI for PPP test runner."""
+    desc = 'Run tests for PPP package.'
+    parser = ArgumentParser(description=desc)
+    doctests_only_help = 'Specifies whether to run doctests only, as ' \
+                         'opposed to doctests with unittests. Default is' \
+                         ' False.'
+    parser.add_argument('-d', '--doctests-only', action='store_true',
+                        help=doctests_only_help)
+    args = parser.parse_args()
+    return args
+
+
+def get_test_modules(test_package):
+    """Get files to test.
+
+    Args:
+        test_package (str): The package containing modules to test.
+
+    Returns:
+        list: List of all python modules in package.
+
+    """
+    if test_package == 'pmix.ppp':  # TODO: Make dynamic.
+        root_dir = TEST_DIR + "../" + "pmix/ppp"
+    elif test_package == 'test':
+        root_dir = TEST_DIR
+    else:
+        raise Exception('Test package not found.')
+
+    test_modules = []
+    for dummy, dummy, filenames in os.walk(root_dir):
+        for file in filenames:
+            if file.endswith('.py'):
+                file = file[:-3]
+                test_module = test_package + '.' + file
+                test_modules.append(test_module)
+    return test_modules
+
+
+def get_test_suite(test_packages):
+    """Get suite to test.
+
+    Returns:
+        TestSuite: Suite to test.
+
+    """
+    suite = unittest.TestSuite()
+    for package in test_packages:
+        pkg_modules = get_test_modules(test_package=package)
+        for pkg_module in pkg_modules:
+            suite.addTest(doctest.DocTestSuite(pkg_module))
+    return suite
+
 
 if __name__ == '__main__':
-    unittest.main()
+    PARAMS = get_args()
+    TEST_SUITE = get_test_suite(TEST_PACKAGES)
+    unittest.TextTestRunner(verbosity=1).run(TEST_SUITE)
+
+    if not PARAMS.doctests_only:
+        unittest.main()

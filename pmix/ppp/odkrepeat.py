@@ -12,6 +12,7 @@ class OdkRepeat:
     Attributes:
         opener (dict): A dictionary row representing first row of repeat group.
         data (list): A list of repeat group components.
+
     """
 
     def __init__(self, opener):
@@ -100,6 +101,7 @@ class OdkRepeat:
     #
     #     Returns:
     #         list: A list of reformatted components.
+    #
     #     """
     #     repeat = []
     #     return repeat

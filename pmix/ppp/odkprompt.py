@@ -1,7 +1,10 @@
 """Module for the OdkPrompt class."""
 import textwrap
+
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkChoicesError
+from pmix.ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
+from pmix.ppp.definitions.error import OdkChoicesError
 
 
 class OdkPrompt:
@@ -22,14 +25,7 @@ class OdkPrompt:
         response_types (tuple): Prompt types which can accept data and do not
             include a list of choices.
         non_response_types (tuple): Prompt types which do not accept data.
-        media_fields (tuple): Fields that can be set to file names of allowable
-            media types for the given field.
-        language_dependent_fields (tuple): Fields for which values can vary by
-            language. A single ODK XLSForm can have many such fields, suffixed
-            by '::language'.
-        truncatable_fields (tuple): Fields that should be limited to a specific
-            length. Current limit is 100 chars, which is somewhat arbitrary but
-            turns out good in converted forms.
+
     """
 
     select_types = (
@@ -49,11 +45,6 @@ class OdkPrompt:
     non_response_types = (
         'note',
     )
-    media_fields = ('image', 'media::image', 'audio', 'media::audio',
-                    'video', 'media::video')
-    language_dependent_fields = \
-        ('label', 'hint', 'constraint_message', 'ppp_input') + media_fields
-    truncatable_fields = ('constraint', 'relevant')
 
     def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type).
@@ -107,7 +98,6 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            # if k.startswith('label' or 'hint' or 'constraint_message'):
             if k.startswith('label') or k.startswith('hint') \
                     or k.startswith('constraint_message'):
                 if v:
@@ -128,10 +118,11 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation.
         """
-        for field in OdkPrompt.language_dependent_fields:
-            if field + '::' + lang in row:
-                row[field] = row[field + '::' + lang]
-        return row
+        new_row = row.copy()
+        for field in LANGUAGE_DEPENDENT_FIELDS:
+            if field + '::' + lang in new_row:
+                new_row[field] = new_row[field + '::' + lang]
+        return new_row
 
     # pylint: disable=too-many-branches
     @staticmethod
@@ -151,20 +142,20 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         fields_to_add = []
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
-                if key.startswith(field) and len(val) > 0:
+        new_row = row.copy()
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
+                if key.startswith(field):
                     if field not in row:
                         fields_to_add.append(field)
                     if field.startswith(prefix):
-                        non_prefixed_mf = field.replace(
-                            prefix, '')
+                        non_prefixed_mf = field.replace(prefix, '')
                         if non_prefixed_mf not in row:
                             fields_to_add.append(non_prefixed_mf)
 
         for field in fields_to_add:
             row[field] = ''
-        if len(fields_to_add) > 0:
+        if fields_to_add:
             row['media'] = []
         return row
 
@@ -178,16 +169,17 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation of prompt.
         """
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
-                if val and key.startswith(field) and val not in row['media']:
-                    row['media'].append(val)
-        return row
+        new_row = row.copy()
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
+                if val and key.startswith(field) \
+                        and val not in new_row['media']:
+                    new_row['media'].append(val)
+        return new_row
 
     @staticmethod
-    def text_relevant():
+    def text_relevant():  # TODO: Create this method.
         # def text_relevant(self, lang):
-        # TODO: Create this method.
         """Find the relevant text for this row."""
         pass
 
@@ -200,10 +192,11 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation of prompt.
         """
-        for field in OdkPrompt.truncatable_fields:
-            row[field + '_original'] = row[field]
-            row[field] = self.truncate_text(row[field])
-        return row
+        new_row = row.copy()
+        for field in TRUNCATABLE_FIELDS:
+            new_row[field + '_original'] = new_row[field]
+            new_row[field] = self.truncate_text(new_row[field])
+        return new_row
 
     def format_media_labels(self, row):
         """Format text for all media labels to be enclosed in brackets.
@@ -215,12 +208,13 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         arbitrary_media_prefix = 'media::'
-        row = self.create_additional_media_fields(row,
-                                                  arbitrary_media_prefix)
-        for key, val in row.items():
-            for field in OdkPrompt.media_fields:
-                if key.startswith(field) and len(val) > 0:
-                    if val[0] is not '[' and val[-1] is not ']':
+        new_row = \
+            self.create_additional_media_fields(row, arbitrary_media_prefix)
+        for key, val in new_row.items():
+            for field in MEDIA_FIELDS:
+                if key.startswith(field) and val:
+                    formatted_media_label = val
+                    if val[0] != '[' and val[-1] != ']':
                         formatted_media_label = '[' + val + ']'
                     row[field] = formatted_media_label
                     row[key] = formatted_media_label
@@ -229,6 +223,82 @@ class OdkPrompt:
                             arbitrary_media_prefix, '')
                         row[non_prefixed_mf] = formatted_media_label
         return row
+
+    @staticmethod
+    def _ignore_relevant(prompt):
+        """If applicable, ignores relevant, setting it to an empty string.
+
+         In cases where a preset is used which makes use of human-readable
+         relevants via the ppp_relevant::<language> field of an XlsForm, this
+         function looks for any IGNORE_RELEVANT_TOKEN present in the field and,
+         if present, sets it to an empty string.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        if prompt['relevant'] == IGNORE_RELEVANT_TOKEN:
+            prompt['relevant'] = ''
+        return prompt
+
+    @staticmethod
+    def set_descriptive_metadata(prompt):
+        """Set descriptive metadata.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        prompt['is_section'] = False
+        if prompt['simple_type'] == 'note' \
+                and prompt['name'].startswith('sect_'):
+            prompt['is_section'] = True
+        return prompt
+
+    @staticmethod
+    def handle_preset(prompt, lang, preset):
+        """Handle preset.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+            lang (str): The language.
+            preset (str): The preset supplied.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        # TODO: (jef 2017.09.24) Human readable: hint variables.
+        # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
+        for key in prompt:
+            for exclusion in PRESETS[preset]['field_exclusions']:
+                if key.startswith(exclusion):
+                    prompt[key] = ''
+                    continue
+
+            for to_replace in PRESETS[preset]['field_replacements']:
+                replace_with = 'ppp_'+to_replace+'::'+lang
+
+                if key == replace_with and prompt[replace_with]:
+                    if to_replace.startswith('label'):
+                        prompt[to_replace] = [prompt[replace_with]]
+                    elif to_replace.startswith('relevant'):
+                        prompt[to_replace] = prompt[replace_with]
+
+            if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
+                if key == 'input_field' and prompt['simple_type'] in \
+                        ('select_one', 'select_multiple'):
+                    prompt['input_field'] = [
+                        {'name': '', 'label': i['label']}
+                        for i in prompt['input_field']
+                    ]
+
+        OdkPrompt._ignore_relevant(prompt)
+
+        return prompt
 
     def text_field(self, field, lang):
         """Find a row value given a field and language.
@@ -252,8 +322,8 @@ class OdkPrompt:
                 first = sorted(keys)[0]
                 value = self.row[first]
         except (KeyError, IndexError):
-            # KeyError: self.row does not have the key '{}::{}'
-            # IndexError: `keys` (filtered by field) is empty list
+            # KeyError: self.row does not have the key '{}::{}'.
+            # IndexError: `keys` (filtered by field) is empty list.
             pass
         return value
 
@@ -305,7 +375,7 @@ class OdkPrompt:
         #     question_type = self.odktype in Odkprompt.response_types or \
         #                     self.odktype in Odkprompt.select_types
         #     if text_str and self.row['read_only'] and question_type:
-        #         # TODO fix read_only lookup
+        #         # TODO: Fix read_only lookup.
         #         text_str = '\n'.join(('[Read only]', text_str))
         # except KeyError:  # Unable to find 'read_only'
         #     pass
@@ -369,19 +439,41 @@ class OdkPrompt:
         Returns:
             dict: The text from all parts of the prompt.
         """
-        # TODO: Refactor so that the dict row is only looped through once
-        # to make all of the changes below.
+        # TODO: Refactor so that the dict row is only looped through once.
         prompt = self.format_media_labels(self.row)
         prompt = self.set_grouped_media_field(prompt)
+        prompt = self.set_descriptive_metadata(prompt)
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
+
         prompt['input_field'] = self.to_html_input_field(lang)
+
         if self.is_section_header:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
+        if 'preset' in kwargs:
+            prompt = self.handle_preset(prompt, lang, kwargs['preset'])
+
         return prompt
+
+    @staticmethod
+    def html_options(**kwargs):
+        """HTML options.
+
+        Args:
+            **kwargs (dict): Keyword arguments.
+
+        Returns:
+            dict: Modified settings based on keyword arguments.
+        """
+        if 'preset' not in kwargs:
+            return kwargs
+        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']\
+                .items():
+            kwargs[k] = v
+        return kwargs
 
     def to_html(self, lang, highlighting, **kwargs):
         """Convert to html.
@@ -395,7 +487,8 @@ class OdkPrompt:
         Returns:
             str: A rendered html template.
         """
+        settings = self.html_options(**kwargs)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=self.to_dict(lang=lang, **kwargs),
-                    highlighting=highlighting)
+            .render(question=self.to_dict(lang=lang, **settings),
+                    highlighting=highlighting, **settings)

@@ -1,4 +1,4 @@
-"""This module defines the Worksheet class."""
+"""Module for Worksheet class."""
 import csv
 
 from pmix.cell import Cell
@@ -6,12 +6,12 @@ from pmix.error import SpreadsheetError
 
 
 class Worksheet:
-    """This module represents a worksheet in a spreadsheet.
+    """Representative class for a worksheet in a given spreadsheet workbook.
 
     A Worksheet is always supposed to have rectangular dimensions. It should
     not ever become a ragged array.
 
-    Attributes:
+    Class Attributes:
         count (int): Keeps track of the sheets created without a name.
     """
 
@@ -43,7 +43,7 @@ class Worksheet:
         """Return the dimensions of this Worksheet as tuple (nrow, ncol)."""
         nrow = len(self)
         ncol = self.ncol()
-        return (nrow, ncol)
+        return nrow, ncol
 
     def ncol(self):
         """Return the number of columns for this Worksheet.
@@ -74,9 +74,13 @@ class Worksheet:
         """
         worksheet = cls(name=sheet.name)
         for i in range(sheet.nrows):
-            cur_row = [Cell.from_cell(c, datemode, stripstr) for c in
-                       sheet.row(i)]
-            worksheet.data.append(cur_row)
+            try:
+                cur_row = [Cell.from_cell(c, datemode, stripstr) for c in
+                        sheet.row(i)]
+                worksheet.data.append(cur_row)
+            except TypeError as e:
+                msg = 'Error in row {}: {}'.format(str(i+1), str(e))
+                raise TypeError(msg)
         return worksheet
 
     def prepend_row(self, row=None):
@@ -119,8 +123,7 @@ class Worksheet:
         """
         if self.data:
             return tuple(str(i) for i in self.data[0])
-        else:
-            return ()
+        return ()
 
     def column_pairs(self, indices=None, base=None, start=0):
         """Iterate over pairs within the same row for all rows.

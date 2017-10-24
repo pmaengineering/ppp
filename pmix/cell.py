@@ -1,11 +1,10 @@
-"""Module for the Cell class."""
+"""Module for Cell class."""
 import datetime
-
 import xlrd
 
 
 class Cell:
-    """This class represents a cell from a spreadsheet."""
+    """Representative class for spreadsheet cell."""
 
     def __init__(self, value=None):
         """Initialize cell to have value as Python object.
@@ -39,8 +38,7 @@ class Cell:
         """Return unicode representation of cell."""
         if self.value is None:
             return ''
-        else:
-            return str(self.value)
+        return str(self.value)
 
     def __repr__(self):
         """Return a representation of the cell."""
@@ -104,8 +102,15 @@ class Cell:
                 value = datetime.date(*date_tuple[:3])
             else:
                 value = datetime.datetime(*date_tuple)
+        elif cell.ctype == xlrd.XL_CELL_ERROR:
+            msg = 'Error cell found. Please correct or erase error cell from '\
+                  'file and try again.\n\nError cells are likely to be one of'\
+                  ' the following: #N/A, #NULL!, #DIV/0!, #VALUE!, #REF!, ' \
+                  '#NAME?, #NUM!, #GETTING_DATA'\
+                .format(cell.ctype, cell.value)
+            raise TypeError(msg)
         else:
-            msg = 'Unhandled cell type: {}. Value is: {}'
-            msg = msg.format(cell.ctype, cell.value)
+            msg = 'Unhandled cell exception.\nType: {}\nValue: {}'\
+                .format(cell.ctype, cell.value)
             raise TypeError(msg)
         return value

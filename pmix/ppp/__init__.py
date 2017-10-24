@@ -1,49 +1,55 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""A package for converting ODK forms."""
+"""Common executional entry point from interfaces."""
+from signal import signal, SIGPIPE, SIG_DFL
+
+from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
 from pmix.ppp.odkform import OdkForm
-from pmix.ppp.error import OdkFormError, OdkChoicesError, \
-    InvalidLanguageException
 
 
-def run(inpath, language, output_format, outfile, **kwargs):
+def run(in_file, language=None, out_file=None, **kwargs):
     """Run ODK form conversion.
 
     Args:
-        inpath (str): Path to load source file.
+        in_file (str): Path to load source file.
         language (str): Language to render form.
         output_format (str): File format to be output.
-        outfile (str): Path to save converted file.
+        out_file (str): Path to save converted file.
         **debug (bool): Debugging on or off.
         **highlight (bool): Highlighting on or off.
+
     Raises:
         InvalidLanguageException: Language related.
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
     """
+    form = OdkForm.from_file(in_file)
+
+
+
     try:
-        form = OdkForm(file=inpath)
         output = None
+        output_format = kwargs['output_format']
         if output_format == 'text':
-            output = form.to_text(language)
-        elif output_format == 'html' or not output_format:
-            output = form.to_html(language, **kwargs)
-        if outfile:
-            with open(outfile, mode='w', encoding='utf-8') as file:
+            output = form.to_text(language=language, **kwargs)
+        elif output_format in ('html', 'doc') or not output_format:
+            output = form.to_html(language=language, **kwargs)
+        if out_file:
+            with open(out_file, mode='w', encoding='utf-8') as file:
                 file.write(output)
         else:
-            print(output)
+            try:
+                print(output)
+            except BrokenPipeError:  # If output is piped.
+                signal(SIGPIPE, SIG_DFL)
+                print(output)
     except InvalidLanguageException as err:
-        if len(str(err)):
+        if str(err):
             raise InvalidLanguageException(err)
-        elif language not in form.languages:
-            msg = 'Specified language not found in form: ' + language
-            msg += '\n\nThe form \'{}\' contains the following languages' \
-                   '.\n'.format(inpath)
-            for lang in form.languages:
-                msg += '  * ' + lang + '\n'
-            raise InvalidLanguageException(msg[0:-1])
-    except OdkChoicesError as err:
-        raise OdkFormError(err)
-    except OdkFormError as err:
-        raise OdkFormError(err)
+        elif language is None:
+            msg = 'InvalidLanguageException: An unknown error occurred when ' \
+                  'attempting to convert form. If a language was not ' \
+                  'supplied, please supply and try again.'
+            raise InvalidLanguageException(msg)
+    except OdkException as err:
+        raise OdkException(err)

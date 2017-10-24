@@ -1,5 +1,5 @@
 """Module for the OdkChoices class."""
-from pmix.ppp.error import InvalidLanguageException
+from pmix.ppp.definitions.error import InvalidLanguageException
 
 
 class OdkChoices:
@@ -8,6 +8,7 @@ class OdkChoices:
     Attributes:
         list_name (str): The name of the choice list.
         data (list): A list of choice options for the choice list.
+
     """
 
     def __init__(self, list_name):
@@ -25,7 +26,7 @@ class OdkChoices:
                                                    len(self.data))
 
     def __str__(self):
-        """String conversion of instance."""
+        """Convert instance to string."""
         return '{}: {}'.format(self.list_name, self.labels(lang='English'))
 
     def add(self, choice):
@@ -46,27 +47,16 @@ class OdkChoices:
             list: Correctly ordered list of choice labels.
 
         Raises:
-            InvalidLanguageException: Language parameter not found in choice
-                list.
-            InvalidLanguageException: No languages found in choice list.
+            InvalidLanguageException
         """
-        choice_langs = self.choice_langs()
-        if lang not in choice_langs:
-            msg = 'Language "{}" not found in choice list {}'
-            msg = msg.format(lang, self.list_name)
+        lang_col = 'label::{}'.format(lang) if lang else 'label'
+        try:
+            labels = [d[lang_col] for d in self.data]
+            return labels
+        except KeyError:
+            msg = 'Language {} not found in choice list {}.'\
+                .format(lang, self.list_name)
             raise InvalidLanguageException(msg)
-        elif not choice_langs:
-            msg = 'No languages found in choice list {}'.format(self.list_name)
-            raise InvalidLanguageException(msg)
-
-        if lang:
-            lang_col = 'label::{}'.format(lang)
-        else:
-            default_language = 'English'
-            lang_col = 'label::{}'.format(default_language) \
-                if default_language else 'label'
-        labels = [d[lang_col] for d in self.data]
-        return labels
 
     def name_labels(self, lang):
         """Get choice name labels.
@@ -77,11 +67,9 @@ class OdkChoices:
         Returns:
             list: Choice variable names and associated labels for choice list.
         """
-        try:
-            return [{'name': x['name'], 'label': x['label::{}'.format(lang)]}
-                    for x in self.data]
-        except KeyError:
-            raise InvalidLanguageException
+        labels = self.labels(lang)
+        return [{'name': row['name'], 'label': labels[i]} for i, row in
+                enumerate(self.data)]
 
     def choice_langs(self):
         """Discover all languages for these choices.
@@ -90,8 +78,8 @@ class OdkChoices:
             list: Alphabetized list of languages.
 
         Raises:
-            InvalidLanguageException: If choice languages differe from survey
-                languages.
+            InvalidLanguageException: If languages of first row differ from
+                languages in any other row.
         """
         langs = set()
         for datum in self.data:

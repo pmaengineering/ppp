@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Take a spreadsheet and create a cascading select from it.
+"""Take a spreadsheet and create a cascading select from it.
 
 Column names must be written as
 

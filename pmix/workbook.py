@@ -1,4 +1,4 @@
-"""This module defines a Workbook class to represent Excel files."""
+"""Module defines a Workbook class to represent Excel files."""
 
 import itertools
 import os.path

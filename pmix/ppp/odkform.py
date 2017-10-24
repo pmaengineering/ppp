@@ -1,24 +1,23 @@
 """Module for the OdkForm class."""
-import datetime
 import os.path
+
 from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.error import OdkFormError
+from pmix.ppp.definitions.error import OdkFormError
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
 from pmix.ppp.odkrepeat import OdkRepeat
-from pmix.workbook import Workbook
+from pmix.ppp.definitions.utils import exclusion
+from pmix.xlsform import Xlsform
 
 
 class OdkForm:
     """Class to represent an entire XLSForm.
 
     Attributes:
-        settings (dict): A dictionary represetnation of the original 'settings'
+        settings (dict): A dictionary representation of the original 'settings'
             worksheet of an ODK XLSForm.
         title (str): Title of the ODK form.
-        languages (list): List of languages used in the ODK form. This is taken
-            from the 'survey' worksheet.
         choices (dict): A list of rows from the 'choices' worksheet.
         ext_choices (dict): A list of rows from the 'external_choices'
             worksheet.
@@ -26,53 +25,43 @@ class OdkForm:
             converted ODK forms.
         questionnaire (list): An ordered representation of the ODK form,
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
+
     """
 
-    def __init__(self, file=None, wb=None):
+    def __init__(self, wb):
         """Initialize the OdkForm.
 
         Create an instance of an ODK form, including survey representation,
         choice options, settings, and metadata.
 
         Args:
-            file (str): The path for the source file of the ODK form,
-                typically an '.xlsx' file meeting the XLSForm specification.
-            wb (Workbook): A Workbook object meeting XLSForm specification.
+            wb (Xlsform): A Xlsform object meeting XLSForm specification.
+
         Raises:
             OdkformError: No ODK form is supplied.
-            InvalidLanguage: Language specified is not found in form.
         """
-        if file is None and wb is None:
-            raise OdkFormError
-        elif file is not None:
-            wb = Workbook(file)
+        self.settings = wb.settings
+        self.language = wb.form_language
 
-        self.settings = {str(k): str(v) for k, v in
-                         self.get_settings(wb).items()}
-        self.title = self.settings.get('form_title', os.path.split(wb.file)[1])
-        self.languages = self.get_languages(wb)
-        self.choices = self.get_choices(wb, 'choices')
-        self.ext_choices = self.get_choices(wb, 'external_choices')
-        conversion_start = datetime.datetime.now()
+        self.title = self.get_title(settings=self.settings, wb=wb)
         self.metadata = {  # TODO Finish filling this out.
-            'file_name': os.path.split(wb.file)[1],
-            'form_id': self.settings.get('form_id'),
-            'country': self.settings.get('form_id')[3:5],
-            'round': self.settings.get('form_id')[6:7],
-            'type_of_form': self.settings.get('form_id')[0:2],
-            'last_author': None,
-            'last_updated': None,
-            'survey_language': self.get_survey_language(),
-            'conversion_start': conversion_start,
-            'conversion_start_formatted':
-                str(conversion_start.date()) +
-                ' ' + str(conversion_start.time())[0:8],
-            'conversion_end': None,
-            'conversion_end_formatted': None,
-            'conversion_time': None,
+            'last_author': str(),
+            'last_updated': str(),
             'changelog': None,
             'info': None,
             'raw_data': wb
+        }
+        self.choices = self.get_choices(wb, 'choices')
+        self.ext_choices = self.get_choices(wb, 'external_choices')
+        self.metadata = {
+            **self.metadata,
+            **{
+                'file_name': os.path.split(wb.file)[1],
+                'form_id': self.settings.get('form_id'),
+                'country': self.settings.get('form_id')[3:5],
+                'round': self.settings.get('form_id')[6:7],
+                'type_of_form': self.settings.get('form_id')[0:2],
+            }
         }
         self.questionnaire = self.convert_survey(wb, self.choices,
                                                  self.ext_choices)
@@ -82,17 +71,30 @@ class OdkForm:
          'phonenumber', 'hidden', 'hidden string', 'hidden int',
          'hidden geopoint']
     warnings = None
-    conversion_info = None
+
+    @classmethod
+    def from_file(cls, path):
+        """Create Odkform object from file in path.
+
+        Args:
+            path (str): The path for the source file of the ODK form,
+                typically an '.xlsx' file meeting the XLSForm specification.
+
+        Returns:
+            Odkform
+        """
+        xlsform = Xlsform(path)
+        return cls(xlsform)
 
     @staticmethod
     def get_settings(wb):
         """Get the XLSForm settings as a settings_dict.
 
         Args:
-            wb (Workbook): A workbook object representing ODK form.
+            wb (Xlsform): A workbook object representing ODK form.
 
         Returns:
-            dict: Form settings.:
+            dict: Form settings.
         """
         settings_dict = {}
         try:
@@ -111,7 +113,7 @@ class OdkForm:
         """Extract choices from an XLSForm.
 
         Args:
-            wb (Workbook): A Workbook object representing ODK form.
+            wb (Xlsform): A Xlsform object representing ODK form.
             ws (Worksheet): One of 'choices' or 'external_choices'.
 
         Returns:
@@ -146,68 +148,31 @@ class OdkForm:
         return formatted_choices
 
     @staticmethod
-    def get_languages(wb):
-        """Get survey languages.
+    def get_title(settings, wb, lang=None):
+        """Get questionnaire title.
 
         Args:
-            wb (Workbook): A Workbook object representing ODK form.
+        settings (dict): A dictionary represetnation of the original 'settings'
+            worksheet of an ODK XLSForm.
+        wb (Workbook): A Workbook object representing an XLSForm.
+        lang (str): The requested render lagnuage of the form.
 
         Returns:
-            list: An alphabetically sorted list of languages in the form.
+            str: The title.
         """
-        header = wb['survey'][0]
-        langs = set()
-        for field in header:
-            # TODO: Handle the following cases, both with cases of a presence
-            # of 'default_language', and not.
-            # 1. No 'label' or 'label::' fields at all,
-            # 2. A 'label' field by itself.
-            # 3. A 'label' field with 'label::' fields.
-            if field == 'label':
-                langs.add('')  # Default language.
-            elif str(field).startswith('label::'):
-                lang = str(field)[len('label::'):]
-                langs.add(lang)
-        return sorted(list(langs))
+        lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
+        backup_title = os.path.split(wb.file)[1]
+        return settings.get(lookup_title, backup_title)
 
-    def get_survey_language(self):
-        """Get default survey language if specified.
-
-        Returns:
-            str: The default language of the form.
-        """
-        return self.settings['default_language'] \
-            if 'default_language' in self.settings else self.languages[0]
-
-    def set_conversion_end(self):
-        """Set conversion end time."""
-        self.metadata['conversion_end'] = datetime.datetime.now()
-        self.metadata['conversion_end_formatted'] = \
-            str(self.metadata['conversion_end'].date()) + ' ' + \
-            str(self.metadata['conversion_end'].time())[0:8]
-
-    def get_running_conversion_time(self):
-        """Get running conversion time at this point in time.
-
-        Returns:
-            str: Total time taken to convert form.
-        """
-        self.metadata['conversion_time'] = \
-            str(self.metadata['conversion_end'] - self.metadata[
-                'conversion_start'])[5:10] + ' ' + 'seconds'
-
-        return self.metadata['conversion_time']
-
-    def to_text(self, lang):
+    def to_text(self, language=None):
         """Get the text representation of an entire XLSForm.
 
         Args:
-            lang (str): The language.
+            language (str): The language.
 
         Returns:
             str: The full string of the XLSForm, ready to print or save.
         """
-        lang = lang if lang else self.metadata['survey_language']
         title_lines = (
             '+{:-^50}+'.format(''),
             '|{:^50}|'.format(self.title),
@@ -215,13 +180,13 @@ class OdkForm:
         )
         title_box = '\n'.join(title_lines)
 
-        q_text = (q.to_text(lang) for q in self.questionnaire)
+        q_text = (q.to_text(language) for q in self.questionnaire)
         sep = '\n\n' + '=' * 52 + '\n\n'
         result = sep.join(q_text)
-        return title_box + sep + result + sep
+        return title_box + sep + result + sep  # TODO: Finish below to_dict or
+    # TODO: change debug feature. If fixed, change to_json to
+    # TODO: call dump return of this method instead of raw data.
 
-    # TODO: Finish this or change debug feature. If fixed, change to_json to
-    # call dump return of this method instead of raw data.
     # def to_dict(self, lang):
     #     """Get the dictionary representation of an entire XLSForm.
     #
@@ -230,8 +195,10 @@ class OdkForm:
     #
     #     Returns:
     #         dict: A full dictionary representation of the XLSForm.
+    #
     #     """
-    #     lang = lang if lang else self.metadata['survey_language']
+    #     lang = lang if lang \
+    #         else self.languages['language_list']['default_language']
     #     html_questionnaire = {
     #         'title': self.title,
     #         'questions': []
@@ -251,7 +218,6 @@ class OdkForm:
             json: A full JSON representation of the XLSForm.
         """
         import json
-        # lang = lang if lang else self.metadata['survey_language']
         raw_survey = []
         header = self.metadata['raw_data']['survey'][0]
         for i, row in enumerate(self.metadata['raw_data']['survey']):
@@ -261,15 +227,14 @@ class OdkForm:
 
         if pretty:
             return json.dumps(raw_survey, indent=2)
-        else:
-            return json.dumps(raw_survey)
+        return json.dumps(raw_survey)
 
-    def to_html(self, lang, **kwargs):
+    def to_html(self, lang=None, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
         Args:
             lang (str): The language.
-            **highlight(bool): For color highlighting of various components
+            **highlight (bool): For color highlighting of various components
                 of html template.
             **debug (bool): For inclusion of debug information to be printed
                 in the JavaScript console.
@@ -277,28 +242,38 @@ class OdkForm:
         Returns:
             str: A full HTML representation of the XLSForm.
         """
-        lang = lang if lang else self.metadata['survey_language']
+        language = lang if lang else self.language
+        debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
         data = {
             'header': {
-                'title': self.title
+                'title': self.get_title(settings=self.settings,
+                                        wb=self.metadata['raw_data'],
+                                        lang=lang)
             },
             'footer': {
-                'data':
-                    self.to_json(pretty=True) if kwargs['debug']
-                    else 'false'
+                'data': self.to_json(pretty=True) if debug else 'false'
             },
             'questionnaire': self.questionnaire
         }
+
+        # - Render Header
         # pylint: disable=no-member
         header = TEMPLATE_ENV.get_template('header.html')\
-            .render(data=data['header'])
+            .render(data=data['header'], **kwargs)
         # pylint: disable=no-member
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()
         html_questionnaire += header
+
+        # - Render Body
         prev_item = None
+        hlt = kwargs['highlight'] if 'highlight' in kwargs else False
         for index, item in enumerate(data['questionnaire']):
+
+            if exclusion(item=item, settings=kwargs):
+                continue
+
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
             elif isinstance(prev_item, OdkGroup) \
@@ -306,23 +281,19 @@ class OdkForm:
                 html_questionnaire += grp_spc
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += item.to_html(lang, kwargs['highlight'],
-                                                   bottom_border=True)
+                html_questionnaire += \
+                    item.to_html(language, hlt, **kwargs, bottom_border=True)
             else:
-                html_questionnaire += item.to_html(lang, kwargs['highlight'])
+                html_questionnaire += item.to_html(language, hlt, **kwargs)
             prev_item = item
-        self.set_conversion_end()
-        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings is not None \
-            else 'false'
-        OdkForm.conversion_info = {} if OdkForm.conversion_info is 'false' \
-            else OdkForm.conversion_info
-        self.get_running_conversion_time()
+        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
+
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
-            .render(info=OdkForm.conversion_info, warnings=OdkForm.warnings,
-                    conversion_time=str(self.metadata['conversion_time']),
-                    data=data['footer']['data'])
+            .render(info=None, warnings=OdkForm.warnings,
+                    data=data['footer']['data'], **kwargs)
         html_questionnaire += footer
+
         return html_questionnaire
 
     @staticmethod
@@ -350,7 +321,6 @@ class OdkForm:
         """
         simple_row = {'token_type': 'prompt'}
         simple_type = 'select_one'
-        choice_list = None
         row_type = row['type']
         if row_type.startswith('select_one_external '):
             list_name = row_type.split(maxsplit=1)[1]
@@ -436,8 +406,6 @@ class OdkForm:
         Returns:
             dict: simple_row information from parsing.
         """
-        simple_row = {}
-
         row_type = row['type']
         simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
         if row_type in simple_types:
@@ -465,7 +433,7 @@ class OdkForm:
         - context group (group without field-list appearance)
 
         Args:
-            wb (Workbook): A Workbook object representing an XLSForm.
+            wb (Xlsform): A Xlsform object representing an XLSForm.
 
         Returns:
             list: A list of objects representing form components.
@@ -512,10 +480,10 @@ class OdkForm:
                     context.add_table(this_prompt)
                 elif token['token_type'] == 'unhandled':
                     # Intentionally no handling for these types.
-                    # possibly start logging
+                    # TODO: Possibly start logging?
                     pass
                 else:
-                    # make an error
+                    # TODO: Make an error?
                     pass
         except KeyError:  # No survey found.
             pass
@@ -550,6 +518,7 @@ class OdkForm:
 
             Args:
                 prompt (OdkPrompt): A prompt to add.
+
             """
             if self.pending_stack:
                 self.pending_stack[-1].add(prompt)
@@ -569,6 +538,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last = self.pending_stack[-1]
@@ -583,6 +553,7 @@ class OdkForm:
 
             Context groups are tracked only to help popping groups correctly
             from the pending stack.
+
             """
             self.group_stack.append(None)
 
@@ -599,6 +570,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack.pop()
@@ -623,6 +595,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.group_stack:
                 last_group = self.group_stack.pop()
@@ -644,6 +617,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if not self.pending_stack:
                 self.pending_stack.append(repeat)
@@ -659,6 +633,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack.pop()
@@ -683,6 +658,7 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
+
             """
             if self.pending_stack:
                 last_pending = self.pending_stack[-1]

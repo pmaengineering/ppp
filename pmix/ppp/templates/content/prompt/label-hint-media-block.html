@@ -11,10 +11,11 @@
                                 {% endfor %}
                               {% endif %}
                               {% if question.media %}
-                                {% for item in question.media %}
-                                  <span class="media">{{ item }}</span>
-                                  <br/>
-                                {% endfor %}
+                                <div class="media-items">
+                                  {% for item in question.media %}
+                                    <div class="media">{{ item }}</div>
+                                  {% endfor %}
+                                </div>
                               {% endif %}
                             </div>
                           {% endif %}

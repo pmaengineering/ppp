@@ -1,0 +1,113 @@
+"""Unit tests for numbering.py."""
+
+import itertools
+import unittest
+
+import pmix.numbering as numbering
+
+
+class NumberingFormatTest(unittest.TestCase):
+    """Test the string format for fixed numberings."""
+
+    def match_re(self, prog, expr, match):
+        found = prog.match(expr)
+        if match:
+            msg = 'Expected "{}" to be accepted.'.format(expr)
+            self.assertIsNotNone(found, msg=msg)
+        else:
+            msg = 'Expected "{}" not to be accepted.'.format(expr)
+            self.assertIsNone(found, msg=msg)
+
+    def test_upper_re(self):
+        """Regex-ify uppercase numbering."""
+        this_prog = numbering.Numbering.upper_prog
+        good = tuple('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        for item in good:
+            self.match_re(this_prog, item, True)
+
+        bad_single = tuple('ÁÉae01')
+        other_bad = ('', 'AA', 'A1', '1A', '_', '-', 'A.', ' A', 'A ')
+        for item in itertools.chain(bad_single, other_bad):
+            self.match_re(this_prog, item, False)
+
+    def test_number_re(self):
+        """Regex-ify pure number numbering."""
+        this_prog = numbering.Numbering.number_prog
+        good = ('001', '101', '201', 'LCL_301', 'A1', 'FLW801', 'PHC105', '1')
+        for item in good:
+            self.match_re(this_prog, item, True)
+
+        bad = ('', '001a', '10.', '_', '-', 'SN_101i')
+        for item in bad:
+            self.match_re(this_prog, item, False)
+
+    def test_ext_letter_re(self):
+        """Regex-ify extended numbering with letter."""
+        this_prog = numbering.Numbering.ext_letter_prog
+        good = ('001a', 'PHC101d', '101z', 'LCL_308a', 'SN_101.i')
+        for item in good:
+            self.match_re(this_prog, item, True)
+
+        bad = ('001', 'A', '', '_', '-', 'PHC101.ix', '101a.', ' 101a', '1a ')
+        for item in bad:
+            self.match_re(this_prog, item, False)
+
+    def test_ext_roman_re(self):
+        """Regex-ify extended numbering with roman numeral."""
+        this_prog = numbering.Numbering.ext_roman_prog
+        good = ('1a.i', '2b.ii', '3c.iii', '4d:iv', '5e_v', '6f-vi', '7g)vii',
+                '8h_viii', '9i_ix', '10j_x', '1.a.i')
+        for item in good:
+            self.match_re(this_prog, item, True)
+
+        bad = ('', '_', '-', '001', 'A', '2ii', '1iiii', '25y', '1i ', ' 2ii',
+               '21av')
+        for item in bad:
+            self.match_re(this_prog, item, False)
+
+    def test_decompose(self):
+        """Decompose numbering."""
+        answers = (
+            ('A', 'A', '', '', '', '', '', ''),
+            ('001', '', '', '001', '', '', '', ''),
+            ('001a', '', '', '001', '', 'a', '', ''),
+            ('001.a', '', '', '001', '.', 'a', '', ''),
+            ('3a.iii', '', '', '3', '', 'a', '.', 'iii'),
+            ('PHC101-i', '', 'PHC', '101', '-', 'i', '', ''),
+            ('FLW801', '', 'FLW', '801', '', '', '', ''),
+            ('LCL_101', '', 'LCL_', '101', '', '', '', '')
+        )
+        for expr, upper, leader, number, punc0, lower, punc1, roman in answers:
+            msg = 'Working with "{}"'.format(expr)
+            num = numbering.Numbering(expr)
+            self.assertEqual(upper, num.upper, msg=msg)
+            self.assertEqual(leader, num.leader, msg=msg)
+            self.assertEqual(number, num.number, msg=msg)
+            self.assertEqual(punc0, num.punc0, msg=msg)
+            self.assertEqual(lower, num.lower, msg=msg)
+            self.assertEqual(punc1, num.punc1, msg=msg)
+            self.assertEqual(roman, num.roman, msg=msg)
+
+class NumberingIncrementTest(unittest.TestCase):
+    """Test numbering increments."""
+
+    def test_number_increment(self):
+        num = numbering.Numbering('001')
+        num.increment('^1')
+        self.assertEqual(str(num), '002')
+        num.increment('^2')
+        self.assertEqual(str(num), '004')
+        num.increment('^a')
+        self.assertEqual(str(num), '004a')
+        num.increment('^1')
+        self.assertEqual(str(num), '005')
+        num.increment('^1a')
+        self.assertEqual(str(num), '006a')
+        num.increment('^1a')
+        self.assertEqual(str(num), '007a')
+
+        num = numbering.Numbering('101')
+        num.increment('^1')
+        self.assertEqual(str(num), '102')
+
+

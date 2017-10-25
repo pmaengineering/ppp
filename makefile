@@ -82,13 +82,6 @@ ssh:
 	ssh root@192.155.80.11
 
 
-# CTAGS
-tags:
-	ctags -R --python-kinds=-i .
-
-ltags:
-	ctags -R --python-kinds=-i ./${CODE_SRC}
-
 
 # Application Management
 serve:server

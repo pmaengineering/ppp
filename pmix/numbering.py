@@ -15,7 +15,8 @@ Increment with special strings starting with '^'.
     - '^i'
     - '^A'
 
-Keep the same as previous numbers with the lookback symbol '<'.
+Keep the same as previous numbers in the same series with the lookback symbol
+'<'.
 
     - '<'
     - '<3'
@@ -37,6 +38,7 @@ Count up to a fixed number with '>'.
 ...and then a fixed number such as 099.
 """
 
+import copy
 import re
 
 
@@ -49,11 +51,54 @@ PUNCTUATION = tuple(':-)._')
 class NumberingContext:
 
     def __init__(self):
+        self.cmds = []
+        self.numbers = []
         self.current_series = None
         self.all_series = {}
 
     def next(self, item):
-        pass
+        self.cmds.append(item)
+        try:
+            num = Numbering(item)
+            self.current_series = num
+            self.all_series[str(num)] = [num]
+            self.numbers.append(num)
+        except ValueError:
+            if self.current_series is None:
+                # E.g. getting an increment without a number
+                raise
+            self.parse_cmd(item)
+            # Get last number and apply
+
+    def parse_cmd(self, cmd):
+        if cmd.startswith('^'):
+            self.increment_cmd(cmd)
+        elif cmd.startswith('<'):
+            self.lookback(cmd)
+
+    def current_series_last(self, lookback=1):
+        last = self.all_series[str(self.current_series)][-lookback]
+        return last
+
+    def increment_cmd(self, cmd):
+        new_num = copy.copy(self.current_series_last())
+        new_num.increment(cmd)
+        self.current_series_add(new_num)
+
+    def lookback(self, cmd):
+        if cmd == '<':
+            lookback = 1
+        else:
+            lookback = int(cmd[1:])
+        new_num = copy.copy(self.current_series_last(lookback))
+        self.current_series_add(new_num)
+
+    def current_series_add(self, num):
+        self.all_series[str(self.current_series)].append(num)
+        self.numbers.append(num)
+
+    def __iter__(self):
+        return iter(self.numbers)
 
     def is_numbering(self, item):
         """Return true if the item is numbering."""
@@ -70,18 +115,18 @@ class Numbering:
       + LCL_101
       + 001
 
-    - An extended number, which is a Number above, plus a lowercase letter or a
-      roman numeral.
+    - An extended number, which is a Number above, plus a lowercase letter,
+      and possibly punctuation and a roman numeral.
       + 201a
-      + 201.i
+      + 201a.i
     """
 
     upper_re = r'^[A-Z]$'
-    number_re = r'^([^\s\d]*)(\d+)$'
+    number_re = r'^([^\s\d<>@^#*]*)(\d+)$'
     punc_re = r'([:\-)._])'
-    ext_letter_re = r'^([^\s\d]*)(\d+){}?([a-z])$'.format(punc_re)
+    ext_letter_re = r'^([^\s\d<>@^#*]*)(\d+){}?([a-z])$'.format(punc_re)
     roman_re = r'(i{1,3}|iv|v|vi{1,3}|ix|x)'
-    ext_roman_re = r'^([^\s\d]*)(\d+){}?([a-z]){}{}$'
+    ext_roman_re = r'^([^\s\d<>@^#*]*)(\d+){}?([a-z]){}{}$'
     ext_roman_re = ext_roman_re.format(punc_re, punc_re, roman_re)
 
     upper_prog = re.compile(upper_re)
@@ -89,8 +134,14 @@ class Numbering:
     ext_roman_prog = re.compile(ext_roman_re)
     ext_letter_prog = re.compile(ext_letter_re)
 
-    def __init__(self, numbering):
+    def __init__(self, numbering=None):
         """Take input numbering and break apart incrementable components."""
+        if numbering is None:
+            self.reset()
+        else:
+            self.set(numbering)
+
+    def reset(self):
         self.upper = ''
         self.leader = ''
         self.number = ''
@@ -98,6 +149,10 @@ class Numbering:
         self.lower = ''
         self.punc1 = ''
         self.roman = ''
+
+    def set(self, numbering):
+        """Take input numbering and break apart incrementable components."""
+        self.reset()
 
         upper_match = self.upper_prog.match(numbering)
         number_match = self.number_prog.match(numbering)
@@ -169,9 +224,7 @@ class Numbering:
         else:
             self.number = str(new_number)
 
-        self.punc0 = ''
         self.lower = ''
-        self.punc1 = ''
         self.roman = ''
 
     def increase_lower(self, lower):
@@ -203,9 +256,11 @@ class Numbering:
 
     def __str__(self):
         """Convert the numbering to a string."""
-        parts = (self.upper, self.number, self.punc0, self.lower, self.punc1,
-                 self.roman)
-        expr = ''.join(filter(None, parts))
+        expr = self.upper + self.number
+        if self.lower:
+            expr += self.punc0 + self.lower
+            if self.roman:
+                expr += self.punc1 + self.roman
         return expr
 
     def __repr__(self):

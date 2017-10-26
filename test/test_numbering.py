@@ -91,7 +91,8 @@ class NumberingFormatTest(unittest.TestCase):
 class NumberingIncrementTest(unittest.TestCase):
     """Test numbering increments."""
 
-    def test_number_increment(self):
+    def test_naive_number_increment(self):
+        """A naive test of incrementing."""
         num = numbering.Numbering('001')
         num.increment('^1')
         self.assertEqual(str(num), '002')
@@ -110,4 +111,20 @@ class NumberingIncrementTest(unittest.TestCase):
         num.increment('^1')
         self.assertEqual(str(num), '102')
 
+    def test_numbering_chain(self):
+        chains = (
+            (('001', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
+             ('001', '002', '003', '004', '004', '004', '005a', '005b')),
+            (('101', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
+             ('101', '102', '103', '104', '104', '104', '105a', '105b')),
+            (('101', '^1a',  '^a',   '^1',  '201', '<',   '^a',   '<' ),
+             ('101', '102a', '102b', '103', '201', '201', '201a', '201a')),
+        )
+        for chain, answers in chains:
+            context = numbering.NumberingContext()
+            for cmd, answer in zip(chain, answers):
+                context.next(cmd)
+                num_now = str(context.numbers[-1])
+                msg = 'Mistake on chain {}'.format(chain)
+                self.assertEqual(num_now, answer)
 

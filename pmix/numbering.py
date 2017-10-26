@@ -26,7 +26,7 @@ Resume a previous section with the '*' symbol.
     - '*A^A'
     - '*001^1'
 
-One time questions are marked with a '#'.
+Sticky questions are marked with a '#'.
 
     - '#LCL_101'
 
@@ -49,43 +49,52 @@ PUNCTUATION = tuple(':-)._')
 
 
 class NumberingContext:
+    """Class to represent the context in which numbering occurs."""
 
     def __init__(self):
-        self.cmds = []
+        """Initialize the numbering context with empty values."""
+        self.stream = []
         self.numbers = []
         self.current_series = None
         self.all_series = {}
+        self.stickies = []
 
     def next(self, item):
-        self.cmds.append(item)
+        """Process the next item in the stream.
+
+        A stream includes commands and non-commands. Remember but do nothing
+        with the non-commands.
+        """
+        self.stream.append(item)
         try:
+            self.parse_cmd(item)
+        except ValueError:
             num = Numbering(item)
             self.current_series = num
             self.all_series[str(num)] = [num]
             self.numbers.append(num)
-        except ValueError:
-            if self.current_series is None:
-                # E.g. getting an increment without a number
-                raise
-            self.parse_cmd(item)
-            # Get last number and apply
 
     def parse_cmd(self, cmd):
+        """Parse a command in this miniature language."""
         if cmd.startswith('^'):
-            self.increment_cmd(cmd)
+            self.increment(cmd)
         elif cmd.startswith('<'):
             self.lookback(cmd)
+        elif cmd.startswith('#'):
+            self.sticky(cmd)
+        elif not cmd:
+            self.blank()
+        else:
+            raise ValueError(cmd)
 
-    def current_series_last(self, lookback=1):
-        last = self.all_series[str(self.current_series)][-lookback]
-        return last
-
-    def increment_cmd(self, cmd):
+    def increment(self, cmd):
+        """Parse an increment command and add the correct number."""
         new_num = copy.copy(self.current_series_last())
         new_num.increment(cmd)
         self.current_series_add(new_num)
 
     def lookback(self, cmd):
+        """Parse a lookback command and add the correct number."""
         if cmd == '<':
             lookback = 1
         else:
@@ -93,11 +102,41 @@ class NumberingContext:
         new_num = copy.copy(self.current_series_last(lookback))
         self.current_series_add(new_num)
 
+    def sticky(self, cmd):
+        """Parse a sticky number command and add the correct number."""
+        num_str = cmd[1:]
+        num = Numbering(num_str)
+        self.numbers.append(num)
+        self.stickies.append(num)
+
+    def blank(self):
+        """Parse an empty command."""
+        self.numbers.append(None)
+
     def current_series_add(self, num):
+        """Add a number to the current series."""
         self.all_series[str(self.current_series)].append(num)
         self.numbers.append(num)
 
+    def current_series_last(self, lookback=1):
+        """Return the number in the current series starting from the back."""
+        last = self.all_series[str(self.current_series)][-lookback]
+        return last
+
+    def string_iter(self):
+        """Yield each number as a string."""
+        for item in self:
+            if item:
+                yield str(item)
+            else:
+                yield ''
+
+    def filtered_iter(self):
+        """Return an iterator that skips the non-number entries."""
+        return iter(filter(None, self.numbers))
+
     def __iter__(self):
+        """Return an iterator over all entries, including the None's."""
         return iter(self.numbers)
 
     def is_numbering(self, item):
@@ -142,6 +181,7 @@ class Numbering:
             self.set(numbering)
 
     def reset(self):
+        """Set all components of the numbering to empty string."""
         self.upper = ''
         self.leader = ''
         self.number = ''
@@ -182,6 +222,7 @@ class Numbering:
             self.punc0 = ''
 
     def increment(self, cmd):
+        """Increment a number based on an increment command."""
         sub_cmds = list(cmd)
         if sub_cmds.pop(0) != '^':
             msg = 'Bad increment "{}". Must start with "^"'.format(cmd)
@@ -256,7 +297,7 @@ class Numbering:
 
     def __str__(self):
         """Convert the numbering to a string."""
-        expr = self.upper + self.number
+        expr = self.upper + self.leader + self.number
         if self.lower:
             expr += self.punc0 + self.lower
             if self.roman:
@@ -266,4 +307,3 @@ class Numbering:
     def __repr__(self):
         """Return the repr of this numbering."""
         return 'Numbering("{}")'.format(str(self))
-

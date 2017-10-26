@@ -111,20 +111,63 @@ class NumberingIncrementTest(unittest.TestCase):
         num.increment('^1')
         self.assertEqual(str(num), '102')
 
-    def test_numbering_chain(self):
-        chains = (
-            (('001', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
-             ('001', '002', '003', '004', '004', '004', '005a', '005b')),
-            (('101', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
-             ('101', '102', '103', '104', '104', '104', '105a', '105b')),
-            (('101', '^1a',  '^a',   '^1',  '201', '<',   '^a',   '<' ),
-             ('101', '102a', '102b', '103', '201', '201', '201a', '201a')),
-        )
+    def compare_chains(self, chains):
+        """Compare commands to answers in batches."""
         for chain, answers in chains:
             context = numbering.NumberingContext()
             for cmd, answer in zip(chain, answers):
                 context.next(cmd)
                 num_now = str(context.numbers[-1])
                 msg = 'Mistake on chain {}'.format(chain)
-                self.assertEqual(num_now, answer)
+                self.assertEqual(num_now, answer, msg=msg)
 
+    def compare_chains_entirely(self, chains):
+        """Compare chains in their entirety."""
+        for chain, answers in chains:
+            context = numbering.NumberingContext()
+            for cmd in chain:
+                context.next(cmd)
+            results = tuple(context.string_iter())
+            self.assertEqual(results, answers)
+
+    def test_increment_lookback(self):
+        """Increment and lookback operators and their interplay."""
+        chains = (
+            (('001', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
+             ('001', '002', '003', '004', '004', '004', '005a', '005b')),
+
+            (('101', '^1',  '^1',  '^1',  '<',   '<',   '^1a',  '^a'),
+             ('101', '102', '103', '104', '104', '104', '105a', '105b')),
+
+            (('101', '^1a',  '^a',   '^1',  '201', '<',   '^a',   '<' ),
+             ('101', '102a', '102b', '103', '201', '201', '201a', '201a')),
+
+            (('323a', '^a',   '<2',   '<2'),
+             ('323a', '323b', '323a', '323b')),
+        )
+        self.compare_chains(chains)
+
+    def test_sticky(self):
+        """Sticky operator correctness."""
+        chains = (
+            (('PHC101', '^1',     '#LCL_301', '^1'),
+             ('PHC101', 'PHC102', 'LCL_301',  'PHC103')),
+
+            (('BF012', '^1',    '#NS012', '^1'),
+             ('BF012', 'BF013', 'NS012',  'BF014')),
+
+            (('001a', '#099', '101a'),
+             ('001a', '099',  '101a'))
+        )
+        self.compare_chains(chains)
+
+    def test_blanks(self):
+        """Blanks mixed in with commands."""
+        chains = (
+            (('', '001a', '', '^1'),
+             ('', '001a', '', '002')),
+
+            (('PHC_101', '^a',       '', '#LCL_100', '', '^1'),
+             ('PHC_101', 'PHC_101a', '', 'LCL_100',  '', 'PHC_102'))
+        )
+        self.compare_chains_entirely(chains)

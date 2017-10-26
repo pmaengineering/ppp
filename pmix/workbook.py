@@ -15,18 +15,19 @@ from pmix.worksheet import Worksheet
 class Workbook:
     """Class to represent an Excel file."""
 
-    def __init__(self, path):
+    def __init__(self, path, stripstr=True):
         """Initialize by storing data from spreadsheet.
 
         Args:
             path (str): The path where to find the Excel file
+            stripstr (bool): Remove trailing / leading whitespace from text?
         """
         self.file = path
         self.data = []
 
         ext = os.path.splitext(path)[1]
         if ext in ('.xls', '.xlsx'):
-            self.data = self.data_from_excel(path)
+            self.data = self.data_from_excel(path, stripstr)
         else:
             msg = 'Unsupported file type. Extension: "{}"'.format(ext)
             raise TypeError(msg)
@@ -156,9 +157,9 @@ def remove_extra_whitespace(inpath, outpath):
 
     Args:
         inpath (str): The path where to find the source file.
-        outpath (str): The path where to write the CSV
+        outpath (str): The path where to write the new xlsxfile.
     """
-    wb = Workbook(inpath)
+    wb = Workbook(inpath, stripstr=False)
     for cell in wb.cell_iter():
         old_value = str(cell)
         new_value = utils.clean_string(old_value)
@@ -187,7 +188,7 @@ def workbook_cli():
     prog_desc = 'Utilities for workbooks, depending on the options provided'
     parser = argparse.ArgumentParser(description=prog_desc)
 
-    file_help = 'Path to source XLSForms containing translations.'
+    file_help = 'Path to source workbook.'
     parser.add_argument('xlsxfile', help=file_help)
 
     ws_help = ('Remove trailing and leading whitespace of text and newlines.')

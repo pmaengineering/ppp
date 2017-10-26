@@ -26,6 +26,14 @@ class Cell:
         """Test whether cell is blank."""
         return self.value is None or self.value == ''
 
+    def set_highlight(self, color='HL_YELLOW'):
+        """Highlight this cell.
+
+        Args:
+            color (str): The highlight color
+        """
+        self.highlight = color
+
     def __bool__(self):
         """Get truthiness of the cell.
 
@@ -89,28 +97,38 @@ class Cell:
             int_val = int(cell.value)
             value = int_val if int_val == cell.value else cell.value
         elif cell.ctype == xlrd.XL_CELL_DATE:
-            if datemode is None:
-                # set to modern Excel
-                datemode = 1
-            date_tuple = xlrd.xldate_as_tuple(cell.value, datemode)
-            if date_tuple[:3] == (0, 0, 0):
-                # must be time only
-                value = datetime.time(*date_tuple[3:])
-            elif date_tuple[3:] == (0, 0, 0):
-                # must be date only
-                # pylint: disable=redefined-variable-type
-                value = datetime.date(*date_tuple[:3])
-            else:
-                value = datetime.datetime(*date_tuple)
+            value = Cell.parse_datetime(cell.value, datemode)
         elif cell.ctype == xlrd.XL_CELL_ERROR:
             msg = 'Error cell found. Please correct or erase error cell from '\
                   'file and try again.\n\nError cells are likely to be one of'\
                   ' the following: #N/A, #NULL!, #DIV/0!, #VALUE!, #REF!, ' \
-                  '#NAME?, #NUM!, #GETTING_DATA'\
-                .format(cell.ctype, cell.value)
+                  '#NAME?, #NUM!, #GETTING_DATA'
             raise TypeError(msg)
         else:
             msg = 'Unhandled cell exception.\nType: {}\nValue: {}'\
                 .format(cell.ctype, cell.value)
             raise TypeError(msg)
+        return value
+
+    @staticmethod
+    def parse_datetime(value, datemode):
+        """Convert an xlrd cell value to a date time object.
+
+        Args:
+            value: The cell value
+            datemode (int): The date mode of the Excel workbook
+        """
+        if datemode is None:
+            # set to modern Excel
+            datemode = 1
+        date_tuple = xlrd.xldate_as_tuple(value, datemode)
+        if date_tuple[:3] == (0, 0, 0):
+            # must be time only
+            value = datetime.time(*date_tuple[3:])
+        elif date_tuple[3:] == (0, 0, 0):
+            # must be date only
+            # pylint: disable=redefined-variable-type
+            value = datetime.date(*date_tuple[:3])
+        else:
+            value = datetime.datetime(*date_tuple)
         return value

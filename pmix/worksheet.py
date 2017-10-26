@@ -76,10 +76,10 @@ class Worksheet:
         for i in range(sheet.nrows):
             try:
                 cur_row = [Cell.from_cell(c, datemode, stripstr) for c in
-                        sheet.row(i)]
+                           sheet.row(i)]
                 worksheet.data.append(cur_row)
-            except TypeError as e:
-                msg = 'Error in row {}: {}'.format(str(i+1), str(e))
+            except TypeError as err:
+                msg = 'Error in row {}: {}'.format(str(i+1), str(err))
                 raise TypeError(msg)
         return worksheet
 

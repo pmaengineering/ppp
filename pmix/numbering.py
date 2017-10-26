@@ -180,6 +180,7 @@ class Numbering:
         else:
             self.set(numbering)
 
+    # pylint: disable=attribute-defined-outside-init
     def reset(self):
         """Set all components of the numbering to empty string."""
         self.upper = ''

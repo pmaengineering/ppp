@@ -5,8 +5,8 @@ import re
 import xlsxwriter
 
 import pmix.utils as utils
-from pmix.workbook import Workbook
-from pmix.xlsform import Xlsform
+import pmix.workbook
+import pmix.xlsform
 
 
 class TranslationDict:
@@ -36,7 +36,8 @@ class TranslationDict:
             '.', ':', or ')' and then possibly whitespace.
     """
 
-    number_re = r'^\s*([A-Z]|(\S*\d+[.a-z]*))[.:)]\s+'
+    # TODO (jkp 2017-10-26): refactor out the string stripping to utils
+    # to break up cyclical import
     number_re = r"""
                 ^\s*                # Begin with possible whitespace.
                 (
@@ -79,9 +80,9 @@ class TranslationDict:
         Args:
             obj: A source object, either Xlsform or Workbook
         """
-        if isinstance(obj, Xlsform):
+        if isinstance(obj, pmix.xlsform.Xlsform):
             self.translations_from_xlsform(obj)
-        elif isinstance(obj, Workbook):
+        elif isinstance(obj, pmix.workbook.Workbook):
             self.translations_from_workbook(obj)
 
     def translations_from_xlsform(self, xlsform):
@@ -251,7 +252,7 @@ class TranslationDict:
         return all_languages
 
     def write_excel(self, path, others=None):
-        """Write data to an Excel spreadsheet.
+        """Write translation data to an Excel spreadsheet.
 
         An MS-Excel spreadsheet can easily handle unicode and entries with
         newlines. It also supports coloring to highlight missing data.

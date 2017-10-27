@@ -19,6 +19,7 @@
 
 import unittest
 
+import pmix.utils as utils
 from pmix.verbiage import TranslationDict
 
 
@@ -43,9 +44,8 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
             ('114c.d.i. My falsified question', '114c.d.i. '),
             ('411i. Post pregnancy usage', '411i. ')
         )
-        trans_dict = TranslationDict()
         for lab, num in yes_split:
-            number, dummy = trans_dict.split_text(lab)
+            number, dummy = utils.td_split_text(lab)
             msg = 'Found "{}", expected "{}"'.format(number, num)
             self.assertTrue(number == num, msg=msg)
 
@@ -66,9 +66,8 @@ class TranslationDictNumberSplitTest(unittest.TestCase):
             '',
             'sayana_150x300.jpg'
         )
-        trans_dict = TranslationDict()
         for lab in no_split:
-            number, dummy = trans_dict.split_text(lab)
+            number, dummy = utils.td_split_text(lab)
             msg = 'Number present in "{}"'.format(lab)
             self.assertTrue(number == '', msg=msg)
 

@@ -20,12 +20,12 @@ class NumberingFormatTest(unittest.TestCase):
 
     def test_upper_re(self):
         """Regex-ify uppercase numbering."""
-        this_prog = numbering.Numbering.upper_prog
-        good = tuple('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        this_prog = numbering.Numbering.letter_prog
+        good = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         for item in good:
             self.match_re(this_prog, item, True)
 
-        bad_single = tuple('ÁÉae01')
+        bad_single = tuple('ÁÉ01')
         other_bad = ('', 'AA', 'A1', '1A', '_', '-', 'A.', ' A', 'A ')
         for item in itertools.chain(bad_single, other_bad):
             self.match_re(this_prog, item, False)
@@ -68,6 +68,7 @@ class NumberingFormatTest(unittest.TestCase):
     def test_decompose(self):
         """Decompose numbering."""
         answers = (
+            ('a', 'a', '', '', '', '', '', ''),
             ('A', 'A', '', '', '', '', '', ''),
             ('001', '', '', '001', '', '', '', ''),
             ('001a', '', '', '001', '', 'a', '', ''),
@@ -77,16 +78,16 @@ class NumberingFormatTest(unittest.TestCase):
             ('FLW801', '', 'FLW', '801', '', '', '', ''),
             ('LCL_101', '', 'LCL_', '101', '', '', '', '')
         )
-        for expr, upper, leader, number, punc0, lower, punc1, roman in answers:
+        for expr, let, lead, number, p0, low, p1, rom in answers:
             msg = 'Working with "{}"'.format(expr)
             num = numbering.Numbering(expr)
-            self.assertEqual(upper, num.upper, msg=msg)
-            self.assertEqual(leader, num.leader, msg=msg)
+            self.assertEqual(let, num.letter, msg=msg)
+            self.assertEqual(lead, num.leader, msg=msg)
             self.assertEqual(number, num.number, msg=msg)
-            self.assertEqual(punc0, num.punc0, msg=msg)
-            self.assertEqual(lower, num.lower, msg=msg)
-            self.assertEqual(punc1, num.punc1, msg=msg)
-            self.assertEqual(roman, num.roman, msg=msg)
+            self.assertEqual(p0, num.punc0, msg=msg)
+            self.assertEqual(low, num.lower, msg=msg)
+            self.assertEqual(p1, num.punc1, msg=msg)
+            self.assertEqual(rom, num.roman, msg=msg)
 
 class NumberingIncrementTest(unittest.TestCase):
     """Test numbering increments."""
@@ -147,6 +148,17 @@ class NumberingIncrementTest(unittest.TestCase):
         )
         self.compare_chains(chains)
 
+    def test_letter_increment(self):
+        """Increment upper and lower case letters."""
+        chains = (
+            (('A', '^A', '^A'),
+             ('A', 'B',  'C')),
+
+            (('a', '^a', '^a'),
+             ('a', 'b',  'c'))
+        )
+        self.compare_chains(chains)
+
     def test_sticky(self):
         """Sticky operator correctness."""
         chains = (
@@ -180,5 +192,16 @@ class NumberingIncrementTest(unittest.TestCase):
 
             (('~PHC100', '', '^1a',     '^a'),
              ('',        '', 'PHC101a', 'PHC101b'))
+        )
+        self.compare_chains_entirely(chains)
+
+    def test_resume(self):
+        """Resume previous series."""
+        chains = (
+            (('PHC101', 'a', '^a', '*^1a'),
+             ('PHC101', 'a', 'b',  'PHC102a')),
+
+            (('~000', '^1',  'a', '^a', '*<'),
+             ('',     '001', 'a', 'b',  '001'))
         )
         self.compare_chains_entirely(chains)

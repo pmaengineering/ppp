@@ -4,8 +4,8 @@ import argparse
 import os.path
 
 from pmix.numbering import NumberingContext
+import pmix.utils as utils
 from pmix.xlstab import Xlstab
-import pmix.verbiage
 from pmix.workbook import Workbook
 
 
@@ -127,7 +127,6 @@ def compute_prepend_numbers(inpath, col, outpath):
     xlsform = Xlsform(inpath)
     survey = xlsform['survey']
     context = NumberingContext()
-    td_split_text = pmix.verbiage.TranslationDict.split_text
     for cell in survey.column(col):
         context.next(str(cell))
     for i, header in enumerate(survey.column_headers()):
@@ -138,13 +137,13 @@ def compute_prepend_numbers(inpath, col, outpath):
                     header_skipped = True
                     continue
                 if num:
-                    cell_num, the_rest = td_split_text(str(cell))
+                    cell_num, the_rest = utils.td_split_text(str(cell))
                     new_text = '. '.join((num, the_rest))
                     cell.value = new_text
                     if not cell_num:
                         cell.set_highlight()
                 elif cell:
-                    cell_num, the_rest = td_split_text(str(cell))
+                    cell_num, the_rest = utils.td_split_text(str(cell))
                     if cell_num:
                         cell.value = the_rest
                         cell.set_highlight()

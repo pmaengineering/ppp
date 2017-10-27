@@ -1,4 +1,65 @@
-"""Useful functions for PMIX."""
+"""Useful string functions for PMIX."""
+
+import re
+
+
+NUMBER_RE = r"""
+            ^\s*                # Begin with possible whitespace.
+            (
+                [a-zA-Z]        # Start with a letter
+            |
+                (
+                    \S*         # or start with non-whitespace and
+                    \d+         # one or more numbers, then possibly
+                    [.a-z]*     # dots (.) and lower-case letters
+                )
+            )
+            [.:)]               # Always end with one of '.', ':', ')' and
+            \s+                 # finally whitespace
+            """
+
+
+# pylint: disable=no-member
+NUMBER_PROG = re.compile(NUMBER_RE, re.VERBOSE)
+
+
+def td_clean_string(text):
+    """Clean a string for a translation dictionary.
+
+    Removes extra whitespace and a number if found.
+
+    Args:
+        text (str): String to be cleaned.
+
+    Returns:
+        String with extra whitespace and leading number (if found) removed.
+    """
+    text = clean_string(text)
+    _, text = td_split_text(text)
+    return text
+
+
+def td_split_text(text):
+    """Split text into a number and the rest.
+
+    This splitting is done using the regex program `NUMBER_PROG`.
+
+    Args:
+        text (str): String to split
+
+    Returns:
+        A tuple `(number, the_rest)`. The original string is `number +
+        the_rest`. If no number is found with the regex, then `number` is
+        '', the empty string.
+    """
+    number = ''
+    the_rest = text
+    if len(text.split()) > 1:
+        match = NUMBER_PROG.match(text)
+        if match:
+            number = text[match.span()[0]:match.span()[1]]
+            the_rest = text[match.span()[1]:]
+    return number, the_rest
 
 
 def clean_string(text):
@@ -20,6 +81,7 @@ def clean_string(text):
     text = newline_space_fix(text)
     return text
 
+
 def newline_space_fix(text):
     """Replace "newline-space" with "newline".
 
@@ -37,6 +99,7 @@ def newline_space_fix(text):
     while newline_space in text:
         text = text.replace(newline_space, fix)
     return text
+
 
 def space_newline_fix(text):
     """Replace "space-newline" with "newline".

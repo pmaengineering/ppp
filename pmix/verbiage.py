@@ -1,6 +1,5 @@
 """Module for capturing translations from XLSForms."""
 import logging
-import re
 
 import xlsxwriter
 
@@ -35,25 +34,6 @@ class TranslationDict:
             'LCL_010. '. Currently (10/5/2016) numbering scheme must end with
             '.', ':', or ')' and then possibly whitespace.
     """
-
-    # TODO (jkp 2017-10-26): refactor out the string stripping to utils
-    # to break up cyclical import
-    number_re = r"""
-                ^\s*                # Begin with possible whitespace.
-                (
-                    [A-Z]           # Start with a capital letter
-                |
-                    (
-                        \S*         # or start with non-whitespace and
-                        \d+         # one or more numbers, then possibly
-                        [.a-z]*     # dots (.) and lower-case letters
-                    )
-                )
-                [.:)]               # Always end with '.' ':' ')' and
-                \s+                 # whitespace
-                """
-    # pylint: disable=no-member
-    number_prog = re.compile(number_re, re.VERBOSE)
 
     def __init__(self, src=None, base='English'):
         """Initialize a translation dictionary.
@@ -152,8 +132,8 @@ class TranslationDict:
                 other metadata.
             lang (str): String name of other language
         """
-        cleaned_src = self.clean_string(src)
-        cleaned_other = self.clean_string(str(other['cell']))
+        cleaned_src = utils.td_clean_string(src)
+        cleaned_other = utils.td_clean_string(str(other['cell']))
         other['translation'] = cleaned_other
         try:
             this_dict = self.data[cleaned_src]
@@ -209,8 +189,8 @@ class TranslationDict:
             String in other language that is a translation of `src`. This
             string also has the same numbering as `src`.
         """
-        number, _ = self.split_text(src)
-        src = self.clean_string(src)
+        number, _ = utils.td_split_text(src)
+        src = utils.td_clean_string(src)
         clean_translation = self.get_translation(src, lang)
         numbered_translation = number + clean_translation
         return numbered_translation
@@ -281,36 +261,6 @@ class TranslationDict:
                 except KeyError:
                     # Missing information is highlighted
                     ws.write(i + 1, j + 1, '', red_background)
-
-    @staticmethod
-    def clean_string(text):
-        """Clean a string."""
-        text = utils.clean_string(text)
-        _, text = TranslationDict.split_text(text)
-        return text
-
-    @staticmethod
-    def split_text(text):
-        """Split text into a number and the rest.
-
-        This splitting is done using the regex attribute `number_prog`.
-
-        Args:
-            text (str): String to split
-
-        Returns:
-            A tuple `(number, the_rest)`. The original string is `number +
-            the_rest`. If no number is found with the regex, then `number` is
-            '', the empty string.
-        """
-        number = ''
-        the_rest = text
-        if len(text.split()) > 1:
-            match = TranslationDict.number_prog.match(text)
-            if match:
-                number = text[match.span()[0]:match.span()[1]]
-                the_rest = text[match.span()[1]:]
-        return number, the_rest
 
     def __str__(self):
         """Return a string representation of the data."""

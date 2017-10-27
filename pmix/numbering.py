@@ -3,6 +3,7 @@
 Start a section with a fixed number. Examples are:
 
     - A
+    - a
     - 001
     - 200
     - Q320
@@ -28,8 +29,9 @@ Keep the same as previous numbers in the same series with the lookback symbol
     - '<'
     - '<3'
 
-Resume a previous section with the '*' symbol.
+Resume a previous section with the '*' symbol. '*' alone refers to one previous
 
+    - '*^1'
     - '*A^A'
     - '*001^1'
 
@@ -62,6 +64,7 @@ class NumberingContext:
         """Initialize the numbering context with empty values."""
         self.stream = []
         self.numbers = []
+        self.prev_series = None
         self.current_series = None
         self.all_series = {}
         self.stickies = []
@@ -92,7 +95,7 @@ class NumberingContext:
         elif cmd.startswith('>'):
             raise RuntimeError('">" not yet implemented')
         elif cmd.startswith('*'):
-            raise RuntimeError('"*" not yet implemented')
+            self.resume(cmd)
         elif not cmd:
             self.blank()
         else:
@@ -128,6 +131,15 @@ class NumberingContext:
         num = Numbering.init_silent(num_str)
         self.new_series_add(num)
 
+    def resume(self, cmd):
+        """Resume a previous series."""
+        if cmd[1] in '<^':
+            tmp = self.current_series
+            self.current_series = self.prev_series
+            self.prev_series = tmp
+            self.parse_cmd(cmd[1:])
+        else:
+            raise RuntimeError('"*NUM" not yet implemented')
     def blank(self):
         """Parse an empty command."""
         self.numbers.append(None)
@@ -139,6 +151,7 @@ class NumberingContext:
 
     def new_series_add(self, num):
         """Add a number to start a new series."""
+        self.prev_series = self.current_series
         self.current_series = num
         self.all_series[str(num)] = [num]
         self.numbers.append(num)
@@ -164,10 +177,8 @@ class NumberingContext:
         """Return an iterator over all entries, including the None's."""
         return iter(self.numbers)
 
-    def is_numbering(self, item):
-        """Return true if the item is numbering."""
-        pass
 
+# pylint: disable=too-many-instance-attributes
 class Numbering:
     """Class to represent a numbering object.
 
@@ -185,7 +196,7 @@ class Numbering:
       + 201a.i
     """
 
-    upper_re = r'^[A-Z]$'
+    letter_re = r'^[a-zA-Z]$'
     number_re = r'^([^\s\d~<>@^#*]*)(\d+)$'
     punc_re = r'([:\-)._])'
     ext_letter_re = r'^([^\s\d~<>@^#*]*)(\d+){}?([a-z])$'.format(punc_re)
@@ -193,7 +204,7 @@ class Numbering:
     ext_roman_re = r'^([^\s\d~<>@^#*]*)(\d+){}?([a-z]){}{}$'
     ext_roman_re = ext_roman_re.format(punc_re, punc_re, roman_re)
 
-    upper_prog = re.compile(upper_re)
+    letter_prog = re.compile(letter_re)
     number_prog = re.compile(number_re)
     ext_roman_prog = re.compile(ext_roman_re)
     ext_letter_prog = re.compile(ext_letter_re)
@@ -208,6 +219,7 @@ class Numbering:
 
     @classmethod
     def init_silent(cls, numbering=None):
+        """Create and return a silent Numbering."""
         num = cls(numbering)
         num.silent = True
         return num
@@ -215,7 +227,7 @@ class Numbering:
     # pylint: disable=attribute-defined-outside-init
     def reset(self):
         """Set all components of the numbering to empty string."""
-        self.upper = ''
+        self.letter = ''
         self.leader = ''
         self.number = ''
         self.punc0 = ''
@@ -227,12 +239,12 @@ class Numbering:
         """Take input numbering and break apart incrementable components."""
         self.reset()
 
-        upper_match = self.upper_prog.match(numbering)
+        letter_match = self.letter_prog.match(numbering)
         number_match = self.number_prog.match(numbering)
         ext_roman_match = self.ext_roman_prog.match(numbering)
         ext_letter_match = self.ext_letter_prog.match(numbering)
-        if upper_match:
-            self.upper = numbering
+        if letter_match:
+            self.letter = numbering
         elif number_match:
             self.leader = number_match.group(1)
             self.number = number_match.group(2)
@@ -265,25 +277,31 @@ class Numbering:
                 self.increase_number(item)
             elif item in ('i', 'v', 'x'):
                 self.increase_roman(item)
-            elif item.islower():
+            elif self.letter and item.isalpha():
+                self.increase_letter(item)
+            elif item.islower(): # and not self.letter
                 self.increase_lower(item)
-            elif item.isupper():
-                self.increase_upper(item)
             else:
                 msg = 'Bad increment "{}". Must be A, 1, a, or i.'.format(cmd)
 
 
-    def increase_upper(self, upper):
-        """Increase an upper by a specified amount.
+    def increase_letter(self, letter):
+        """Increase a letter by a specified amount.
 
         Args:
-            upper (str): A single upper case letter
+            letter (str): A single letter
         """
-        cur_index = UPPER_LETTERS.index(self.upper)
-        delta_index = UPPER_LETTERS.index(upper) + 1
-        new_upper = UPPER_LETTERS[cur_index + delta_index]
-        self.upper = new_upper
-
+        if letter.isupper():
+            cur_index = UPPER_LETTERS.index(self.letter)
+            delta_index = UPPER_LETTERS.index(letter) + 1
+            new_letter = UPPER_LETTERS[cur_index + delta_index]
+            self.letter = new_letter
+        else:
+            # Assume lower case
+            cur_index = LOWER_LETTERS.index(self.letter)
+            delta_index = LOWER_LETTERS.index(letter) + 1
+            new_letter = LOWER_LETTERS[cur_index + delta_index]
+            self.letter = new_letter
 
     def increase_number(self, increment):
         """Increase a number by an increment.
@@ -305,7 +323,7 @@ class Numbering:
         """Increase an lower by a specified amount.
 
         Args:
-            upper (str): A single lower case letter
+            lower (str): A single lower case letter
         """
         cur_index = LOWER_LETTERS.index(self.lower) if self.lower else -1
         delta_index = LOWER_LETTERS.index(lower) + 1
@@ -316,7 +334,7 @@ class Numbering:
         """Increase an roman by a specified amount.
 
         Args:
-            upper (str): A single roman numeral
+            roman (str): A single roman numeral
         """
         if not self.lower:
             msg = 'Cannot increase roman numeral without lower case letter'
@@ -337,7 +355,7 @@ class Numbering:
 
     def __str__(self):
         """Convert the numbering to a string."""
-        expr = self.upper + self.leader + self.number
+        expr = self.letter + self.leader + self.number
         if self.lower:
             expr += self.punc0 + self.lower
             if self.roman:

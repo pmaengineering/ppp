@@ -7,6 +7,13 @@ Start a section with a fixed number. Examples are:
     - 200
     - Q320
 
+Enter a silenced fixed number with '~'. This is useful to start a series
+without numbering.
+
+    - ~A
+    - ~000
+    - ~Q300
+
 Increment with special strings starting with '^'.
 
     - '^1'
@@ -70,9 +77,7 @@ class NumberingContext:
             self.parse_cmd(item)
         except ValueError:
             num = Numbering(item)
-            self.current_series = num
-            self.all_series[str(num)] = [num]
-            self.numbers.append(num)
+            self.new_series_add(num)
 
     def parse_cmd(self, cmd):
         """Parse a command in this miniature language."""
@@ -82,6 +87,12 @@ class NumberingContext:
             self.lookback(cmd)
         elif cmd.startswith('#'):
             self.sticky(cmd)
+        elif cmd.startswith('~'):
+            self.silent(cmd)
+        elif cmd.startswith('>'):
+            raise RuntimeError('">" not yet implemented')
+        elif cmd.startswith('*'):
+            raise RuntimeError('"*" not yet implemented')
         elif not cmd:
             self.blank()
         else:
@@ -90,6 +101,7 @@ class NumberingContext:
     def increment(self, cmd):
         """Parse an increment command and add the correct number."""
         new_num = copy.copy(self.current_series_last())
+        new_num.silent = False
         new_num.increment(cmd)
         self.current_series_add(new_num)
 
@@ -100,6 +112,7 @@ class NumberingContext:
         else:
             lookback = int(cmd[1:])
         new_num = copy.copy(self.current_series_last(lookback))
+        new_num.silent = False
         self.current_series_add(new_num)
 
     def sticky(self, cmd):
@@ -108,6 +121,12 @@ class NumberingContext:
         num = Numbering(num_str)
         self.numbers.append(num)
         self.stickies.append(num)
+
+    def silent(self, cmd):
+        """Parse a silent fixed number command and add to the list."""
+        num_str = cmd[1:]
+        num = Numbering.init_silent(num_str)
+        self.new_series_add(num)
 
     def blank(self):
         """Parse an empty command."""
@@ -118,16 +137,22 @@ class NumberingContext:
         self.all_series[str(self.current_series)].append(num)
         self.numbers.append(num)
 
+    def new_series_add(self, num):
+        """Add a number to start a new series."""
+        self.current_series = num
+        self.all_series[str(num)] = [num]
+        self.numbers.append(num)
+
     def current_series_last(self, lookback=1):
         """Return the number in the current series starting from the back."""
         last = self.all_series[str(self.current_series)][-lookback]
         return last
 
     def string_iter(self):
-        """Yield each number as a string."""
+        """Yield each number as a string for numbering."""
         for item in self:
             if item:
-                yield str(item)
+                yield item.to_string()
             else:
                 yield ''
 
@@ -161,11 +186,11 @@ class Numbering:
     """
 
     upper_re = r'^[A-Z]$'
-    number_re = r'^([^\s\d<>@^#*]*)(\d+)$'
+    number_re = r'^([^\s\d~<>@^#*]*)(\d+)$'
     punc_re = r'([:\-)._])'
-    ext_letter_re = r'^([^\s\d<>@^#*]*)(\d+){}?([a-z])$'.format(punc_re)
+    ext_letter_re = r'^([^\s\d~<>@^#*]*)(\d+){}?([a-z])$'.format(punc_re)
     roman_re = r'(i{1,3}|iv|v|vi{1,3}|ix|x)'
-    ext_roman_re = r'^([^\s\d<>@^#*]*)(\d+){}?([a-z]){}{}$'
+    ext_roman_re = r'^([^\s\d~<>@^#*]*)(\d+){}?([a-z]){}{}$'
     ext_roman_re = ext_roman_re.format(punc_re, punc_re, roman_re)
 
     upper_prog = re.compile(upper_re)
@@ -175,10 +200,17 @@ class Numbering:
 
     def __init__(self, numbering=None):
         """Take input numbering and break apart incrementable components."""
+        self.silent = False
         if numbering is None:
             self.reset()
         else:
             self.set(numbering)
+
+    @classmethod
+    def init_silent(cls, numbering=None):
+        num = cls(numbering)
+        num.silent = True
+        return num
 
     # pylint: disable=attribute-defined-outside-init
     def reset(self):
@@ -296,6 +328,13 @@ class Numbering:
         new_roman = ROMAN_NUMERALS[cur_index + delta_index]
         self.roman = new_roman
 
+    def to_string(self):
+        """Convert to string for use in numbering."""
+        if self.silent:
+            return ''
+        else:
+            return str(self)
+
     def __str__(self):
         """Convert the numbering to a string."""
         expr = self.upper + self.leader + self.number
@@ -303,6 +342,8 @@ class Numbering:
             expr += self.punc0 + self.lower
             if self.roman:
                 expr += self.punc1 + self.roman
+        if self.silent:
+            expr = '~' + expr
         return expr
 
     def __repr__(self):

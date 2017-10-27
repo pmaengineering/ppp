@@ -117,7 +117,7 @@ class NumberingIncrementTest(unittest.TestCase):
             context = numbering.NumberingContext()
             for cmd, answer in zip(chain, answers):
                 context.next(cmd)
-                num_now = str(context.numbers[-1])
+                num_now = context.numbers[-1].to_string()
                 msg = 'Mistake on chain {}'.format(chain)
                 self.assertEqual(num_now, answer, msg=msg)
 
@@ -169,5 +169,16 @@ class NumberingIncrementTest(unittest.TestCase):
 
             (('PHC_101', '^a',       '', '#LCL_100', '', '^1'),
              ('PHC_101', 'PHC_101a', '', 'LCL_100',  '', 'PHC_102'))
+        )
+        self.compare_chains_entirely(chains)
+
+    def test_silent(self):
+        """Silent numbers."""
+        chains = (
+            (('', '~000', '^1',  '^1a'),
+             ('', '',     '001', '002a')),
+
+            (('~PHC100', '', '^1a',     '^a'),
+             ('',        '', 'PHC101a', 'PHC101b'))
         )
         self.compare_chains_entirely(chains)

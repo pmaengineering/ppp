@@ -25,15 +25,13 @@ def run(in_file, language=None, out_file=None, **kwargs):
     """
     form = OdkForm.from_file(in_file)
 
-
-
     try:
         output = None
         output_format = kwargs['output_format']
         if output_format == 'text':
-            output = form.to_text(language=language, **kwargs)
+            output = form.to_text(lang=language, **kwargs)
         elif output_format in ('html', 'doc') or not output_format:
-            output = form.to_html(language=language, **kwargs)
+            output = form.to_html(lang=language, **kwargs)
         if out_file:
             with open(out_file, mode='w', encoding='utf-8') as file:
                 file.write(output)

@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Common executional entry point from interfaces."""
+"""
+About PPP
+PPP is a tool that converts ODK XlsForm specification .xlsx Excel files to more
+human-readable, printable formats, commonly called "paper questionnaires".
+
+Officially, PPP stands for "Pretty PDF Printer", but other formats are
+supported (see: the `--format` option described in the "CLI How-to").
+
+PPP Web Application
+- Convert XlsForms online: http://ppp.pma2020.org
+- Github: https://github.com/pma-2020/ppp-web
+
+Functions
+- run: Common executional entry point from interfaces.
+"""
 from signal import signal, SIGPIPE, SIG_DFL
 
 from pmix.ppp.definitions.error import OdkException, InvalidLanguageException

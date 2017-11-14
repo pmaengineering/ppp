@@ -1,4 +1,8 @@
-v0.2.1, ??????
+v0.2.1, 14 November 2017
+ * Workbook and Xlsform classes for modeling Excel files
+ * PPP sub-package to convert an ODK form to PDF and HTML
+ * Various utilities: cascade, sheet-to-csv, analytics, numbering
+ * Qlang removed
  * Added unit tests
 
 v0.2.0, 5 October 2016

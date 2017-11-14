@@ -1,6 +1,7 @@
 """Module defines a Workbook class to represent Excel files."""
 
 import itertools
+import copy
 import os.path
 import argparse
 
@@ -86,7 +87,7 @@ class Workbook:
             ws = wb.add_worksheet(worksheet.name)
             for i, line in enumerate(worksheet):
                 for j, cell in enumerate(line):
-                    this_value = str(cell.value) if strings else cell.value
+                    this_value = str(cell) if strings else cell.value
                     # TODO: If more complicated formats, then use a lookup
                     if cell.highlight is None:
                         this_format = None
@@ -97,6 +98,10 @@ class Workbook:
                         ws.write(i, j, this_value)
                     else:
                         ws.write(i, j, this_value, this_format)
+
+    def copy(self):
+        """Make a deep copy of this workbook."""
+        return copy.deepcopy(self)
 
     @staticmethod
     def data_from_excel(path, stripstr=True):

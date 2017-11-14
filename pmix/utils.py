@@ -115,3 +115,23 @@ def space_newline_fix(text):
     while space_newline in text:
         text = text.replace(space_newline, fix)
     return text
+
+
+def show_whitespace(text):
+    """Replace whitespace characters with unicode.
+
+    Args:
+        text (str): The string to work with
+
+    Returns:
+        The text with the whitespace now visible.
+    """
+    text = text.replace('\r\n', '\n')
+    text = text.replace('\r', '\n')
+    # Middle dot
+    text = text.replace(' ', '\u00b7')
+    # Small right triangle
+    text = text.replace('\t', '\u25b8')
+    # Downwards arrow with corner leftwards
+    text = text.replace('\n', '\u21b5')
+    return text

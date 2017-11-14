@@ -26,6 +26,21 @@ class Cell:
         """Test whether cell is blank."""
         return self.value is None or self.value == ''
 
+    def equals(self, other, whitespace=True):
+        """Return string equality of the two cells.
+
+        Args:
+            other (Cell): The other cell
+            whitespace (bool): If False, give equality disregarding whitespace
+        """
+        if whitespace:
+            return str(self) == str(other)
+        else:
+            this_str = ''.join(str(self).split())
+            other_str = ''.join(str(other).split())
+            return this_str == other_str
+
+
     def set_highlight(self, color='HL_YELLOW'):
         """Highlight this cell.
 
@@ -42,6 +57,13 @@ class Cell:
         """
         return bool(self.value)
 
+    def __eq__(self, other):
+        """Define equality comparison for Cells."""
+        if isinstance(other, Cell):
+            return self.value == other.value
+        else:
+            return False
+
     def __str__(self):
         """Return unicode representation of cell."""
         if self.value is None:
@@ -50,7 +72,7 @@ class Cell:
 
     def __repr__(self):
         """Return a representation of the cell."""
-        msg = '<Cell(value="{}")>'.format(self.value)
+        msg = '<Cell(value={!r})>'.format(self.value)
         return msg
 
     @classmethod

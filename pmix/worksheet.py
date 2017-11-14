@@ -180,31 +180,69 @@ class Worksheet:
                 }
                 yield base_data, other_data
 
-    def column(self, key):
+    def column_key(self, key):
+        """Return a list of integers corresponding to the input.
+
+        Args:
+            key (list, str, or int): Str for lookup by name, int for lookup by
+                index, or a list of those.
+
+        Returns:
+            A list of integers.
+        """
+        column_headers = self.column_headers()
+        if isinstance(key, str) or isinstance(key, int):
+            key = [key]
+        result = []
+        for item in key:
+            if isinstance(item, str):
+                try:
+                    col = column_headers.index(item)
+                    result.append(col)
+                except ValueError:
+                    raise KeyError(item)
+            elif isinstance(item, int):
+                result.append(item)
+            else:
+                raise TypeError(key)
+        return result
+
+    def column(self, key, start=0):
         """Iterate over the desired column cell by cell.
 
         Args:
             key (str or int): Str for lookup by name, int for lookup by index
+            start (int): The row to start iterating on
 
         Yields:
-            The cells in the requested column from the first row to the last
+            The cells in the requested column from the start row to the last
 
         Raises:
             ValueError: The supplied str does not match a column header
             IndexError: The supplied int is out of range
             TypeError: Neither str nor int is passed in as an argument
         """
-        if isinstance(key, str):
-            try:
-                col = self.column_headers().index(key)
-            except ValueError:
-                raise KeyError(key)
-        elif isinstance(key, int):
-            col = key
-        else:
-            raise TypeError(key)
+        cols = self.column_key(key)
+        col = cols[0]
         for row in self:
-            yield row[col]
+            if start <= 0:
+                yield row[col]
+            else:
+                start -= 1
+
+    def column_str(self, key, start=0):
+        """Iterate over the desired column cell by cell and return the string.
+
+        Args:
+            key (str or int): Str for lookup by name, int for lookup by index
+            start (int): The row to start iterating on
+
+        Yields:
+            The cell strings in the requested column from the start row to the
+            last
+        """
+        for cell in self.column(key, start):
+            yield str(cell)
 
     def to_csv(self, path, strings=True):
         """Write this Worksheet as a CSV.

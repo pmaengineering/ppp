@@ -6,9 +6,9 @@ on working with spreadsheets. The main features are the following:
 * _analytics_
 * _borrow_
 * _cascade_
+* _numbering_
 * _ppp_
 * _workbook_
-* _xlsform_
 
 Formerly `qlang`, this package has been renamed and expanded to provide new
 functionality and new command-line tools. The command line tools are described after installation.
@@ -86,6 +86,17 @@ python3 -m pmix.cascade FILE
 
 creates a new Excel spreadsheet after converting geographic identifiers from wide format to tall format.
 
+## Numbering
+
+Use the numbering mini-language and create question numbers for an ODK survey.
+
+```
+python3 -m pmix.numbering FILE
+```
+
+The program then looks for a column entitled "N" in the "survey" worksheet. It creates numbers based off of the
+directives there and adds them to label columns.
+
 ## PPP
 #### About PPP
 PPP is a tool that converts ODK XlsForm specification .xlsx Excel files to more human-readable, printable formats, commonly called "paper questionnaires".
@@ -102,7 +113,7 @@ PPP also exists on the web!
 | Argument | Description |
 |:---------|:------------|
 | xlsxfile |  Path to source XLSForm. |
-              
+
 ##### Options
 | Short Flag | Long Flag | Description |
 |:-----------|:----------|:------------|
@@ -118,14 +129,14 @@ PPP also exists on the web!
 | -c | --hr-constraint   | Adding this option will toggle display of human readable 'constraint' text, rather than the syntax- heavy codified logic of the original XlsForm.
 | -C | --no-constraint   | Adding this option will toggle removal of all constraints from the rendered form.
 | -t | --text-replacements | Adding this option will toggle text replacements as shown in the 'text_replacements' worksheet of the XlsForm. The most common function of text replacement is to render more human readable variable names, but can also be used to remove sensitive information, or add brevity / clarity where needed.
-| -p  | --preset | Select from a preset of bundled options. The 'developer' preset renders a form that is the most similar to the original XlsForm. The 'internal' preset is more human readable but is not stripped of sensitive information. The 'public' option is like the 'internal' option, only with sensitive information removed. Option usage: `-p {public,internal,developer,minimal}`. 
+| -p  | --preset | Select from a preset of bundled options. The 'developer' preset renders a form that is the most similar to the original XlsForm. The 'internal' preset is more human readable but is not stripped of sensitive information. The 'public' option is like the 'internal' option, only with sensitive information removed. Option usage: `-p {public,internal,developer,minimal}`.
 
 ##### Example Usage
-Print HTML converted XlsForm with default settings to the console:   
-`python -m  mix.ppp myXlsForm.xlsx`
+Print HTML converted XlsForm with default settings to the console:
+`python -m  pmix.ppp myXlsForm.xlsx`
 
-Convert an ODK Excel file to a MS Word-readable .doc file (is really HTML under the hood), with the preset of "minimal", and the language set to French:  
-`python -m  mix.ppp myXlsForm.xlsx -l Français -f doc -p minimal > myXlsForm.doc` 
+Convert an ODK Excel file to a MS Word-readable .doc file (is really HTML under the hood), with the preset of "minimal", and the language set to French:
+`python -m  pmix.ppp myXlsForm.xlsx -l Français -f doc -p minimal > myXlsForm.doc`
 
 ## Workbook
 
@@ -142,17 +153,6 @@ python3 -m pmix.workbook FILE -c SHEET
 ```
 python3 -m pmix.workbook FILE -w
 ```
-
-## Xlsform
-
-Use the numbering mini-language and create question numbers for an ODK survey.
-
-```
-python3 -m pmix.xlsform FILE -n
-```
-
-The program then looks for a column entitled "N" in the "survey" worksheet. It creates numbers based off of the
-directives there and adds them to label columns.
 
 ## Bugs
 

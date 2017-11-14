@@ -46,11 +46,16 @@ Count up to a fixed number with '>'.
 
 ...and then a fixed number such as 099.
 """
-
+import argparse
 import copy
+import os.path
 import re
 
+import pmix.utils as utils
+from pmix.xlsform import Xlsform
 
+
+DEFAULT_NUM_COL = 'N'
 LOWER_LETTERS = tuple('abcdefghijklmnopqrstuvwxyz')
 UPPER_LETTERS = tuple('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 ROMAN_NUMERALS = ('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x')
@@ -284,7 +289,6 @@ class Numbering:
             else:
                 msg = 'Bad increment "{}". Must be A, 1, a, or i.'.format(cmd)
 
-
     def increase_letter(self, letter):
         """Increase a letter by a specified amount.
 
@@ -367,3 +371,81 @@ class Numbering:
     def __repr__(self):
         """Return the repr of this numbering."""
         return 'Numbering("{}")'.format(str(self))
+
+
+def compute_prepend_numbers(inpath, col, outpath):
+    """Compute numbers based on mini-language and prepend to all labels.
+
+    This program highlights cells in the following two specific cases:
+
+    (1) The numbering column says there should be a number in the label, but
+        there is no number found in the original label. In this case, the
+        number is add to the label.
+    (2) The numbering column does not produce a number, but the original label
+        has a number. In this case, the number is removed.
+
+    Adding a number means to join the number, the string '. ', and the text of
+    the cell.
+
+    Args:
+        inpath (str): The path where to find the source file.
+        col (str): The name of the column where to find numbering.
+        outpath (str): The path where to write the new xlsxfile.
+    """
+    xlsform = Xlsform(inpath)
+    survey = xlsform['survey']
+    context = NumberingContext()
+    for cell in survey.column(col):
+        context.next(str(cell))
+    for i, header in enumerate(survey.column_headers()):
+        if header.startswith('label') or header.startswith('ppp_label'):
+            header_skipped = False
+            for num, cell in zip(context.string_iter(), survey.column(i)):
+                if not header_skipped:
+                    header_skipped = True
+                    continue
+                if num:
+                    cell_num, the_rest = utils.td_split_text(str(cell))
+                    new_text = '. '.join((num, the_rest))
+                    cell.value = new_text
+                    if not cell_num:
+                        cell.set_highlight()
+                elif cell:
+                    cell_num, the_rest = utils.td_split_text(str(cell))
+                    if cell_num:
+                        cell.value = the_rest
+                        cell.set_highlight()
+    xlsform.write_out(outpath)
+
+
+def numbering_cli():
+    """Run the command line interface for this module."""
+    prog_desc = 'Update numbering in an ODK form'
+    parser = argparse.ArgumentParser(description=prog_desc)
+    file_help = 'Path to source XLSForm.'
+    parser.add_argument('xlsxfile', help=file_help)
+    numbering_help = ('Compute numbering based on a column in the "survey" '
+                      'tab. If this option string is not given, '
+                      'then a default of "N" is assumed for the column '
+                      'header. This program updates label and ppp_label '
+                      'columns.')
+    parser.add_argument('-n', '--numbering', help=numbering_help)
+    out_help = ('Path to write output. If this argument is not supplied, then '
+                'defaults are used.')
+    parser.add_argument('-o', '--outpath', help=out_help)
+    args = parser.parse_args()
+
+    col = DEFAULT_NUM_COL
+    if args.numbering:
+        col = args.numbering
+    filename, extension = os.path.splitext(args.xlsxfile)
+    if args.outpath is None:
+        outpath = os.path.join(filename+'-num'+extension)
+    else:
+        outpath = args.outpath
+    compute_prepend_numbers(args.xlsxfile, col, outpath)
+    print('Renumbered labels and wrote file to "{}"'.format(outpath))
+
+
+if __name__ == '__main__':
+    numbering_cli()

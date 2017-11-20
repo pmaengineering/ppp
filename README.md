@@ -35,7 +35,11 @@ python3 -m pmix.analytics FILE1 [FILE2 ...]
 creates a JSON file describing the prompts and fields for analytics.
 
 ## Borrow
+The purpose of the Pmix *Borrow* module use to assist with translation 
+management of ODK forms. It is especially useful for merging translations from
+one file into another. 
 
+#### Command Line Usage
 This module is called with
 
 ```
@@ -48,7 +52,7 @@ target languages are in the subsequent columns. With the `-m` argument,
 it creates a translation dictionary and then merges those translations into
 the file specified by `-m`.
 
-#### Examples
+##### Examples
 
 1) Without `-m`,
 
@@ -68,7 +72,20 @@ creates a translation dictionary from `FILE1 [FILE2 ...]` and then merges into `
 
 In both examples, a default output filename is used, but one can be specified with the `-o` argument.
 
-The resultant file with merged translations has the following possible highlighting:
+#### The Input File
+The input file can be 1 of 2 kinds:
+1. A standard ODK file.
+2. A raw translations file.  
+
+A raw translations file has the following form, using English and French as 
+examples:   
+
+| text::English | text::Français | ... | text::<language *n*\> |
+| --- | --- | --- | --- |
+| Hello! | Bonjour! | ... | <"Hello!" in language *n*\> |
+
+#### The Output File
+A resultant file with merged translations has the following possible highlighting:
 
 * Orange if the source and the translation are the same.
 * Blue if the new translation changes the old translation.

@@ -22,8 +22,8 @@ def _required_fields(parser):
     """
     # File
     #   type:'string'
-    file_help = 'Path to source XLSForm.'
-    parser.add_argument('xlsxfile', help=file_help)
+    file_help = 'Path to source XLSForm(s).'
+    parser.add_argument('xlsxfiles', nargs='+', help=file_help)
     # Bundled Option Presets
     #   type='single selection', options:'custom, developer, internal,
     #   public', default:'public'
@@ -57,7 +57,7 @@ def _non_preset_optional_fields(parser):
          '\'default_language\' in the \'settings\' worksheet is used. If that '
          'is not specified and more than one language is in the XLSForm, the '
          'language that comes first alphabetically will be used.')
-    parser.add_argument('-l', '--language', help=language_help)
+    parser.add_argument('-l', '--language', nargs='+', help=language_help)
 
     # Output Format
     #   type='single selection', default:'html'
@@ -178,8 +178,10 @@ def _cli_only_fields(parser):
                         help=highlighting_help)
 
     # Out path
-    out_help = ('Path to write output. If this argument is not supplied, then '
-                'STDOUT is used.')
+    out_help = ('Path (including file name) to save converted file if 1 file, '
+                'else path to directory for multiple files, in which case file'
+                ' names will be automatically generated.\n\nIf this argument '
+                'is not supplied, then STDOUT is used.')
     parser.add_argument('-o', '--outpath', help=out_help)
     return parser
 
@@ -220,12 +222,13 @@ def cli():
         raise OdkFormError(msg)
 
     try:
-        run(in_file=args.xlsxfile, language=args.language,
-            output_format=args.format, out_file=args.outpath,
+        run(files=list(args.xlsxfiles),
+            languages=[l for l in args.language] if args.language else [None],
+            output_format=args.format, outpath=args.outpath,
             debug=args.debug, highlight=args.highlight, preset=args.preset)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
-            .format(args.xlsxfile, err)
+            .format(args.xlsxfiles, err)
         print(err, file=stderr)
 
 

@@ -4,7 +4,7 @@ env/
 __pycache__
 *.pyc
 test/files/ignored/*
-*/test/files/ignored/*
+test/files/multiple_file_language_option_conversion/ignored/*
 *~$*
 *.DS_Store
 dist/

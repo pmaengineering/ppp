@@ -4,6 +4,7 @@
 import unittest
 import doctest
 import os
+import subprocess
 from argparse import ArgumentParser
 from pmix.ppp.odkform import OdkForm
 from pmix.ppp.odkprompt import OdkPrompt
@@ -222,6 +223,45 @@ class OdkFormTest(unittest.TestCase, PppTest):
             msg = '\nGot: {}\nExpected: {}'.format(got, expected)
             # noinspection PyTypeChecker
             self.assertTrue(isinstance(got, expected), msg)
+
+
+class MultiConversionTest(unittest.TestCase):
+    """Test conversion of n files in n languages for n option combinations."""
+
+    @staticmethod
+    def ls(_dir):
+        """Call LS on a directory."""
+        return subprocess.Popen(['ls', _dir, '-l'], stdout=subprocess.PIPE)\
+            .stdout.read().decode('UTF-8').split('\n')
+
+    def test_multi_conversion(self):
+        src_dir = TEST_FILES_DIR + 'multiple_file_language_option_conversion/'
+        out_dir = src_dir + 'ignored/'
+        src_dir_ls_input = MultiConversionTest.ls(src_dir)
+        src_files = \
+            [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
+        subprocess.call(['rm', '-rf', out_dir])
+        subprocess.call(['mkdir', out_dir])
+        subprocess.call(['python', '-m', 'pmix.ppp'] + src_files +
+                        ['-o', out_dir, '-f', 'doc', '-p', 'minimal',
+                         '-l', 'English', 'Français'])
+        out_dir_ls_input = MultiConversionTest.ls(out_dir)
+        expected_output = "['/Users/joeflack4/projects/pmix_dev/test/files/mu" \
+                         "ltiple_file_language_option_conversion/ignored/:'," \
+                         " 'BFR5-Female-Questionnaire-v13-jef-English-minima" \
+                         "l.doc', 'BFR5-Female-Questionnaire-v13-jef-Françai" \
+                         "s-minimal.doc', 'BFR5-Household-Questionnaire-v13-" \
+                         "jef-English-minimal.doc', 'BFR5-Household-Question" \
+                         "naire-v13-jef-Français-minimal.doc', 'BFR5-Listing" \
+                         "-v1-jef-English-minimal.doc', 'BFR5-Listing-v1-jef" \
+                         "-Français-minimal.doc', 'BFR5-Reinterview-Question" \
+                         "naire-v13-jef-English-minimal.doc', 'BFR5-Reinterv" \
+                         "iew-Questionnaire-v13-jef-Français-minimal.doc', '" \
+                         "BFR5-SDP-Questionnaire-v13-jef-English-minimal.doc" \
+                         "', 'BFR5-SDP-Questionnaire-v13-jef-Français-minima" \
+                         "l.doc', 'BFR5-Selection-v2-jef-English-minimal.doc" \
+                         "', 'BFR5-Selection-v2-jef-Français-minimal.doc', '']"
+        self.assertEqual(str(out_dir_ls_input), expected_output)
 
 
 def get_args():

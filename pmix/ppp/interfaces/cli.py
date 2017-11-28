@@ -25,19 +25,21 @@ def _required_fields(parser):
     file_help = 'Path to source XLSForm.'
     parser.add_argument('xlsxfile', help=file_help)
     # Bundled Option Presets
-    #   type='single selection', options:'custom, developer, internal,
+    #   type='single selection', options:'custom, developer/full, internal,
     #   public', default:'public'
     #   note='the CLI does not have 'custom'. Leaving this option blank in the
     #   CLI os the same as 'custom'.'
     presets_help = \
-        ('Select from a preset of bundled options. The \'developer\' preset'
+        ('Select from a preset of bundled options. The \'developer\' or '
+         '\'full\' preset'
          ' renders a form that is the most similar to the original XlsForm. '
          'The \'internal\' preset is more human readable but is not stripped '
          'of sensitive information. The \'public\' option is like the '
          '\'internal\' optoin, only with sensitive information removed.')
     parser.add_argument('-p', '--preset',
-                        choices=('public', 'internal', 'developer', 'minimal'),
-                        default='developer', help=presets_help)
+                        choices=('public', 'internal', 'full', 'developer',
+                                 'minimal'),
+                        default='full', help=presets_help)
     return parser
 
 
@@ -91,7 +93,7 @@ def _preset_optional_fields(parser):
     """
     # Input replacement
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer'
+    #   FALSE if developer/full'
     input_replacement_help = \
         ('Adding this option will toggle replacement of visible choice '
          'options in input fields. Instead of the normal choice options, '
@@ -102,19 +104,19 @@ def _preset_optional_fields(parser):
 
     # Exclusion
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer
+    #   FALSE if developer/full
     exclusion_help = \
         ('Adding this option will toggle exclusion of certain survey form '
          'compoments from the rendered form. This can be used to remove '
          'ODK-specific implementation elements from the form which are only '
-         'useful for developers, and can also be used to wholly remove '
+         'useful for developer, and can also be used to wholly remove '
          'sensitive information without any replacement.')
     parser.add_argument('-e', '--exclusion', action='store_true',
                         help=exclusion_help)
 
     # Human-readable relevant text
     #   type='boolean', default:'TRUE if public else TRUE if internal else
-    #   FALSE if developer
+    #   FALSE if developer/full
     hr_relevant_help = \
         ('Adding this option will toggle display of human readable '
          '\'relevant\' text, rather than the syntax-heavy codified logic of '
@@ -124,7 +126,7 @@ def _preset_optional_fields(parser):
 
     # Human-readable constraint text
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer
+    #   FALSE if developer/full
     hr_constraint_help = \
         ('Adding this option will toggle display of human readable '
          '\'constraint\' text, rather than the syntax-heavy codified logic of '
@@ -134,7 +136,7 @@ def _preset_optional_fields(parser):
 
     # No constraint text
     #   type='boolean', default:'FALSE if public else FALSE if internal
-    #   else FALSE if developer
+    #   else FALSE if developer/full
     no_constraint_help = \
         ('Adding this option will toggle removal of all constraints from the '
          'rendered form.')
@@ -143,7 +145,7 @@ def _preset_optional_fields(parser):
 
     # General text replacements
     #   type='boolean', default:'TRUE if public else TRUE if internal else
-    #   FALSE if developer
+    #   FALSE if developer/full
     text_replacements_help = \
         ('Adding this option will toggle text replacements as shown in the '
          '\'text_replacements\' worksheet of the XlsForm. The most common '

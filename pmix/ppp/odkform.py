@@ -540,7 +540,7 @@ class OdkForm:
             otherwise it is added to the list of components.
 
             Args:
-                prompt (OdkPrompt): A prompt to add.
+                prompt (OdkPrompt | OdkCalculate): A prompt to add.
 
             """
             if self.pending_stack:

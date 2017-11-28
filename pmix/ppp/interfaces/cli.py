@@ -36,7 +36,7 @@ def _required_fields(parser):
          'The \'internal\' preset is more human readable but is not stripped '
          'of sensitive information. The \'public\' option is like the '
          '\'internal\' optoin, only with sensitive information removed.')
-    parser.add_argument('-p', '--preset',
+    parser.add_argument('-p', '--preset', nargs='+',
                         choices=('public', 'internal', 'full', 'developer',
                                  'minimal'),
                         default='full', help=presets_help)
@@ -67,7 +67,7 @@ def _non_preset_optional_fields(parser):
                    'not supported, but one can easily convert a PPP .doc file '
                    'into PDF via the use of WKHTMLtoPDF '
                    '(https://wkhtmltopdf.org/).')
-    parser.add_argument('-f', '--format',
+    parser.add_argument('-f', '--format', nargs='+',
                         choices=SUPPORTED_FORMATS, default='doc',
                         help=format_help)
     return parser
@@ -225,7 +225,7 @@ def cli():
     try:
         run(files=list(args.xlsxfiles),
             languages=[l for l in args.language] if args.language else [None],
-            output_format=args.format, outpath=args.outpath,
+            format=args.format, outpath=args.outpath,
             debug=args.debug, highlight=args.highlight, preset=args.preset)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\

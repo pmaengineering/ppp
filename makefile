@@ -60,16 +60,8 @@ doc:
 
 
 # TESTING
-TEST_FEATURE_FILE=BFR5-Household-Questionnaire-v8-jef
 test:
 	${PYTHON} -m unittest discover -v
-
-test_feature:
-	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f html -p minimal > output/${TEST_FEATURE_FILE}.html
-
-test_feature_doc:
-	${PYTHON} -m pmix.ppp test/files/${TEST_FEATURE_FILE}.xlsx -l English -f doc -p minimal > output/${TEST_FEATURE_FILE}.doc
-	open output/${TEST_FEATURE_FILE}.doc
 
 testdoc:
 	${PYTHON} -m test.test --doctests-only

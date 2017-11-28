@@ -66,10 +66,9 @@ def _non_preset_optional_fields(parser):
     format_help = ('File format. HTML and DOC are supported formats. PDF is '
                    'not supported, but one can easily convert a PPP .doc file '
                    'into PDF via the use of WKHTMLtoPDF '
-                   '(https://wkhtmltopdf.org/). If this flag is not supplied, '
-                   'output is html by default.')
+                   '(https://wkhtmltopdf.org/).')
     parser.add_argument('-f', '--format',
-                        choices=SUPPORTED_FORMATS, default='html',
+                        choices=SUPPORTED_FORMATS, default='doc',
                         help=format_help)
     return parser
 

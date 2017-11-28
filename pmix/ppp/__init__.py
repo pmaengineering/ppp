@@ -16,9 +16,13 @@ Functions
 - run: Common executional entry point from interfaces.
 """
 import os
+from copy import copy
 from signal import signal, SIGPIPE, SIG_DFL
+from itertools import product
+from collections import OrderedDict
 
 from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
+from pmix.ppp.definitions.constants import MULTI_ARGUMENT_CONVERSION_OPTIONS
 from pmix.ppp.odkform import OdkForm
 
 
@@ -28,8 +32,8 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
     Args:
         in_file (str): Path to load source file.
         language (str or None): Language to render form.
-        output_format (str): File format to be output.
         outpath (str or None): Path to save converted file.
+        **format (str): File format to be output.
         **debug (bool): Debugging on or off.
         **highlight (bool): Highlighting on or off.
 
@@ -43,9 +47,10 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
     try:
         output = None
         output_format = \
-            kwargs['output_format'] if 'output_format' in kwargs else 'html'
+            kwargs['format'] if 'format' in kwargs else 'html'
         if output_format == 'text':
             output = form.to_text(lang=language, **kwargs)
+
         elif output_format in ('html', 'doc'):
             output = form.to_html(lang=language, **kwargs)
 
@@ -53,13 +58,13 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
             if os.path.isdir(outpath) and not os.path.exists(outpath):
                 os.makedirs(outpath)
             if os.path.isdir(outpath):
-                base_filename =  os.path.basename(os.path.splitext(in_file)[0])
+                base_filename = os.path.basename(os.path.splitext(in_file)[0])
                 lang = '-' + language if language else ''
                 options_affix = '-' + kwargs['preset'] \
                     if 'preset' in kwargs and kwargs['preset'] != 'developer' \
                     else ''
-                out_file = outpath + base_filename + lang + options_affix + \
-                           '.' + output_format
+                out_file = '{}{}{}{}.{}'.format(outpath, base_filename, lang,
+                                                options_affix, output_format)
                 if out_file[0] == '/':
                     out_file = out_file[1:]
             else:
@@ -84,6 +89,45 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
         raise OdkException(err)
 
 
+def enumerate_combos(dict_with_lists):
+    """Enumerate keyword-arg combination variants.
+
+    Args:
+        dict_with_lists (dict): A dictionary of lists.
+
+    Returns:
+        list: A list of dicts, where each list in dict_of_lists has been
+        de-listed to a single value.
+    """
+    dict_with_only_lists = \
+        OrderedDict({k: v for k, v in dict_with_lists.items()
+                     if isinstance(v, list)})
+    lists = [v for k, v in dict_with_only_lists.items()]
+    tupled_combos = list(product(*lists))
+
+    dict_of_only_lists_combos = []
+    for i in range(len(tupled_combos)):
+        dool_combo = copy(dict_with_only_lists)
+        tuple_combo = list(tupled_combos.pop(0))
+        for k in dool_combo:
+            dool_combo[k] = tuple_combo.pop(0)
+        dict_of_only_lists_combos.append(dict(dool_combo))
+
+    full_dict_combos = []
+    for dool_combo in dict_of_only_lists_combos:
+        fd_combo = copy(dict_with_lists)
+        for k, v in dool_combo.items():
+            fd_combo[k] = v
+        full_dict_combos.append(fd_combo)
+
+    return full_dict_combos
+
+
+def num_args(option):
+    """Get number of args, aka "nargs" for a given option."""
+    return len(option) if isinstance(option, list) else 1
+
+
 def run(files, languages=[None], outpath=None, **kwargs):
     """Run ODK form conversion on n files of n option combinations.
 
@@ -98,11 +142,14 @@ def run(files, languages=[None], outpath=None, **kwargs):
         **highlight (bool): Highlighting on or off.
     """
     _outpath = outpath
-    for file in files:
-        if len(files) > 1 and not outpath:
-            _outpath = os.path.dirname(file) + '/'
-            # print(_outpath)
-        for language in languages:
-            # TODO: 2017.11.27-jef: Add 'n option combo' functionality.
+    _kwargs = copy(kwargs)
 
-            convert_file(file, language, outpath=_outpath, **kwargs)
+    combos = enumerate_combos(_kwargs)
+
+    for file in files:
+        num_output = num_args(files) * num_args(languages) * num_args(combos)
+        if num_output > 1 and not outpath:
+            _outpath = os.path.dirname(file) + '/'
+        for language in languages:
+            for combo in combos:
+                convert_file(file, language, outpath=_outpath, **combo)

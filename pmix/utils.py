@@ -135,3 +135,27 @@ def show_whitespace(text):
     # Downwards arrow with corner leftwards
     text = text.replace('\n', '\u21b5')
     return text
+
+
+def number_to_excel_column(col):
+    """Convert a zero-indexed column number to Excel column name
+
+    Args:
+        col (int): The column number, e.g. from a Worksheet. Should be
+            zero-indexed
+
+    Returns:
+        str: The Excel column name
+
+    Raises:
+        ValueError: If col > 26*26 or col < 0
+    """
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if len(letters) * len(letters) < col or col < 0:
+        raise ValueError(col)
+    div, mod = divmod(col, len(letters))
+    primary_letter = letters[mod]
+    if div > 0:
+        return letters[div - 1] + primary_letter
+    else:
+        return primary_letter

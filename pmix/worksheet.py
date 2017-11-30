@@ -50,7 +50,7 @@ class Worksheet:
 
         Checks that all rows have the same length.
         """
-        if len(self) > 0:
+        if self:
             lengths = {len(line) for line in self}
             if len(lengths) > 1:
                 msg = 'Worksheet has inconsistent column counts'
@@ -191,7 +191,7 @@ class Worksheet:
             A list of integers.
         """
         column_headers = self.column_headers()
-        if isinstance(key, str) or isinstance(key, int):
+        if isinstance(key, (int, str)):
             key = [key]
         result = []
         for item in key:

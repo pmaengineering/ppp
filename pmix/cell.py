@@ -35,11 +35,9 @@ class Cell:
         """
         if whitespace:
             return str(self) == str(other)
-        else:
-            this_str = ''.join(str(self).split())
-            other_str = ''.join(str(other).split())
-            return this_str == other_str
-
+        this_str = ''.join(str(self).split())
+        other_str = ''.join(str(other).split())
+        return this_str == other_str
 
     def set_highlight(self, color='HL_YELLOW'):
         """Highlight this cell.
@@ -61,8 +59,7 @@ class Cell:
         """Define equality comparison for Cells."""
         if isinstance(other, Cell):
             return self.value == other.value
-        else:
-            return False
+        return False
 
     def __str__(self):
         """Return unicode representation of cell."""
@@ -149,7 +146,6 @@ class Cell:
             value = datetime.time(*date_tuple[3:])
         elif date_tuple[3:] == (0, 0, 0):
             # must be date only
-            # pylint: disable=redefined-variable-type
             value = datetime.date(*date_tuple[:3])
         else:
             value = datetime.datetime(*date_tuple)

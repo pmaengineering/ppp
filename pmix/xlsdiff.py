@@ -69,6 +69,7 @@ def indexed_venn(seq1, seq2):
     seq2_set = set(seq2)
     common = seq1_set & seq2_set
     counted = Counter(seq1) + Counter(seq2)
+
     def build_indexed_a_b(seq_a, seq_b):
         """Build up indexed components for IndexedVenn."""
         common_a = []
@@ -89,6 +90,7 @@ def indexed_venn(seq1, seq2):
         return common_a, common_a_dup, a_not_b, a_to_b
     seq_1_info = build_indexed_a_b(seq1, seq2)
     seq_2_info = build_indexed_a_b(seq2, seq1)
+
     return IndexedVenn(*seq_1_info, *seq_2_info)
 
 
@@ -262,7 +264,6 @@ class XlsDiff:
                     record = CellDiff(base_cell, new_cell, row[0], col[0],
                                       new_row, new_col, row[1], col[1])
                     self.cell_diff[sheet_name].append(record)
-
 
     def write_diff_new(self, path, copy=False):
         """Highlight the differences on the new spreadsheet and write out.

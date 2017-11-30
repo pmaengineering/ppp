@@ -64,8 +64,8 @@ class OdkTable:
         self.contents = self.data[1:]
 
         # - De-list labels
-        for c in self.contents:
-            c.row['label'] = c.row['label'][0]
+        for con in self.contents:
+            con.row['label'] = con.row['label'][0]
 
     # Temporary noinspection until method is added.
     # noinspection PyUnusedLocal

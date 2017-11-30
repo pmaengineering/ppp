@@ -143,7 +143,7 @@ class OdkPrompt:
         """
         fields_to_add = []
         new_row = row.copy()
-        for key, val in new_row.items():
+        for key, _ in new_row.items():
             for field in MEDIA_FIELDS:
                 if key.startswith(field):
                     if field not in row:

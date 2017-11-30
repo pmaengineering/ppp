@@ -145,6 +145,7 @@ class NumberingContext:
             self.parse_cmd(cmd[1:])
         else:
             raise RuntimeError('"*NUM" not yet implemented')
+
     def blank(self):
         """Parse an empty command."""
         self.numbers.append(None)
@@ -284,7 +285,7 @@ class Numbering:
                 self.increase_roman(item)
             elif self.letter and item.isalpha():
                 self.increase_letter(item)
-            elif item.islower(): # and not self.letter
+            elif item.islower():  # and not self.letter
                 self.increase_lower(item)
             else:
                 msg = 'Bad increment "{}". Must be A, 1, a, or i.'.format(cmd)
@@ -354,8 +355,7 @@ class Numbering:
         """Convert to string for use in numbering."""
         if self.silent:
             return ''
-        else:
-            return str(self)
+        return str(self)
 
     def __str__(self):
         """Convert the numbering to a string."""

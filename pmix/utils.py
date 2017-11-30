@@ -138,7 +138,7 @@ def show_whitespace(text):
 
 
 def number_to_excel_column(col):
-    """Convert a zero-indexed column number to Excel column name
+    """Convert a zero-indexed column number to Excel column name.
 
     Args:
         col (int): The column number, e.g. from a Worksheet. Should be
@@ -157,5 +157,4 @@ def number_to_excel_column(col):
     primary_letter = letters[mod]
     if div > 0:
         return letters[div - 1] + primary_letter
-    else:
-        return primary_letter
+    return primary_letter

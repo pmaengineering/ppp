@@ -395,6 +395,7 @@ class OdkForm:
 
     @staticmethod
     def make_simple_calculate():
+        """Make a simple calculate."""
         simple_row = {
             'token_type': 'calculate'
         }
@@ -428,6 +429,7 @@ class OdkForm:
             simple_row = {'token_type': 'unhandled', 'simple_type': row_type}
         return simple_row
 
+    # pylint: disable=too-many-branches
     @staticmethod
     def convert_survey(wb, choices, ext_choices):
         """Convert rows and strings of a workbook into object components.

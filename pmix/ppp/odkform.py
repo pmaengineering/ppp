@@ -3,6 +3,7 @@ import os.path
 
 from pmix.ppp.config import TEMPLATE_ENV
 from pmix.ppp.definitions.error import OdkFormError
+from pmix.ppp.odkcalculate import OdkCalculate
 from pmix.ppp.odkchoices import OdkChoices
 from pmix.ppp.odkgroup import OdkGroup
 from pmix.ppp.odkprompt import OdkPrompt
@@ -393,6 +394,13 @@ class OdkForm:
         return simple_row
 
     @staticmethod
+    def make_simple_calculate():
+        simple_row = {
+            'token_type': 'calculate'
+        }
+        return simple_row
+
+    @staticmethod
     def parse_type(row, choices, ext_choices):
         """Describe the 'type' column of a row XLSForm.
 
@@ -410,6 +418,8 @@ class OdkForm:
         simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
         if row_type in simple_types:
             simple_row = OdkForm.make_simple_prompt(row_type)
+        elif row_type == 'calculate':
+            simple_row = OdkForm.make_simple_calculate()
         elif row_type.startswith('select_'):
             simple_row = OdkForm.parse_select_type(row, choices, ext_choices)
         elif row_type.startswith('begin ') or row_type.startswith('end '):
@@ -425,6 +435,7 @@ class OdkForm:
         Main types are:
 
         - prompt
+        - calculate
         - begin group
         - end group
         - begin repeat
@@ -460,6 +471,9 @@ class OdkForm:
                     choice_list = token['choice_list']
                     this_prompt = OdkPrompt(dict_row, choice_list)
                     context.add_prompt(this_prompt)
+                elif token['token_type'] == 'calculate':
+                    this_calculate = OdkCalculate(dict_row)
+                    context.add_calculate(this_calculate)
                 elif token['token_type'] == 'begin group':
                     this_group = OdkGroup(dict_row)
                     context.add_group(this_group)
@@ -524,6 +538,18 @@ class OdkForm:
                 self.pending_stack[-1].add(prompt)
             else:
                 self.result.append(prompt)
+
+        def add_calculate(self, calculate):
+            """Add a calculate to the questionnaire.
+
+            If there is an item on the pending stack, it is added there,
+            otherwise it is added to the list of components.
+
+            Args:
+                calculate (OdkCalculate): A calculate to add.
+
+            """
+            self.add_prompt(calculate)
 
         def add_group(self, group):
             """Add a group to the pending stack.

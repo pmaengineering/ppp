@@ -9,6 +9,7 @@ on working with spreadsheets. The main features are the following:
 * _numbering_
 * _ppp_
 * _workbook_
+* _xlsdiff_
 
 Formerly `qlang`, this package has been renamed and expanded to provide new
 functionality and new command-line tools. The command line tools are described after installation.
@@ -35,9 +36,9 @@ python3 -m pmix.analytics FILE1 [FILE2 ...]
 creates a JSON file describing the prompts and fields for analytics.
 
 ## Borrow
-The purpose of the Pmix *Borrow* module use to assist with translation 
+The purpose of the Pmix *Borrow* module use to assist with translation
 management of ODK forms. It is especially useful for merging translations from
-one file into another. 
+one file into another.
 
 #### Command Line Usage
 This module is called with
@@ -75,10 +76,10 @@ In both examples, a default output filename is used, but one can be specified wi
 #### The Input File
 The input file can be 1 of 2 kinds:
 1. A standard ODK file.
-2. A raw translations file.  
+2. A raw translations file.
 
-A raw translations file has the following form, using English and French as 
-examples:   
+A raw translations file has the following form, using English and French as
+examples:
 
 | text::English | text::Français | ... | text::<language *n*\> |
 | --- | --- | --- | --- |
@@ -170,6 +171,23 @@ python3 -m pmix.workbook FILE -c SHEET
 ```
 python3 -m pmix.workbook FILE -w
 ```
+
+## XlsDiff
+
+A utility for showing the differences between two Excel files.
+
+```
+python3 -m pmix.xlsdiff FILE1 FILE2 --excel
+```
+
+The above command creates a new Excel file, highlighting `FILE2` to show differences.
+Highlighting significance is as follows:
+
+- *Red* -- Rows and columns that are duplicate so are not compared
+- *Orange* -- Rows and columns that are in the marked up file, but not in the other
+- *Yellow* -- Cells that are different between the the two files
+- *Green* -- Rows that are in a changed order
+
 
 ## Bugs
 

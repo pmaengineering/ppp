@@ -29,6 +29,10 @@ Keep the same as previous numbers in the same series with the lookback symbol
     - '<'
     - '<3'
 
+Lookbacks can be followed by an increment.
+
+    - '<3^a'
+
 Resume a previous section with the '*' symbol. '*' alone refers to one previous
 
     - '*^1'
@@ -115,13 +119,22 @@ class NumberingContext:
 
     def lookback(self, cmd):
         """Parse a lookback command and add the correct number."""
+        increment_pos = cmd.find('^')
+        if increment_pos < 0:
+            increment = ''
+        else:
+            increment = cmd[increment_pos:]
+            cmd = cmd[:increment_pos]
         if cmd == '<':
             lookback = 1
         else:
             lookback = int(cmd[1:])
         new_num = copy.copy(self.current_series_last(lookback))
         new_num.silent = False
+        if increment:
+            new_num.increment(increment)
         self.current_series_add(new_num)
+
 
     def sticky(self, cmd):
         """Parse a sticky number command and add the correct number."""

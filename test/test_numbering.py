@@ -145,6 +145,12 @@ class NumberingIncrementTest(unittest.TestCase):
 
             (('323a', '^a',   '<2',   '<2'),
              ('323a', '323b', '323a', '323b')),
+
+            (('323a', '^1a',  '<2^a', '<2^a'),
+             ('323a', '324a', '323b', '324b')),
+
+            (('001a', '<^i'),
+             ('001a', '001a.i'))
         )
         self.compare_chains(chains)
 

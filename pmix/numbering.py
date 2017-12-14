@@ -418,11 +418,16 @@ def compute_prepend_numbers(inpath, col, outpath):
                     header_skipped = True
                     continue
                 if num:
-                    cell_num, the_rest = utils.td_split_text(str(cell))
+                    old_text = str(cell)
+                    cell_num, the_rest = utils.td_split_text(old_text)
                     new_text = '. '.join((num, the_rest))
                     cell.value = new_text
                     if not cell_num:
+                        # Highlight yellow for adding a number
                         cell.set_highlight()
+                    elif new_text != old_text:
+                        # Highlight orange for changing a number
+                        cell.set_highlight('HL_ORANGE')
                 elif cell:
                     cell_num, the_rest = utils.td_split_text(str(cell))
                     if cell_num:

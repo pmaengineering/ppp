@@ -223,6 +223,18 @@ class OdkFormTest(unittest.TestCase, PppTest):
             # noinspection PyTypeChecker
             self.assertTrue(isinstance(got, expected), msg)
 
+    def test_to_html(self):
+        """Test to_html method."""
+        forms = self.get_forms(self.data)
+        for dummy, form in forms.items():
+            kwargs = {'output_format': 'html'}
+            html = form.to_html(**kwargs)
+            self.assertTrue(html.startswith("""<html>\n    <head>"""))
+            self.assertTrue(html.endswith('</html>'))
+            self.assertIn("""    </head>\n    <body id="survey">
+        <div id="container">
+            <div id="identification_section" class="section">""", html)
+
 
 def get_args():
     """CLI for PPP test runner."""

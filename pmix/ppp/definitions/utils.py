@@ -20,9 +20,12 @@ def exclusion(item, settings):
     Returns
         bool: True if item should be excluded, else False.
     """
-    try:
-        exclude = False
+    config = {
+        'error_on_no_exclude_column_for_preset': False
+    }
+    exclude = False
 
+    try:
         if 'exclusion' in settings or 'preset' in settings \
                 and PRESETS[settings['preset']]['general_exclusions']:
 
@@ -31,8 +34,8 @@ def exclusion(item, settings):
             elif hasattr(item, 'opener'):
                 item_data = 'opener'
             else:
-                # Table; Rather than explicitly exluding a table, the group itself
-                #     should be excluded.
+                # Table; Rather than explicitly exluding a table, the group
+                # itself should be excluded.
                 return False
 
             token = EXCLUSION_TOKEN.lower()
@@ -40,6 +43,13 @@ def exclusion(item, settings):
 
         return exclude
     except KeyError:
-        err = 'If using exclusion option or preset with exclusions, XlsForm ' \
-              'must have field named \'ppp_excludes\'.'
-        raise KeyError(err)
+        err = True
+        if config['error_on_no_exclude_column_for_preset'] == False \
+                and 'preset' in settings:
+            err = False
+        if err:
+            msg = 'If using exclusion option or preset with exclusions, ' \
+                  'XlsForm must have field named \'ppp_excludes\'.'
+            raise KeyError(msg)
+        else:
+            return exclude

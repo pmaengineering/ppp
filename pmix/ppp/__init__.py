@@ -60,6 +60,8 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
                     else ''
                 out_file = outpath + base_filename + lang + options_affix + \
                            '.' + output_format
+                if out_file[0] == '/':
+                    out_file = out_file[1:]
             else:
                 out_file = outpath
             with open(out_file, mode='w', encoding='utf-8') as file:

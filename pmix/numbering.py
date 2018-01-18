@@ -386,7 +386,7 @@ class Numbering:
         return 'Numbering("{}")'.format(str(self))
 
 
-def compute_prepend_numbers(inpath, col, outpath):
+def compute_prepend_numbers(inpath, col, outpath, rm_on_empty=False):
     """Compute numbers based on mini-language and prepend to all labels.
 
     This program highlights cells in the following two specific cases:
@@ -404,6 +404,9 @@ def compute_prepend_numbers(inpath, col, outpath):
         inpath (str): The path where to find the source file.
         col (str): The name of the column where to find numbering.
         outpath (str): The path where to write the new xlsxfile.
+        rm_on_empty (bool): Remove numbers that exist when numbering column is
+            blank.
+
     """
     xlsform = Xlsform(inpath)
     survey = xlsform['survey']
@@ -428,7 +431,7 @@ def compute_prepend_numbers(inpath, col, outpath):
                     elif new_text != old_text:
                         # Highlight orange for changing a number
                         cell.set_highlight('HL_ORANGE')
-                elif cell:
+                elif cell and rm_on_empty:
                     cell_num, the_rest = utils.td_split_text(str(cell))
                     if cell_num:
                         cell.value = the_rest
@@ -451,6 +454,10 @@ def numbering_cli():
     out_help = ('Path to write output. If this argument is not supplied, then '
                 'defaults are used.')
     parser.add_argument('-o', '--outpath', help=out_help)
+    rm_help = ('Remove a number that pre-exists in a label if numbering '
+               'column is blank.')
+    parser.add_argument('-r', '--rm_on_empty', action='store_true',
+                        help=rm_help)
     args = parser.parse_args()
 
     col = DEFAULT_NUM_COL

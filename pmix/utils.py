@@ -66,7 +66,7 @@ def clean_string(text):
     """Clean a string for addition into the translation dictionary.
 
     Leading and trailing whitespace is removed. Newlines are converted to
-    the UNIX style. Opening number is removed if found by `split_text`.
+    the UNIX style.
 
     Args:
         text (str): String to be cleaned.
@@ -79,6 +79,7 @@ def clean_string(text):
     text = text.replace('\r', '\n')
     text = space_newline_fix(text)
     text = newline_space_fix(text)
+    text = space_space_fix(text)
     return text
 
 
@@ -98,6 +99,22 @@ def newline_space_fix(text):
     fix = '\n'
     while newline_space in text:
         text = text.replace(newline_space, fix)
+    return text
+
+
+def space_space_fix(text):
+    """Replace "space-space" with "space".
+
+    Args:
+        text (str): The string to work with
+
+    Returns:
+        The text with the appropriate fix.
+    """
+    space_space = '  '
+    space = ' '
+    while space_space in text:
+        text = text.replace(space_space, space)
     return text
 
 

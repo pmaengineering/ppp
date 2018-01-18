@@ -379,9 +379,9 @@ class XlsDiff:
             outer = '{:-^60}'.format(inner)
             print(outer)
             for record in cell_list:
-                base_row = record.row_a
+                base_row = record.row_a + 1
                 base_col = utils.number_to_excel_column(record.col_a)
-                new_row = record.row_b
+                new_row = record.row_b + 1
                 new_col = utils.number_to_excel_column(record.col_b)
                 msg = '>>> Base[{}{}] != New[{}{}]'
                 msg = msg.format(base_col, base_row, new_col, new_row)

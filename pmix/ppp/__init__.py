@@ -102,23 +102,14 @@ def enumerate_combos(dict_with_lists):
     dict_with_only_lists = \
         OrderedDict({k: v for k, v in dict_with_lists.items()
                      if isinstance(v, list)})
-    lists = [v for k, v in dict_with_only_lists.items()]
-    tupled_combos = list(product(*lists))
+    dict_without_lists = \
+        {k: v for k, v in dict_with_lists.items() if not isinstance(v, list)}
 
-    dict_of_only_lists_combos = []
-    for i in range(len(tupled_combos)):
-        dool_combo = copy(dict_with_only_lists)
-        tuple_combo = list(tupled_combos.pop(0))
-        for k in dool_combo:
-            dool_combo[k] = tuple_combo.pop(0)
-        dict_of_only_lists_combos.append(dict(dool_combo))
-
-    full_dict_combos = []
-    for dool_combo in dict_of_only_lists_combos:
-        fd_combo = copy(dict_with_lists)
-        for k, v in dool_combo.items():
-            fd_combo[k] = v
-        full_dict_combos.append(fd_combo)
+    ds1 = dict_with_only_lists.values()
+    ds2 = [i for i in ds1]
+    ds3 = list(product(*ds2))
+    ds4 = [dict(zip(dict_with_only_lists, i)) for i in ds3]
+    full_dict_combos = [{**i, **dict_without_lists} for i in ds4]
 
     return full_dict_combos
 

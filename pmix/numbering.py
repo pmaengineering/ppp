@@ -15,6 +15,11 @@ without numbering.
     - ~000
     - ~Q300
 
+TODO: Silence any of the other increments by starting with a '~'.
+
+    - ~^1
+    - ~<4
+
 Increment with special strings starting with '^'.
 
     - '^1'
@@ -43,12 +48,12 @@ Sticky questions are marked with a '#'.
 
     - '#LCL_101'
 
-Count up to a fixed number with '>'.
+TODO: Count up to a fixed number with '>'.
 
     - '>1'
     - '>A'
 
-...and then a fixed number such as 099.
+...and then a fixed number such as 099 with '>1@099'
 """
 import argparse
 import copy
@@ -347,6 +352,8 @@ class Numbering:
         delta_index = LOWER_LETTERS.index(lower) + 1
         new_lower = LOWER_LETTERS[cur_index + delta_index]
         self.lower = new_lower
+
+        self.roman = ''
 
     def increase_roman(self, roman):
         """Increase an roman by a specified amount.

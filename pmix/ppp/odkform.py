@@ -130,9 +130,11 @@ class OdkForm:
         try:
             choices = wb[ws]
             header = [str(x) for x in choices[0]]
+
             if 'list_name' not in header:
                 msg = 'Column "list_name" not found in {} tab'.format(ws)
                 raise OdkFormError(msg)
+
             for i, row in enumerate(choices):
                 if i == 0:
                     continue
@@ -144,7 +146,7 @@ class OdkForm:
                     odkchoices = OdkChoices(list_name)
                     odkchoices.add(dict_row)
                     formatted_choices[list_name] = odkchoices
-        except KeyError:  # Worksheet does not exist.
+        except (KeyError, IndexError):  # Worksheet does not exist.
             pass
         return formatted_choices
 
@@ -308,7 +310,7 @@ class OdkForm:
 
         Args:
             row (dict): A row as a dictionary. Keys and values are strings.
-            choices (dict): A dictionary with list_names as keys. Represents
+            choices (dict): A diction   ary with list_names as keys. Represents
                 the choices found in 'choices' tab.
             ext_choices (dict): A dictionary with list_names as keys.
                 Represents choices found in 'external_choices' tab.
@@ -323,22 +325,24 @@ class OdkForm:
         simple_row = {'token_type': 'prompt'}
         simple_type = 'select_one'
         row_type = row['type']
-        if row_type.startswith('select_one_external '):
-            list_name = row_type.split(maxsplit=1)[1]
-            choice_list = ext_choices[list_name]
-        elif row_type.startswith('select_multiple_external '):
-            simple_type = 'select_multiple'
-            list_name = row_type.split(maxsplit=1)[1]
-            choice_list = ext_choices[list_name]
-        elif row_type.startswith('select_one '):
-            list_name = row_type.split(maxsplit=1)[1]
-            choice_list = choices[list_name]
-        elif row_type.startswith('select_multiple '):
-            simple_type = 'select_multiple'
-            list_name = row_type.split(maxsplit=1)[1]
-            choice_list = choices[list_name]
-        else:
-            raise OdkFormError()
+        list_name = row_type.split(maxsplit=1)[1]
+
+        try:
+            if row_type.startswith('select_one_external '):
+                choice_list = ext_choices[list_name]
+            elif row_type.startswith('select_multiple_external '):
+                simple_type = 'select_multiple'
+                choice_list = ext_choices[list_name]
+
+            elif row_type.startswith('select_one '):
+                choice_list = choices[list_name]
+            elif row_type.startswith('select_multiple '):
+                simple_type = 'select_multiple'
+                choice_list = choices[list_name]
+            else:
+                raise OdkFormError()
+        except KeyError:
+            raise OdkFormError('List \'{}\' not found.'.format(list_name))
 
         simple_row['simple_type'] = simple_type
         simple_row['choice_list'] = choice_list
@@ -458,10 +462,14 @@ class OdkForm:
                 names, and groups nested within a field-list group.
         """
         context = OdkForm.ConversionContext()
+        survey, header = None, None
         try:
             survey = wb['survey']
             header = survey[0]
+        except KeyError:  # No survey found.
+            pass
 
+        if survey and header:
             for i, row in enumerate(survey):
                 if i == 0:
                     continue
@@ -501,8 +509,7 @@ class OdkForm:
                 else:
                     # TODO: Make an error?
                     pass
-        except KeyError:  # No survey found.
-            pass
+
         return context.result
 
     class ConversionContext:

@@ -4,7 +4,6 @@
 import unittest
 import doctest
 import os
-# import signal
 import subprocess
 from argparse import ArgumentParser
 
@@ -242,16 +241,6 @@ class OdkFormTest(unittest.TestCase, PppTest):
 class MultiConversionTest(unittest.TestCase):
     """Test conversion of n files in n languages for n option combinations."""
 
-    # @staticmethod
-    # def ls(_dir):
-    #     """Call LS on a directory."""
-    #     proc = subprocess.Popen(['ls', _dir, '-l'], stdout=subprocess.PIPE,
-    #                             shell=True,
-    #                             preexec_fn=os.setsid)
-    #     ls = proc.stdout.read().decode('UTF-8').split('\n')
-    #     os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-    #     return ls
-
     def test_multi_conversion(self):
         src_dir = TEST_FILES_DIR + 'multiple_file_language_option_conversion/'
         out_dir = src_dir + 'ignored/'
@@ -259,13 +248,31 @@ class MultiConversionTest(unittest.TestCase):
         src_files = \
             [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
         subprocess.call(['rm', '-rf', out_dir])
-        subprocess.call(['mkdir', out_dir])
-        subprocess.call(['python', '-m', 'pmix.ppp'] + src_files +
-                        ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal',
-                         'full', '-l', 'English', 'Français'])
-        out_dir_ls_input = os.listdir(out_dir)
-        expected_output = 'pending'
-        self.assertEqual(str(out_dir_ls_input), expected_output)
+        os.makedirs(out_dir)
+        command = ['python', '-m', 'pmix.ppp'] + src_files + \
+                  ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full', '-l',
+                   'English', 'Français']
+        subprocess.call(command)
+
+        out_dir_ls_input = str(os.listdir(out_dir))
+        expected_output = \
+            str(['BFR5-Selection-v2-jef-Français-minimal.html',
+                 'BFR5-Female-Questionnaire-v13-jef-Français-full.html',
+                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.doc',
+                 'BFR5-Female-Questionnaire-v13-jef-Français-full.doc',
+                 'BFR5-Selection-v2-jef-Français-full.html',
+                 'BFR5-Female-Questionnaire-v13-jef-English-full.doc',
+                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.html',
+                 'BFR5-Selection-v2-jef-Français-full.doc',
+                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.doc',
+                 'BFR5-Female-Questionnaire-v13-jef-English-full.html',
+                 'BFR5-Selection-v2-jef-English-minimal.doc',
+                 'BFR5-Selection-v2-jef-English-minimal.html',
+                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.html',
+                 'BFR5-Selection-v2-jef-Français-minimal.doc',
+                 'BFR5-Selection-v2-jef-English-full.doc',
+                 'BFR5-Selection-v2-jef-English-full.html'])
+        self.assertEqual(expected_output, str(out_dir_ls_input))
 
 
 def get_args():

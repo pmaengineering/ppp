@@ -65,12 +65,15 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
                     else ''
                 out_file = '{}{}{}{}.{}'.format(outpath, base_filename, lang,
                                                 options_affix, output_format)
-                if out_file[0] == '/':
-                    out_file = out_file[1:]
+
+                if isinstance(out_file, list):
+                    if out_file[0] == '/':
+                        out_file = out_file[1:]
             else:
                 out_file = outpath
             with open(out_file, mode='w', encoding='utf-8') as file:
                 file.write(output)
+            print(out_file)
         else:
             try:
                 print(output)
@@ -134,11 +137,13 @@ def run(files, languages=[None], outpath=None, **kwargs):
     """
     _outpath = outpath
     _kwargs = copy(kwargs)
-
     combos = enumerate_combos(_kwargs)
+    num_output = num_args(files) * num_args(languages) * num_args(combos)
+
+    if num_output > 1 or outpath:
+        print('Creating files.')
 
     for file in files:
-        num_output = num_args(files) * num_args(languages) * num_args(combos)
         if num_output > 1 and not outpath:
             _outpath = os.path.dirname(file) + '/'
         for language in languages:

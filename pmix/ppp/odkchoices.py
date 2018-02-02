@@ -53,7 +53,7 @@ class OdkChoices:
         try:
             labels = [d[lang_col] for d in self.data]
             return labels
-        except KeyError:
+        except (KeyError, IndexError):
             msg = 'Language {} not found in choice list {}.'\
                 .format(lang, self.list_name)
             raise InvalidLanguageException(msg)

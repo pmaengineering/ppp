@@ -174,6 +174,14 @@ class TranslationDict:
                           max_count))
         return first_max
 
+    def get_all_translations(self, src, lang):
+        this_dict = self.data[src]
+        all_translation_data = this_dict[lang]
+        all_found = [other['translation'] for other in all_translation_data]
+        unique_all_found = set(all_found)
+        sorted_all_found = sorted(list(unique_all_found))
+        return sorted_all_found
+
     def get_numbered_translation(self, src, lang):
         """Return a translation for a source string, respecting numbering.
 
@@ -261,6 +269,32 @@ class TranslationDict:
                 except KeyError:
                     # Missing information is highlighted
                     ws.write(i + 1, j + 1, '', red_background)
+
+    def write_diverse_excel(self, path, language):
+        """Write translation duplicate data to an Excel spreadsheet.
+
+        Args:
+            path (str): String path to write the MS-Excel file
+            language (str): The language to find duplicates
+        """
+        wb = xlsxwriter.Workbook(path)
+        red_background = wb.add_format()
+        red_background.set_bg_color('#FFAAA5')
+        ws = wb.add_worksheet('translations')
+        all_languages = [self.base, language]
+        ws.write_row(0, 0, all_languages)
+        dups = []
+        for key in self.data:
+            found = self.get_all_translations(key, language)
+            if len(found) > 1:
+                dups.append((key, found))
+        for i, item in enumerate(dups):
+            ws.write(i + 1, 0, item[0])
+            for j, translation in enumerate(item[1]):
+                if j == 0:
+                    ws.write(i + 1, j + 1, translation)
+                else:
+                    ws.write(i + 1, j + 1, translation, red_background)
 
     def __str__(self):
         """Return a string representation of the data."""

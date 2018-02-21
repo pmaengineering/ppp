@@ -45,6 +45,11 @@ def borrow_cli():  # pylint: disable=too-many-locals
                   'translation file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
+    diverse_help = ('Supply a language. Used without the --merge argument, '
+                    'this creates a worksheet that shows only strings with '
+                    'diverse translations for the supplied language.')
+    parser.add_argument('-d', '--diverse', help=diverse_help)
+
     add_help = ('Add a language to the resulting output. The translation file '
                 'will have a column for that language. Or, the merged XLSForm '
                 'will include columns for that language and have translations '
@@ -75,7 +80,10 @@ def borrow_cli():  # pylint: disable=too-many-locals
 
     if args.merge is None:
         outpath = 'translations.xlsx' if args.outpath is None else args.outpath
-        translation_dict.write_excel(outpath, add)
+        if args.diverse:
+            translation_dict.write_diverse_excel(outpath, args.diverse)
+        else:
+            translation_dict.write_excel(outpath, add)
         print('Created translation file: "{}"'.format(outpath))
     else:
         xlsform = Xlsform(args.merge)

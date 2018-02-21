@@ -3,15 +3,16 @@
 A mixed bag of PMA2020 utilities. There are several functionalities all based
 on working with spreadsheets. The main features are the following:
 
-* _analytics_
-* _borrow_
-* _cascade_
-* _numbering_
-* _ppp_
-* _workbook_
-* _xlsdiff_
+* [Analytics](#analytics)
+* [Borrow](#borrow)
+* [Cascade](#cascade)
+* [Numbering](#numbering)
+* [PPP](#ppp)
+* [Workbook](#workbook)
+* [XlsDiff](#xlsdiff)
+* [Viffer](#viffer)
 
-Formerly `qlang`, this package has been renamed and expanded to provide new
+Formerly [`qlang`](https://github.com/jkpr/qlang), this package has been renamed and expanded to provide new
 functionality and new command-line tools. The command line tools are described after installation.
 
 This version requires Python 3 or later. Python 2 is not supported.
@@ -88,11 +89,11 @@ examples:
 #### The Output File
 A resultant file with merged translations has the following possible highlighting:
 
-* Orange if the source and the translation are the same.
-* Blue if the new translation changes the old translation.
-* Green if the translation is not found in the TranslationDict, but there is a pre-existing translation.
-* Red if translation is not found and there is no pre-existing translation.
-* No highlight if the translation is the same as the pre-existing translation.
+![#ffa500](https://placehold.it/15/ffa500/000000?text=+) *Orange* if the source and the translation are the same.  
+![#0000ff](https://placehold.it/15/0000ff/000000?text=+) *Blue* if the new translation changes the old translation.  
+![#00ff00](https://placehold.it/15/00ff00/000000?text=+) *Green* if the translation is not found in the TranslationDict, but there is a pre-existing translation.  
+![#ff0000](https://placehold.it/15/ff0000/000000?text=+) *Red* if translation is not found and there is no pre-existing translation.  
+![#ffffff](https://placehold.it/15/ffffff/000000?text=+) *No highlight* if the translation is the same as the pre-existing translation.
 
 ## Cascade
 
@@ -173,7 +174,6 @@ python3 -m pmix.workbook FILE -w
 ```
 
 ## XlsDiff
-
 A utility for showing the differences between two Excel files.
 
 ```
@@ -183,10 +183,31 @@ python3 -m pmix.xlsdiff FILE1 FILE2 --excel
 The above command creates a new Excel file, highlighting `FILE2` to show differences.
 Highlighting significance is as follows:
 
-- *Red* -- Rows and columns that are duplicate so are not compared
-- *Orange* -- Rows and columns that are in the marked up file, but not in the other
-- *Yellow* -- Cells that are different between the the two files
-- *Green* -- Rows that are in a changed order
+![#ff0000](https://placehold.it/15/ff0000/000000?text=+) *Red* -- Rows and columns that are duplicate so are not compared  
+![#ffa500](https://placehold.it/15/ffa500/000000?text=+) *Orange* -- Rows and columns that are in the marked up file, but not in the other  
+![#ffff00](https://placehold.it/15/ffff00/000000?text=+) *Yellow* -- Cells that are different between the the two files  
+![#00ff00](https://placehold.it/15/00ff00/000000?text=+) *Green* -- Rows that are in a changed order  
+
+![XlsDiff](docs/xlsdiff_output.png)
+
+##### Options
+| Short Flag | Long Flag | Description |
+|:-----------|:----------|:------------|
+| -h | --help | Show this help message and exit. |
+| -r | --reverse | Reverse the order of the base file and the new file for processing. |
+| -s | --simple | Do a simple diff instead of the default ODK diff. |
+| -e | --excel | Path to write Excel output. If flag is given with no argument then default out path is used. If flag is omitted, then write text output to STDOUT.|
+
+## Viffer
+Viffer is a tool that provides a tabulated report on the differences between two XlsForms. Viffer stands for "Version Diff'er".
+
+![XlsDiff](docs/viffer_output_small.png)
+
+This tool is currently under development under another fork of pmix. If interested in using it, please see: https://github.com/joeflack4/pmix/tree/feature_viffer#viffer
+
+##### Example Usage
+Generate a Viffer report.
+`python -m  pmix.viffer old_form.xlsx new_form.xlsx`
 
 
 ## Bugs

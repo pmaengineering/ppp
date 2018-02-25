@@ -9,5 +9,6 @@ HL_COLORS = {
     'HL_ORANGE': '#FFD3B6',
     'HL_RED': '#FFAAA5',
     'HL_GREEN': '#85CA5D',
-    'HL_BLUE': '#9ACEDF'
+    'HL_BLUE': '#9ACEDF',
+    'HL_GREY': '#D3D3D3',
 }

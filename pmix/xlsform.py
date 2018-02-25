@@ -93,7 +93,17 @@ class Xlsform(Workbook):
         for sheet in self:
             sheet.add_language(language)
 
-    def merge_translations(self, translations, ignore=None, carry=False):
-        """Merge translations."""
+    def merge_translations(self, translations, ignore=None, carry=False,
+                           no_diverse=False):
+        """Merge translations.
+
+        Args:
+            translations (TranslationDict): Translations
+            ignore (set of str): The languages to ignore when translating
+            carry (bool): Carry the source language over to missing translations
+            no_diverse (bool): If true, then do not translate text that has
+                multiple translations.
+        """
         for sheet in self:
-            sheet.merge_translations(translations, ignore, carry=carry)
+            sheet.merge_translations(translations, ignore, carry=carry,
+                                     no_diverse=no_diverse)

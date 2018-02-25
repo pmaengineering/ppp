@@ -45,6 +45,16 @@ def borrow_cli():  # pylint: disable=too-many-locals
                   'translation file is created.')
     parser.add_argument('-m', '--merge', help=merge_help)
 
+    correct_help = ('Mark a given file as correct. Text from these files will '
+                    'disallow diverse translations from files not marked as '
+                    'correct. This is a way to give files precedence for '
+                    'translations.')
+    parser.add_argument('-C', '--correct', action='append', help=correct_help)
+
+    no_diverse_help = 'If text has diverse translations, do not borrow it.'
+    parser.add_argument('-D', '--no_diverse', action='store_true',
+                        help=no_diverse_help)
+
     diverse_help = ('Supply a language. Used without the --merge argument, '
                     'this creates a worksheet that shows only strings with '
                     'diverse translations for the supplied language.')
@@ -74,9 +84,20 @@ def borrow_cli():  # pylint: disable=too-many-locals
     add = sorted(list(set(args.add))) if args.add else None
 
     translation_dict = TranslationDict()
-    for path in set(args.xlsxfile):
+    extracted = set()
+    if args.correct:
+        for path in args.correct:
+            if path in extracted:
+                continue
+            xlsform = Xlsform(path)
+            translation_dict.extract_translations(xlsform, correct=True)
+            extracted.add(path)
+    for path in args.xlsxfile:
+        if path in extracted:
+            continue
         xlsform = Xlsform(path)
         translation_dict.extract_translations(xlsform)
+        extracted.add(path)
 
     if args.merge is None:
         outpath = 'translations.xlsx' if args.outpath is None else args.outpath
@@ -88,7 +109,8 @@ def borrow_cli():  # pylint: disable=too-many-locals
     else:
         xlsform = Xlsform(args.merge)
         # wb.add_language(add)
-        xlsform.merge_translations(translation_dict, ignore, carry=args.carry)
+        xlsform.merge_translations(translation_dict, ignore, carry=args.carry,
+                                   no_diverse=args.no_diverse)
         outpath = args.outpath
         if outpath is None:
             orig = xlsform.file

@@ -271,19 +271,22 @@ class Xlstab(Worksheet):
         return sorted_languages
 
     def merge_translations(self, translations, ignore=None, base='English',
-                           carry=False):
+                           carry=False, no_diverse=False):
         """Merge translations from a TranslationDict.
 
         By the end of this method call, this worksheet will have translations
         filled in and colored appropriately. The highlighting rules are as
         follows:
 
+        - Yellow if no_diverse is True and the source text has diverse
+            translations.
         - Orange if the source and the translation are the same.
         - Blue if the new translation changes the old translation.
         - Green if the translation is not found in the TranslationDict, but
             there is a pre-existing translation.
         - Red if translation is not found and there is no pre-existing
             translation.
+        - Grey if the translation fills in a previously missing translation.
         - No highlight if the translation is the same as the pre-existing
             translation.
 
@@ -294,6 +297,8 @@ class Xlstab(Worksheet):
             base (str): The base language. Should probably be left as English.
             carry (bool): True if missing translations be filled in from the
                 base language.
+            no_diverse (bool): If true, then do not translate text that has
+                multiple translations.
         """
         for src, other in self.lazy_translation_pairs(ignore, base):
             src_text = str(src['cell'])
@@ -301,13 +306,21 @@ class Xlstab(Worksheet):
                 continue
             other_text = str(other['cell'])
             other_lang = other['language']
+            if no_diverse:
+                count_unique = translations.count_unique_translations(
+                        src_text, other_lang)
+                if count_unique > 1:
+                    other['cell'].highlight = 'HL_YELLOW'
+                    continue
             try:
                 translated = translations.get_numbered_translation(src_text,
                                                                    other_lang)
                 other['cell'].value = translated
                 if src_text == translated:
                     other['cell'].highlight = 'HL_ORANGE'
-                elif translated != other_text:
+                elif translated != other_text and other_text == '':
+                    other['cell'].highlight = 'HL_GREY'
+                elif translated != other_text: # and other_text != ''
                     other['cell'].highlight = 'HL_BLUE'
             except KeyError:
                 if other['cell'].is_blank():

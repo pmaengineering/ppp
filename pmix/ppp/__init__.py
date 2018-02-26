@@ -17,7 +17,11 @@ Functions
 """
 import os
 from copy import copy
-from signal import signal, SIGPIPE, SIG_DFL
+try:
+    # noinspection PyUnresolvedReferences
+    from signal import signal, SIGPIPE, SIG_DFL
+except ImportError as e:
+    pass
 from itertools import product
 from collections import OrderedDict
 
@@ -78,7 +82,11 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
             try:
                 print(output)
             except BrokenPipeError:  # If output is piped.
-                signal(SIGPIPE, SIG_DFL)
+                try:
+                    signal(SIGPIPE, SIG_DFL)
+                # noinspection PyBroadException
+                except:
+                    pass
                 print(output)
     except InvalidLanguageException as err:
         if str(err):

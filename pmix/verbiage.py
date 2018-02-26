@@ -196,10 +196,12 @@ class TranslationDict:
         """
         # Set the default return value to 0
         count_unique = 0
+        # Clean source text
+        cleaned_src = utils.td_clean_string(src)
         # If the text key is in translations
-        if src in self.data:
+        if cleaned_src in self.data:
             # Get all translations for a given key
-            all_src_data = self.data[src]
+            all_src_data = self.data[cleaned_src]
             # If the language is among the translations
             if lang in all_src_data:
                 # Collect all the unique translation strings
@@ -222,10 +224,12 @@ class TranslationDict:
         """
         # Set the default return value to an empty list
         unique = []
+        # Clean source text
+        cleaned_src = utils.td_clean_string(src)
         # If the text key is in translations
-        if src in self.data:
+        if cleaned_src in self.data:
             # Get all translations for a given key
-            all_src_data = self.data[src]
+            all_src_data = self.data[cleaned_src]
             # If the language is among the translations
             if lang in all_src_data:
                 # Collect all the unique translation strings
@@ -252,8 +256,8 @@ class TranslationDict:
             string also has the same numbering as `src`.
         """
         number, _ = utils.td_split_text(src)
-        src = utils.td_clean_string(src)
-        clean_translation = self.get_translation(src, lang)
+        cleaned_src = utils.td_clean_string(src)
+        clean_translation = self.get_translation(cleaned_src, lang)
         numbered_translation = number + clean_translation
         return numbered_translation
 

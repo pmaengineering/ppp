@@ -151,13 +151,13 @@ PPP also exists on the web!
 | -p  | --preset | Select from a preset of bundled options. The 'developer' preset renders a form that is the most similar to the original XlsForm. The 'internal' preset is more human readable but is not stripped of sensitive information. The 'public' option is like the 'internal' option, only with sensitive information removed. Option usage: `-p {public,internal,developer,minimal}`.
 
 ##### Example Usage
-> `python -m  pmix.ppp myXlsForm.xlsx`  
+> `python -m  ppp myXlsForm.xlsx`
 > *Prints HTML converted XlsForm with default settings to the console*
   
-> `python -m  pmix.ppp myXlsForm.xlsx -l Français -f doc -p minimal > myXlsForm.doc`  
+> `python -m  ppp myXlsForm.xlsx -l Français -f doc -p minimal > myXlsForm.doc`
 > *Converts an ODK Excel file to a MS Word-readable .doc file (is really HTML under the hood), with the preset of "minimal", and the language set to French*
 
-> `python -m pmix.ppp myXlsForm1.xlsx myXlsForm2.xlsx -l Luganda Lusoga English -f doc pdf -p minimal full`
+> `python -m ppp myXlsForm1.xlsx myXlsForm2.xlsx -l Luganda Lusoga English -f doc pdf -p minimal full`
 > *Saves a document for every combination of forms and options passed, in this case **2** input files \* **3** languages \* **2** file formats \* **2** detail formats, or **24** output files*
 
 ## Workbook

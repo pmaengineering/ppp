@@ -7,14 +7,14 @@ import os
 import subprocess
 from argparse import ArgumentParser
 
-from pmix.ppp.odkform import OdkForm
-from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.odkgroup import OdkGroup
+from ppp.odkform import OdkForm
+from ppp.odkprompt import OdkPrompt
+from ppp.odkgroup import OdkGroup
 # from pmix.odkchoices import OdkChoices  # TODO
 # from pmix.odkrepeat import OdkRepeat  # TODO
 # from pmix.odktable import OdkTable  # TODO
 
-TEST_PACKAGES = ['pmix.ppp', 'test']
+TEST_PACKAGES = ['ppp', 'test']
 TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
 TEST_FILES_DIR = TEST_DIR + 'files/'
 
@@ -249,7 +249,7 @@ class MultiConversionTest(unittest.TestCase):
             [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python', '-m', 'pmix.ppp'] + src_files + \
+        command = ['python', '-m', 'ppp'] + src_files + \
                   ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full', '-l',
                    'English', 'Français']
         subprocess.call(command)
@@ -298,7 +298,7 @@ def get_test_modules(test_package):
         list: List of all python modules in package.
 
     """
-    if test_package == 'pmix.ppp':  # TODO: Make dynamic.
+    if test_package == 'ppp':  # TODO: Make dynamic.
         root_dir = TEST_DIR + "../" + "pmix/ppp"
     elif test_package == 'test':
         root_dir = TEST_DIR

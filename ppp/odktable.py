@@ -1,7 +1,7 @@
 """Module for the OdkTable class."""
-from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.definitions.utils import exclusion
-# from pmix.ppp.definitions.error import OdkformError
+from ppp.config import TEMPLATE_ENV
+from ppp.definitions.utils import exclusion
+# from ppp.definitions.error import OdkformError
 
 
 class OdkTable:

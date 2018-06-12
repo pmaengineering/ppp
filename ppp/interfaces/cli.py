@@ -5,10 +5,10 @@ from argparse import ArgumentParser
 from sys import stderr
 from copy import copy
 
-from pmix.ppp import run
-from pmix.ppp.definitions.constants import SUPPORTED_FORMATS
-from pmix.ppp.definitions.abstractions import chain
-from pmix.ppp.definitions.error import OdkException, OdkFormError
+from ppp import run
+from ppp.definitions.constants import SUPPORTED_FORMATS
+from ppp.definitions.abstractions import chain
+from ppp.definitions.error import OdkException, OdkFormError
 
 
 def _required_fields(parser):
@@ -205,11 +205,11 @@ def cli():
 
     Side Effects: Executes program.
 
-    Command Syntax: python3 -m pmix.ppp <file> <options>
+    Command Syntax: python3 -m ppp <file> <options>
 
     Examples:
         # Creates a 'myFile.html' in English with component highlighting.
-        python3 -m pmix.ppp myFile.xlsx -l 'English' -h > myFile.html
+        python3 -m ppp myFile.xlsx -l 'English' -h > myFile.html
     """
     prog_desc = 'Convert XLSForm to Paper version.'
 

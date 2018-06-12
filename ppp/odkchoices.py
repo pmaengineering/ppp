@@ -1,5 +1,5 @@
 """Module for the OdkChoices class."""
-from pmix.ppp.definitions.error import InvalidLanguageException
+from ppp.definitions.error import InvalidLanguageException
 
 
 class OdkChoices:

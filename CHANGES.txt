@@ -1,21 +1,28 @@
-v0.2.1, 14 November 2017
+v1.0.2, 2016-06-12
+ * Fix to include package data.
+
+v1.0.0, 2016-06-12
+ * Initial release
+
+#### Before splitting into repo independent from Pmix package.
+v0.2.1, 2017-11-04
  * Workbook and Xlsform classes for modeling Excel files
  * PPP sub-package to convert an ODK form to PDF and HTML
  * Various utilities: cascade, sheet-to-csv, analytics, numbering
  * Qlang removed
  * Added unit tests
 
-v0.2.0, 5 October 2016
+v0.2.0, 2016-10-05
  * Renamed package to 'pmix'
  * Expanded to contain borrow.py, functionality to grab translations
  * Efficiencies from internals: more of an OO-design rather than functional
 
-v0.1.2, 29 August 2016
+v0.1.2, 2016-08-29
  * Copy all worksheets from original file, not just survey, choices, settings
 
-v0.1.1, 23 May 2016
+v0.1.1, 2016-05-23
  * Conditional formatting to highlight missing languages (English and translations)
 
-v0.1.0, 4 March 2016
+v0.1.0, 2016-03-04
  * Initial release
  * Included command-line interface

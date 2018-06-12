@@ -14,5 +14,5 @@ MANIFEST
 tags
 *.swp
 /*.html
-pmix.egg-info
+*.egg-info
 output/

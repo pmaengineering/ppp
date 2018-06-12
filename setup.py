@@ -1,24 +1,23 @@
+"""Setup for Pypi"""
 from setuptools import setup, find_packages
 
 
-from pmix import __version__
-
 packages = find_packages(exclude=['test'])
-packages.append('pmix.test')
+packages.append('ppp.test')
 
 setup(
-    name='pmix',
-    version=__version__,
-    author='James K. Pringle',
-    author_email='jpringle@jhu.edu',
+    name='odk_ppp',  # ppp was already taken
+    version='1.0.2',
+    author='Joe Flack',
+    author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
     packages=packages,
     package_dir={
-        'pmix.test': 'test'
+        'ppp': 'ppp',
+        'ppp.test': 'test'
     },
     package_data={
-        'pmix.test': ['files/*.xlsx'],
-        'pmix.ppp': [
+        'ppp': [
             'templates/*.html',
             'templates/content/*.html',
             'templates/content/group/*.html',
@@ -26,14 +25,15 @@ setup(
             'templates/content/prompt/inputs/*.html',
             'templates/content/repeat/*.html',
             'templates/content/table/*.html'
-        ]
+        ],
+        'ppp.test': ['files/*.xlsx']
     },
+
     license='LICENSE.txt',
-    description='Smattering of Python3 tools for PMA workflow',
+    description='Converts ODK XlsForm Excel files into readable formats.',
     long_description=open('README.md').read(),
     install_requires=[
-        'XlsxWriter>=0.7.0',
         'xlrd>=0.9.3',
         'Jinja2>=2.9.6'
-    ],
+    ]
 )

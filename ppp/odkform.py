@@ -1,14 +1,14 @@
 """Module for the OdkForm class."""
 import os.path
 
-from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.definitions.error import OdkFormError
-from pmix.ppp.odkcalculate import OdkCalculate
-from pmix.ppp.odkchoices import OdkChoices
-from pmix.ppp.odkgroup import OdkGroup
-from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.odkrepeat import OdkRepeat
-from pmix.ppp.definitions.utils import exclusion
+from ppp.config import TEMPLATE_ENV
+from ppp.definitions.error import OdkFormError
+from ppp.odkcalculate import OdkCalculate
+from ppp.odkchoices import OdkChoices
+from ppp.odkgroup import OdkGroup
+from ppp.odkprompt import OdkPrompt
+from ppp.odkrepeat import OdkRepeat
+from ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
 

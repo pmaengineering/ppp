@@ -25,9 +25,9 @@ except ImportError as e:
 from itertools import product
 from collections import OrderedDict
 
-from pmix.ppp.definitions.error import OdkException, InvalidLanguageException
-from pmix.ppp.definitions.constants import MULTI_ARGUMENT_CONVERSION_OPTIONS
-from pmix.ppp.odkform import OdkForm
+from ppp.definitions.error import OdkException, InvalidLanguageException
+from ppp.definitions.constants import MULTI_ARGUMENT_CONVERSION_OPTIONS
+from ppp.odkform import OdkForm
 
 
 def convert_file(in_file, language=None, outpath=None, **kwargs):

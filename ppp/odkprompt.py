@@ -1,10 +1,10 @@
 """Module for the OdkPrompt class."""
 import textwrap
 
-from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
+from ppp.config import TEMPLATE_ENV
+from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
-from pmix.ppp.definitions.error import OdkChoicesError
+from ppp.definitions.error import OdkChoicesError
 
 
 class OdkPrompt:

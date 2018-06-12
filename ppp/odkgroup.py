@@ -1,8 +1,8 @@
 """Module for the OdkGroup class."""
-from pmix.ppp.config import TEMPLATE_ENV
-from pmix.ppp.odkprompt import OdkPrompt
-from pmix.ppp.odktable import OdkTable
-from pmix.ppp.definitions.utils import exclusion
+from ppp.config import TEMPLATE_ENV
+from ppp.odkprompt import OdkPrompt
+from ppp.odktable import OdkTable
+from ppp.definitions.utils import exclusion
 
 
 class OdkGroup:

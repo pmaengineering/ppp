@@ -9,28 +9,29 @@ TRUNCATABLE_FIELDS (tuple): Fields that should be limited to a specific
     length. Current limit is 100 chars, which is somewhat arbitrary but
     turns out good in converted forms.
 """
+SYNTAX = {
+    'xlsforms': {
+        'language_field_delimiters': [':', '::']
+    }
+}
 IGNORE_RELEVANT_TOKEN = '#####'
 SUPPORTED_FORMATS = ('html', 'doc')
 LANGUAGE_PERTINENT_WORKSHEETS = ('survey', 'choices', 'external_choices')
-MEDIA_FIELDS = ('image', 'media::image', 'audio', 'media::audio',
-                'video', 'media::video')
+XLSFORM_SUPPORTED_MULTIMEDIA_TYPES = ['image', 'audio', 'video']
+# MEDIA_FIELDS = (image, media:image, media::image, ...)
+MEDIA_FIELDS = tuple(x for x in XLSFORM_SUPPORTED_MULTIMEDIA_TYPES) + \
+   tuple('media' + y + x for x in XLSFORM_SUPPORTED_MULTIMEDIA_TYPES
+         for y in SYNTAX['xlsforms']['language_field_delimiters'])
+# for x in XLSFORM_SUPPORTED_MULTIMEDIA_TYPES:
+#     MEDIA_FIELDS.append(x)
+#     for y in SYNTAX['xlsforms']['language_field_delimiters']:
+#         MEDIA_FIELDS.append('media' + y + x)
 LANGUAGE_DEPENDENT_FIELDS = \
     ('label', 'hint', 'constraint_message', 'ppp_input') + MEDIA_FIELDS
 TRUNCATABLE_FIELDS = ('constraint', 'relevant')
 MULTI_ARGUMENT_CONVERSION_OPTIONS = ('preset', 'format', 'language')
 PRESETS = {
-    'full': {  # Alias for 'developer'.
-        'field_replacements': (),
-        'field_exclusions': (),
-        'other_specific_exclusions': (),
-        'general_exclusions': False,
-        'render_settings': {
-            'html': {
-                'side_letters': True
-            }
-        }
-    },
-    'developer': {  # Alias for 'full'.
+    'full': {
         'field_replacements': (),
         'field_exclusions': (),
         'other_specific_exclusions': (),
@@ -76,3 +77,6 @@ PRESETS = {
         }
     },
 }
+PRESETS['developer'] = PRESETS['full']  # alias
+PRESETS['standard'] = PRESETS['minimal']  # alias
+PRESETS['basic'] = PRESETS['minimal']  # alias

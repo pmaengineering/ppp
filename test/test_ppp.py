@@ -2,21 +2,17 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import unittest
-import doctest
 import os
 import subprocess
-from argparse import ArgumentParser
 
 from ppp.odkform import OdkForm
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
+from test.config import TEST_FILES_DIR, TEST_PACKAGES
+from test.utils import get_args, get_test_suite
 # from pmix.odkchoices import OdkChoices  # TODO
 # from pmix.odkrepeat import OdkRepeat  # TODO
 # from pmix.odktable import OdkTable  # TODO
-
-TEST_PACKAGES = ['ppp', 'test']
-TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
-TEST_FILES_DIR = TEST_DIR + 'files/'
 
 
 # # Mock Objects
@@ -250,8 +246,8 @@ class MultiConversionTest(unittest.TestCase):
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
         command = ['python', '-m', 'ppp'] + src_files + \
-                  ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full', '-l',
-                   'English', 'Français']
+                  ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full',
+                   '-l', 'English', 'Français']
         subprocess.call(command)
 
         out_dir_ls_input = str(os.listdir(out_dir))
@@ -273,62 +269,6 @@ class MultiConversionTest(unittest.TestCase):
                  'BFR5-Selection-v2-jef-English-full.doc',
                  'BFR5-Selection-v2-jef-English-full.html'])
         self.assertEqual(expected_output, str(out_dir_ls_input))
-
-
-def get_args():
-    """CLI for PPP test runner."""
-    desc = 'Run tests for PPP package.'
-    parser = ArgumentParser(description=desc)
-    doctests_only_help = 'Specifies whether to run doctests only, as ' \
-                         'opposed to doctests with unittests. Default is' \
-                         ' False.'
-    parser.add_argument('-d', '--doctests-only', action='store_true',
-                        help=doctests_only_help)
-    args = parser.parse_args()
-    return args
-
-
-def get_test_modules(test_package):
-    """Get files to test.
-
-    Args:
-        test_package (str): The package containing modules to test.
-
-    Returns:
-        list: List of all python modules in package.
-
-    """
-    if test_package == 'ppp':  # TODO: Make dynamic.
-        root_dir = TEST_DIR + "../" + "pmix/ppp"
-    elif test_package == 'test':
-        root_dir = TEST_DIR
-    else:
-        raise Exception('Test package not found.')
-
-    test_modules = []
-    for dirpath, dummy, filenames in os.walk(root_dir):
-        for filename in filenames:
-            if filename.endswith('.py'):
-                filename = filename[:-3]
-                sub_pkg = dirpath.replace(root_dir, '').replace('/', '.')
-                test_module = test_package + sub_pkg + '.' + filename
-                test_modules.append(test_module)
-    return test_modules
-
-
-def get_test_suite(test_packages):
-    """Get suite to test.
-
-    Returns:
-        TestSuite: Suite to test.
-
-    """
-    suite = unittest.TestSuite()
-    for package in test_packages:
-        pkg_modules = get_test_modules(test_package=package)
-        for pkg_module in pkg_modules:
-            suite.addTest(doctest.DocTestSuite(pkg_module))
-    return suite
 
 
 if __name__ == '__main__':

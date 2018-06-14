@@ -72,6 +72,7 @@ class OdkForm:
          'phonenumber', 'hidden', 'hidden string', 'hidden int',
          'hidden geopoint']
     warnings = None
+    # from pdb import set_trace; set_trace()
 
     @classmethod
     def from_file(cls, path):
@@ -158,12 +159,12 @@ class OdkForm:
         settings (dict): A dictionary represetnation of the original 'settings'
             worksheet of an ODK XLSForm.
         wb (Workbook): A Workbook object representing an XLSForm.
-        lang (str): The requested render lagnuage of the form.
+        lang (str): The requested render language of the form.
 
         Returns:
             str: The title.
         """
-        lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
+        lookup_title = 'ppp_form_title::' + lang if lang else 'form_title'
         backup_title = os.path.split(wb.file)[1]
         return settings.get(lookup_title, backup_title)
 

@@ -90,69 +90,69 @@ def _preset_optional_fields(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    # Input replacement
+    # TODO: Input replacement
     #   type='boolean', default:'TRUE if public else FALSE if internal else
     #   FALSE if developer/full'
-    input_replacement_help = \
-        ('Adding this option will toggle replacement of visible choice '
-         'options in input fields. Instead of the normal choice options, '
-         'whatever has been placed in the \'ppp_input\' field of the XlsForm '
-         'will be used. This is normally to hide sensitive information.')
-    parser.add_argument('-i', '--input-replacement', action='store_true',
-                        help=input_replacement_help)
+    # input_replacement_help = \
+    #     ('Adding this option will toggle replacement of visible choice '
+    #      'options in input fields. Instead of the normal choice options, '
+    #      'whatever has been placed in the \'ppp_input\' field of the XlsForm '
+    #      'will be used. This is normally to hide sensitive information.')
+    # parser.add_argument('-i', '--input-replacement', action='store_true',
+    #                     help=input_replacement_help)
 
-    # Exclusion
+    # TODO: Exclusion
     #   type='boolean', default:'TRUE if public else FALSE if internal else
     #   FALSE if developer/full
-    exclusion_help = \
-        ('Adding this option will toggle exclusion of certain survey form '
-         'compoments from the rendered form. This can be used to remove '
-         'ODK-specific implementation elements from the form which are only '
-         'useful for developer, and can also be used to wholly remove '
-         'sensitive information without any replacement.')
-    parser.add_argument('-e', '--exclusion', action='store_true',
-                        help=exclusion_help)
+    # exclusion_help = \
+    #     ('Adding this option will toggle exclusion of certain survey form '
+    #      'compoments from the rendered form. This can be used to remove '
+    #      'ODK-specific implementation elements from the form which are only '
+    #      'useful for developer, and can also be used to wholly remove '
+    #      'sensitive information without any replacement.')
+    # parser.add_argument('-e', '--exclusion', action='store_true',
+    #                     help=exclusion_help)
 
-    # Human-readable relevant text
+    # TODO: Human-readable relevant text
     #   type='boolean', default:'TRUE if public else TRUE if internal else
     #   FALSE if developer/full
-    hr_relevant_help = \
-        ('Adding this option will toggle display of human readable '
-         '\'relevant\' text, rather than the syntax-heavy codified logic of '
-         'the original XlsForm.')
-    parser.add_argument('-r', '--hr-relevant', action='store_true',
-                        help=hr_relevant_help)
+    # hr_relevant_help = \
+    #     ('Adding this option will toggle display of human readable '
+    #      '\'relevant\' text, rather than the syntax-heavy codified logic of '
+    #      'the original XlsForm.')
+    # parser.add_argument('-r', '--hr-relevant', action='store_true',
+    #                     help=hr_relevant_help)
 
-    # Human-readable constraint text
+    # TODO: Human-readable constraint text
     #   type='boolean', default:'TRUE if public else FALSE if internal else
     #   FALSE if developer/full
-    hr_constraint_help = \
-        ('Adding this option will toggle display of human readable '
-         '\'constraint\' text, rather than the syntax-heavy codified logic of '
-         'the original XlsForm.')
-    parser.add_argument('-c', '--hr-constraint', action='store_true',
-                        help=hr_constraint_help)
+    # hr_constraint_help = \
+    #     ('Adding this option will toggle display of human readable '
+    #      '\'constraint\' text, rather than the syntax-heavy codified logic of '
+    #      'the original XlsForm.')
+    # parser.add_argument('-c', '--hr-constraint', action='store_true',
+    #                     help=hr_constraint_help)
 
-    # No constraint text
+    # TODO: No constraint text
     #   type='boolean', default:'FALSE if public else FALSE if internal
     #   else FALSE if developer/full
-    no_constraint_help = \
-        ('Adding this option will toggle removal of all constraints from the '
-         'rendered form.')
-    parser.add_argument('-C', '--no-constraint', action='store_true',
-                        help=no_constraint_help)
+    # no_constraint_help = \
+    #     ('Adding this option will toggle removal of all constraints from the '
+    #      'rendered form.')
+    # parser.add_argument('-C', '--no-constraint', action='store_true',
+    #                     help=no_constraint_help)
 
-    # General text replacements
+    # TODO: General text replacements
     #   type='boolean', default:'TRUE if public else TRUE if internal else
     #   FALSE if developer/full
-    text_replacements_help = \
-        ('Adding this option will toggle text replacements as shown in the '
-         '\'text_replacements\' worksheet of the XlsForm. The most common '
-         'function of text replacement is to render more human readable '
-         'variable names, but can also be used to remove sensitive information'
-         'or add brevity or clarity where needed.')
-    parser.add_argument('-t', '--text-replacements', action='store_true',
-                        help=text_replacements_help)
+    # text_replacements_help = \
+    #     ('Adding this option will toggle text replacements as shown in the '
+    #      '\'text_replacements\' worksheet of the XlsForm. The most common '
+    #      'function of text replacement is to render more human readable '
+    #      'variable names, but can also be used to remove sensitive information'
+    #      'or add brevity or clarity where needed.')
+    # parser.add_argument('-t', '--text-replacements', action='store_true',
+    #                     help=text_replacements_help)
     return parser
 
 
@@ -165,12 +165,12 @@ def _cli_only_fields(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    # Debug
-    debug_help = \
-        'Turns on debug mode. Currently only works for \'html\' format. Only' \
-        ' feature of debug mode currently is that it prints a stringified ' \
-        'JSON representation of survey to the JavaScript console.'
-    parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
+    # TODO: Debug
+    # debug_help = \
+    #     'Turns on debug mode. Currently only works for \'html\' format. Only' \
+    #     ' feature of debug mode currently is that it prints a stringified ' \
+    #     'JSON representation of survey to the JavaScript console.'
+    # parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
 
     # Survey Form Component Highlighting
     highlighting_help = 'Turns on highlighting of various portions of survey' \

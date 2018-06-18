@@ -1,3 +1,6 @@
+v1.0.3, 2016-06-15
+* Updated CLI to disable options that are not actually yet supported. Now they no longer appear in the help text/menu either.
+
 v1.0.2, 2016-06-12
  * Fix to include package data.
 

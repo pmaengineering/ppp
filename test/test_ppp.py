@@ -4,6 +4,7 @@
 import unittest
 import os
 import subprocess
+from glob import glob
 
 from ppp.odkform import OdkForm
 from ppp.odkprompt import OdkPrompt
@@ -34,8 +35,52 @@ class MockForm(OdkForm):
 # # Unit Tests
 # pylint: disable=too-few-public-methods
 # - PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
-class PppTest:
+class PppTest(unittest.TestCase):
     """Base class for PPP package tests."""
+
+    @classmethod
+    def files_dir(cls):
+        """Return name of test class."""
+        return TEST_FILES_DIR + cls.__name__
+
+    def input_path(self):
+        """Return path of input file folder for test class."""
+        return self.files_dir() + '/input/'
+
+    def output_path(self):
+        """Return path of output file folder for test class."""
+        return self.files_dir() + '/output/'
+
+    def input_files(self):
+        """Return paths of input files for test class."""
+        all_files = glob(self.input_path() + '*')
+        sans_temp_files = [x for x in all_files
+                           if not x[len(self.input_path()):].startswith('~$')]
+        return sans_temp_files
+
+    def output_files(self):
+        """Return paths of input files for test class."""
+        return glob(self.output_path() + '*')
+
+    def standard_convert(self):
+        """Converts input/* --> output/*. Returns n files each."""
+        in_files = self.input_files()
+        out_dir = self.output_path()
+        out_files = self.output_files()
+
+        subprocess.call(['rm', '-rf', out_dir])
+        os.makedirs(out_dir)
+        command = ['python', '-m', 'ppp'] + in_files + ['-o', out_dir]
+        subprocess.call(command)
+
+        expected = 'N files: ' + str(len(in_files))
+        actual = 'N files: ' + str(len(out_files))
+        return expected, actual
+
+    def standard_conversion_test(self):
+        """Checks standard convert success."""
+        expected, actual = self.standard_convert()
+        self.assertEqual(expected, actual)
 
     @staticmethod
     def get_forms(data):
@@ -52,7 +97,7 @@ class PppTest:
         return forms
 
 
-class OdkPromptTest(unittest.TestCase, PppTest):
+class OdkPromptTest(PppTest):
     """Unit tests for the OdkPrompt class."""
 
     media_types = ['image', 'audio', 'video', 'media::image',
@@ -177,7 +222,7 @@ class OdkGroupTest(unittest.TestCase):
             self.assertTrue(output == expected_output, msg=msg)
 
 
-class OdkFormTest(unittest.TestCase, PppTest):
+class OdkFormTest(PppTest):
     """Unit tests for the OdkForm class."""
 
     def setUp(self):
@@ -269,6 +314,13 @@ class MultiConversionTest(unittest.TestCase):
                  'BFR5-Selection-v2-jef-English-full.doc',
                  'BFR5-Selection-v2-jef-English-full.html'])
         self.assertEqual(expected_output, str(out_dir_ls_input))
+
+
+class MultipleFieldLanguageDelimiterSupport(PppTest):
+    """Support for both : and :: to be used as delimiter betw field & lang."""
+
+    def test_convert(self):
+        self.standard_conversion_test()
 
 
 if __name__ == '__main__':

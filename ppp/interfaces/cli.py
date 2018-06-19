@@ -165,12 +165,11 @@ def _cli_only_fields(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    # TODO: Debug
-    # debug_help = \
-    #     'Turns on debug mode. Currently only works for \'html\' format. Only' \
-    #     ' feature of debug mode currently is that it prints a stringified ' \
-    #     'JSON representation of survey to the JavaScript console.'
-    # parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
+    debug_help = \
+        'Turns on debug mode. Currently only works for \'html\' format. Only' \
+        ' feature of debug mode currently is that it prints a stringified ' \
+        'JSON representation of survey to the JavaScript console.'
+    parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
 
     # Survey Form Component Highlighting
     highlighting_help = 'Turns on highlighting of various portions of survey' \

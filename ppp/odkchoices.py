@@ -49,9 +49,14 @@ class OdkChoices:
         Raises:
             InvalidLanguageException
         """
-        lang_col = 'label::{}'.format(lang) if lang else 'label'
         try:
-            labels = [d[lang_col] for d in self.data]
+            if lang:
+                if 'label::{}'.format(lang) in self.data[0]:
+                    labels = [d['label::{}'.format(lang)] for d in self.data]
+                else:
+                    labels = [d['label:{}'.format(lang)] for d in self.data]
+            else:
+                labels = [d['label'] for d in self.data]
             return labels
         except (KeyError, IndexError):
             msg = 'Language {} not found in choice list {}.'\
@@ -89,6 +94,9 @@ class OdkChoices:
                     these_langs.add('')  # Default language
                 elif k.startswith('label::'):
                     lang = k[len('label::'):]
+                    these_langs.add(lang)
+                elif k.startswith('label:'):
+                    lang = k[len('label:'):]
                     these_langs.add(lang)
             if not langs:
                 langs = these_langs

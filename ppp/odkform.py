@@ -1,5 +1,5 @@
 """Module for the OdkForm class."""
-import os.path
+import os
 
 from ppp.config import TEMPLATE_ENV
 from ppp.definitions.error import OdkFormError
@@ -72,6 +72,7 @@ class OdkForm:
          'phonenumber', 'hidden', 'hidden string', 'hidden int',
          'hidden geopoint']
     warnings = None
+    # from pdb import set_trace; set_trace()
 
     @classmethod
     def from_file(cls, path):
@@ -158,12 +159,16 @@ class OdkForm:
         settings (dict): A dictionary represetnation of the original 'settings'
             worksheet of an ODK XLSForm.
         wb (Workbook): A Workbook object representing an XLSForm.
-        lang (str): The requested render lagnuage of the form.
+        lang (str): The requested render language of the form.
 
         Returns:
             str: The title.
         """
-        lookup_title = 'ppp_form_title::'+lang if lang else 'form_title'
+        lookup_title = 'form_title'
+        if lang:
+            try1 = settings.get('ppp_form_title' + '::' + lang)
+            try2 = settings.get('ppp_form_title' + ':' + lang)
+            lookup_title = try1 if try1 else try2
         backup_title = os.path.split(wb.file)[1]
         return settings.get(lookup_title, backup_title)
 

@@ -53,7 +53,8 @@ test:
 testdoc:
 	${PYTHON} -m test.test --doctests-only
 test_all: test testdoc
-
+test_survey_cto: #TODO: run a single unit test
+	${PYTHON} -m unittest discover -v
 
 # Package Management
 build:

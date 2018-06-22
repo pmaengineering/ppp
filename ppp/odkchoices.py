@@ -1,5 +1,6 @@
 """Module for the OdkChoices class."""
 from ppp.definitions.error import InvalidLanguageException
+from ppp.definitions.constants import CHOICE_NAME_VARIATIONS
 
 
 class OdkChoices:
@@ -49,10 +50,14 @@ class OdkChoices:
         Raises:
             InvalidLanguageException
         """
-        lang_col = 'label::{}'.format(lang) if lang else 'label'
+        label_variations = ['label']
+        if lang:
+            label_variations += \
+                [x.format(lang) for x in ('label::{}', 'label:{}')]
         try:
-            labels = [d[lang_col] for d in self.data]
-            return labels
+            for label in label_variations:
+                if label in self.data[0]:
+                    return [d[label] for d in self.data]
         except (KeyError, IndexError):
             msg = 'Language {} not found in choice list {}.'\
                 .format(lang, self.list_name)
@@ -67,9 +72,16 @@ class OdkChoices:
         Returns:
             list: Choice variable names and associated labels for choice list.
         """
+        rows = enumerate(self.data)
         labels = self.labels(lang)
-        return [{'name': row['name'], 'label': labels[i]} for i, row in
-                enumerate(self.data)]
+        formatted_rows = []
+        for i, row in rows:
+            formatted_row = {'label': labels[i]}
+            for x in CHOICE_NAME_VARIATIONS:
+                if x in row:
+                    formatted_row[x] = row[x]
+            formatted_rows.append(formatted_row)
+        return formatted_rows
 
     def choice_langs(self):
         """Discover all languages for these choices.
@@ -89,6 +101,9 @@ class OdkChoices:
                     these_langs.add('')  # Default language
                 elif k.startswith('label::'):
                     lang = k[len('label::'):]
+                    these_langs.add(lang)
+                elif k.startswith('label:'):
+                    lang = k[len('label:'):]
                     these_langs.add(lang)
             if not langs:
                 langs = these_langs

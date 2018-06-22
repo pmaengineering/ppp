@@ -3,7 +3,8 @@ import textwrap
 
 from ppp.config import TEMPLATE_ENV
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN, \
+    RELEVANCE_FIELD_TOKENS, PPP_REPLACEMENTS_FIELDS
 from ppp.definitions.error import OdkChoicesError
 
 
@@ -196,8 +197,9 @@ class OdkPrompt:
         """
         new_row = row.copy()
         for field in TRUNCATABLE_FIELDS:
-            new_row[field + '_original'] = new_row[field]
-            new_row[field] = self.truncate_text(new_row[field])
+            if field in new_row:
+                new_row[field + '_original'] = new_row[field]
+                new_row[field] = self.truncate_text(new_row[field])
         return new_row
 
     def format_media_labels(self, row):
@@ -242,8 +244,10 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        if prompt['relevant'] == IGNORE_RELEVANT_TOKEN:
-            prompt['relevant'] = ''
+        for x in RELEVANCE_FIELD_TOKENS:
+            if x in prompt:
+                if prompt[x] == IGNORE_RELEVANT_TOKEN:
+                    prompt[x] = ''
         return prompt
 
     @staticmethod
@@ -287,16 +291,15 @@ class OdkPrompt:
                                  'ppp_'+to_replace+':'+lang]
                 for replace_with in replace_withs:
                     if key == replace_with and prompt[replace_with]:
-                        if to_replace.startswith('label'):
-                            prompt[to_replace] = [prompt[replace_with]]
-                        elif to_replace.startswith('relevant'):
-                            prompt[to_replace] = prompt[replace_with]
+                        for x in PPP_REPLACEMENTS_FIELDS:
+                            if to_replace.startswith(x):
+                                prompt[to_replace] = [prompt[replace_with]]
 
             if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [
-                        {'name': '', 'label': i['label']}
+                        {'name': '', 'value': '', 'label': i['label']}
                         for i in prompt['input_field']
                     ]
 

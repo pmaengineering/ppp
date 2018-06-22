@@ -2,21 +2,18 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import unittest
-import doctest
 import os
 import subprocess
-from argparse import ArgumentParser
+from glob import glob
 
 from ppp.odkform import OdkForm
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
+from test.config import TEST_FILES_DIR, TEST_PACKAGES
+from test.utils import get_args, get_test_suite
 # from pmix.odkchoices import OdkChoices  # TODO
 # from pmix.odkrepeat import OdkRepeat  # TODO
 # from pmix.odktable import OdkTable  # TODO
-
-TEST_PACKAGES = ['ppp', 'test']
-TEST_DIR = os.path.dirname(os.path.realpath(__file__)) + '/'
-TEST_FILES_DIR = TEST_DIR + 'files/'
 
 
 # # Mock Objects
@@ -38,8 +35,52 @@ class MockForm(OdkForm):
 # # Unit Tests
 # pylint: disable=too-few-public-methods
 # - PyLint check not apply? - http://pylint-messages.wikidot.com/messages:r0903
-class PppTest:
+class PppTest(unittest.TestCase):
     """Base class for PPP package tests."""
+
+    @classmethod
+    def files_dir(cls):
+        """Return name of test class."""
+        return TEST_FILES_DIR + cls.__name__
+
+    def input_path(self):
+        """Return path of input file folder for test class."""
+        return self.files_dir() + '/input/'
+
+    def output_path(self):
+        """Return path of output file folder for test class."""
+        return self.files_dir() + '/output/'
+
+    def input_files(self):
+        """Return paths of input files for test class."""
+        all_files = glob(self.input_path() + '*')
+        # With sans_temp_files, you can have XlsForms open while testing.
+        sans_temp_files = [x for x in all_files
+                           if not x[len(self.input_path()):].startswith('~$')]
+        return sans_temp_files
+
+    def output_files(self):
+        """Return paths of input files for test class."""
+        return glob(self.output_path() + '*')
+
+    def standard_convert(self):
+        """Converts input/* --> output/*. Returns n files each."""
+        in_files = self.input_files()
+        out_dir = self.output_path()
+
+        subprocess.call(['rm', '-rf', out_dir])
+        os.makedirs(out_dir)
+        command = ['python', '-m', 'ppp'] + in_files + ['-o', out_dir]
+        subprocess.call(command)
+
+        expected = 'N files: ' + str(len(in_files))
+        actual = 'N files: ' + str(len(self.output_files()))
+        return expected, actual
+
+    def standard_conversion_test(self):
+        """Checks standard convert success."""
+        expected, actual = self.standard_convert()
+        self.assertEqual(expected, actual)
 
     @staticmethod
     def get_forms(data):
@@ -56,7 +97,7 @@ class PppTest:
         return forms
 
 
-class OdkPromptTest(unittest.TestCase, PppTest):
+class OdkPromptTest(PppTest):
     """Unit tests for the OdkPrompt class."""
 
     media_types = ['image', 'audio', 'video', 'media::image',
@@ -181,7 +222,7 @@ class OdkGroupTest(unittest.TestCase):
             self.assertTrue(output == expected_output, msg=msg)
 
 
-class OdkFormTest(unittest.TestCase, PppTest):
+class OdkFormTest(PppTest):
     """Unit tests for the OdkForm class."""
 
     def setUp(self):
@@ -250,8 +291,8 @@ class MultiConversionTest(unittest.TestCase):
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
         command = ['python', '-m', 'ppp'] + src_files + \
-                  ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full', '-l',
-                   'English', 'Français']
+                  ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full',
+                   '-l', 'English', 'Français']
         subprocess.call(command)
 
         out_dir_ls_input = str(os.listdir(out_dir))
@@ -275,60 +316,45 @@ class MultiConversionTest(unittest.TestCase):
         self.assertEqual(expected_output, str(out_dir_ls_input))
 
 
-def get_args():
-    """CLI for PPP test runner."""
-    desc = 'Run tests for PPP package.'
-    parser = ArgumentParser(description=desc)
-    doctests_only_help = 'Specifies whether to run doctests only, as ' \
-                         'opposed to doctests with unittests. Default is' \
-                         ' False.'
-    parser.add_argument('-d', '--doctests-only', action='store_true',
-                        help=doctests_only_help)
-    args = parser.parse_args()
-    return args
+class MultipleFieldLanguageDelimiterSupport(PppTest):
+    """Support for both : and :: to be used as delimiter betw field & lang.
 
-
-def get_test_modules(test_package):
-    """Get files to test.
-
-    Args:
-        test_package (str): The package containing modules to test.
-
-    Returns:
-        list: List of all python modules in package.
-
+        This test checks conversion for the ':' delimiter, specifically, which
+        is occasionally used in some XlsForm specs, such as SurveyCTO. The '::'
+        delimiter case is already covered by other tests since they use
+        mostly vanilla ODK XlsForms using the '::' delimiter.
     """
-    if test_package == 'ppp':  # TODO: Make dynamic.
-        root_dir = TEST_DIR + "../" + "pmix/ppp"
-    elif test_package == 'test':
-        root_dir = TEST_DIR
-    else:
-        raise Exception('Test package not found.')
 
-    test_modules = []
-    for dirpath, dummy, filenames in os.walk(root_dir):
-        for filename in filenames:
-            if filename.endswith('.py'):
-                filename = filename[:-3]
-                sub_pkg = dirpath.replace(root_dir, '').replace('/', '.')
-                test_module = test_package + sub_pkg + '.' + filename
-                test_modules.append(test_module)
-    return test_modules
+    def test_convert(self):
+        self.standard_conversion_test()
 
 
-def get_test_suite(test_packages):
-    """Get suite to test.
+class SkipPatternColRelevantOrRelevance(PppTest):
+    """Allow [relevant || relevance]"""
 
-    Returns:
-        TestSuite: Suite to test.
+    def test_convert(self):
+        self.standard_conversion_test()
 
-    """
-    suite = unittest.TestSuite()
-    for package in test_packages:
-        pkg_modules = get_test_modules(test_package=package)
-        for pkg_module in pkg_modules:
-            suite.addTest(doctest.DocTestSuite(pkg_module))
-    return suite
+
+class ChoiceColNameOrValue(PppTest):
+    """Allow choices worksheet col [name || value]"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class SpacesInFileName(PppTest):
+    """Spaces in file name: Replace or allow"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class SurveyCtoSupport(PppTest):
+    """Check for successful conversion of an actual SurveyCtoFile"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
 
 
 if __name__ == '__main__':

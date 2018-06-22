@@ -3,7 +3,8 @@ import textwrap
 
 from ppp.config import TEMPLATE_ENV
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN
+    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN, \
+    RELEVANCE_FIELD_TOKENS, PPP_REPLACEMENTS_FIELDS
 from ppp.definitions.error import OdkChoicesError
 
 
@@ -108,8 +109,8 @@ class OdkPrompt:
     def reformat_default_lang_vars(row, lang):
         """Reformat default language variables.
 
-        Reformat '::<language_name>' style variable names to remove the
-        '::<language_name>', leaving just the variable.
+        Reformat '::/:<language_name>' style variable names to remove the
+        '::/:<language_name>', leaving just the variable.
 
         Args:
             row (dict): The dictionary representation of prompt.
@@ -122,6 +123,8 @@ class OdkPrompt:
         for field in LANGUAGE_DEPENDENT_FIELDS:
             if field + '::' + lang in new_row:
                 new_row[field] = new_row[field + '::' + lang]
+            elif field + ':' + lang in new_row:
+                new_row[field] = new_row[field + ':' + lang]
         return new_row
 
     # pylint: disable=too-many-branches
@@ -136,7 +139,7 @@ class OdkPrompt:
 
         Args:
             row (dict): The dictionary representation of prompt.
-            prefix (str): Prefix for media fields allowed by ODK; 'media::'.
+            prefix (str): Prefix for media fields allowed by ODK; 'media::/:'.
 
         Returns:
             dict: Reformatted representation.
@@ -194,8 +197,9 @@ class OdkPrompt:
         """
         new_row = row.copy()
         for field in TRUNCATABLE_FIELDS:
-            new_row[field + '_original'] = new_row[field]
-            new_row[field] = self.truncate_text(new_row[field])
+            if field in new_row:
+                new_row[field + '_original'] = new_row[field]
+                new_row[field] = self.truncate_text(new_row[field])
         return new_row
 
     def format_media_labels(self, row):
@@ -207,21 +211,22 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation.
         """
-        arbitrary_media_prefix = 'media::'
-        new_row = \
-            self.create_additional_media_fields(row, arbitrary_media_prefix)
-        for key, val in new_row.items():
-            for field in MEDIA_FIELDS:
-                if key.startswith(field) and val:
-                    formatted_media_label = val
-                    if val[0] != '[' and val[-1] != ']':
-                        formatted_media_label = '[' + val + ']'
-                    row[field] = formatted_media_label
-                    row[key] = formatted_media_label
-                    if field.startswith(arbitrary_media_prefix):
-                        non_prefixed_mf = field.replace(
-                            arbitrary_media_prefix, '')
-                        row[non_prefixed_mf] = formatted_media_label
+        arbitrary_media_prefixes = ['media::', 'media:']
+        for arb in arbitrary_media_prefixes:
+            new_row = \
+                self.create_additional_media_fields(row, arb)
+            for key, val in new_row.items():
+                for field in MEDIA_FIELDS:
+                    if key.startswith(field) and val:
+                        formatted_media_label = val
+                        if val[0] != '[' and val[-1] != ']':
+                            formatted_media_label = '[' + val + ']'
+                        row[field] = formatted_media_label
+                        row[key] = formatted_media_label
+                        if field.startswith(arb):
+                            non_prefixed_mf = field.replace(
+                                arb, '')
+                            row[non_prefixed_mf] = formatted_media_label
         return row
 
     @staticmethod
@@ -239,8 +244,10 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        if prompt['relevant'] == IGNORE_RELEVANT_TOKEN:
-            prompt['relevant'] = ''
+        for x in RELEVANCE_FIELD_TOKENS:
+            if x in prompt:
+                if prompt[x] == IGNORE_RELEVANT_TOKEN:
+                    prompt[x] = ''
         return prompt
 
     @staticmethod
@@ -280,19 +287,19 @@ class OdkPrompt:
                     continue
 
             for to_replace in PRESETS[preset]['field_replacements']:
-                replace_with = 'ppp_'+to_replace+'::'+lang
-
-                if key == replace_with and prompt[replace_with]:
-                    if to_replace.startswith('label'):
-                        prompt[to_replace] = [prompt[replace_with]]
-                    elif to_replace.startswith('relevant'):
-                        prompt[to_replace] = prompt[replace_with]
+                replace_withs = ['ppp_'+to_replace+'::'+lang,
+                                 'ppp_'+to_replace+':'+lang]
+                for replace_with in replace_withs:
+                    if key == replace_with and prompt[replace_with]:
+                        for x in PPP_REPLACEMENTS_FIELDS:
+                            if to_replace.startswith(x):
+                                prompt[to_replace] = [prompt[replace_with]]
 
             if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [
-                        {'name': '', 'label': i['label']}
+                        {'name': '', 'value': '', 'label': i['label']}
                         for i in prompt['input_field']
                     ]
 
@@ -315,14 +322,17 @@ class OdkPrompt:
         value = None
         try:
             if lang:
-                key = '{}::{}'.format(field, lang)
+                if '{}::{}'.format(field, lang) in self.row:
+                    key = '{}::{}'.format(field, lang)
+                else:
+                    key = '{}:{}'.format(field, lang)
                 value = self.row[key]
             else:
                 keys = (k for k in self.row if k.startswith(field))
                 first = sorted(keys)[0]
                 value = self.row[first]
         except (KeyError, IndexError):
-            # KeyError: self.row does not have the key '{}::{}'.
+            # KeyError: self.row does not have the key '{}::/:{}'.
             # IndexError: `keys` (filtered by field) is empty list.
             pass
         return value

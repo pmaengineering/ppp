@@ -7,7 +7,7 @@ packages.append('ppp.test')
 
 setup(
     name='odk_ppp',  # ppp was already taken
-    version='1.1.0',
+    version='1.1.1',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',

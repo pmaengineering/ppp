@@ -54,6 +54,7 @@ class PppTest(unittest.TestCase):
     def input_files(self):
         """Return paths of input files for test class."""
         all_files = glob(self.input_path() + '*')
+        # With sans_temp_files, you can have XlsForms open while testing.
         sans_temp_files = [x for x in all_files
                            if not x[len(self.input_path()):].startswith('~$')]
         return sans_temp_files
@@ -66,7 +67,6 @@ class PppTest(unittest.TestCase):
         """Converts input/* --> output/*. Returns n files each."""
         in_files = self.input_files()
         out_dir = self.output_path()
-        out_files = self.output_files()
 
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
@@ -74,7 +74,7 @@ class PppTest(unittest.TestCase):
         subprocess.call(command)
 
         expected = 'N files: ' + str(len(in_files))
-        actual = 'N files: ' + str(len(out_files))
+        actual = 'N files: ' + str(len(self.output_files()))
         return expected, actual
 
     def standard_conversion_test(self):
@@ -317,7 +317,40 @@ class MultiConversionTest(unittest.TestCase):
 
 
 class MultipleFieldLanguageDelimiterSupport(PppTest):
-    """Support for both : and :: to be used as delimiter betw field & lang."""
+    """Support for both : and :: to be used as delimiter betw field & lang.
+
+        This test checks conversion for the ':' delimiter, specifically, which
+        is occasionally used in some XlsForm specs, such as SurveyCTO. The '::'
+        delimiter case is already covered by other tests since they use
+        mostly vanilla ODK XlsForms using the '::' delimiter.
+    """
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class SkipPatternColRelevantOrRelevance(PppTest):
+    """Allow [relevant || relevance]"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class ChoiceColNameOrValue(PppTest):
+    """Allow choices worksheet col [name || value]"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class SpacesInFileName(PppTest):
+    """Spaces in file name: Replace or allow"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+class SurveyCtoSupport(PppTest):
+    """Check for successful conversion of an actual SurveyCtoFile"""
 
     def test_convert(self):
         self.standard_conversion_test()

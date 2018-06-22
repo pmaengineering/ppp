@@ -1,5 +1,6 @@
 """Module for the OdkChoices class."""
 from ppp.definitions.error import InvalidLanguageException
+from ppp.definitions.constants import CHOICE_NAME_VARIATIONS
 
 
 class OdkChoices:
@@ -49,15 +50,14 @@ class OdkChoices:
         Raises:
             InvalidLanguageException
         """
+        label_variations = ['label']
+        if lang:
+            label_variations += \
+                [x.format(lang) for x in ('label::{}', 'label:{}')]
         try:
-            if lang:
-                if 'label::{}'.format(lang) in self.data[0]:
-                    labels = [d['label::{}'.format(lang)] for d in self.data]
-                else:
-                    labels = [d['label:{}'.format(lang)] for d in self.data]
-            else:
-                labels = [d['label'] for d in self.data]
-            return labels
+            for label in label_variations:
+                if label in self.data[0]:
+                    return [d[label] for d in self.data]
         except (KeyError, IndexError):
             msg = 'Language {} not found in choice list {}.'\
                 .format(lang, self.list_name)
@@ -72,9 +72,16 @@ class OdkChoices:
         Returns:
             list: Choice variable names and associated labels for choice list.
         """
+        rows = enumerate(self.data)
         labels = self.labels(lang)
-        return [{'name': row['name'], 'label': labels[i]} for i, row in
-                enumerate(self.data)]
+        formatted_rows = []
+        for i, row in rows:
+            formatted_row = {'label': labels[i]}
+            for x in CHOICE_NAME_VARIATIONS:
+                if x in row:
+                    formatted_row[x] = row[x]
+            formatted_rows.append(formatted_row)
+        return formatted_rows
 
     def choice_langs(self):
         """Discover all languages for these choices.

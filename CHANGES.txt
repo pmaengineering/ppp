@@ -1,3 +1,6 @@
+v1.1.1, 2016-06-22
+* Fixed a bug in which the following tests were not passing: test_multi_conversion.
+
 v1.1.0, 2016-06-22
  * Began adding support for several XlsForm variations that can appear in SurveyCTO forms.
 

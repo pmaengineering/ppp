@@ -3,8 +3,10 @@
                         {% set label_hint_highlight = ' bg-light-green' %}
                         {% set relevant_highlight = ' bg-light-green' %}
                       {% endif %}
-                      <tr>
-                        <td class="group-header" colspan="2">
+                      <tr class="table-header">
+                        <td class="question-cell"></td>
+                        <td class="response-cell">
+                        <!--<td class="group-header" colspan="2">-->
                           <div class="header-container flex-container-row">
                             <div class="align-left {{ name_highlight }}">
                               {% if question.name %}

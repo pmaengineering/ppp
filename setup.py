@@ -7,7 +7,7 @@ packages.append('ppp.test')
 
 setup(
     name='odk_ppp',  # ppp was already taken
-    version='1.1.2',
+    version='1.1.3',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
@@ -35,9 +35,6 @@ setup(
     install_requires=[
         'xlrd>=0.9.3',
         'Jinja2>=2.9.6'
-    ],
-    depenency_links=[  # update to pma2020 url when migrated
-        'https://github.com/jkpr/pmix/zipball/'
-        'ee41fccebcbea7beb14a8188daddea51cb1bda35'
+        'pmix==0.2.2'
     ]
 )

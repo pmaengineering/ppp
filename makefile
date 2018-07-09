@@ -3,7 +3,7 @@ SRC=./pmix/
 TEST=./test/
 
 
-.PHONY: lint tags ltags test all lint_all codestyle docstyle server serve lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test paper build dist pypi_push_test pypi_push pypi_test pip_test pypi pip
+.PHONY: lint tags ltags test all lint_all codestyle docstyle lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test paper build dist pypi_push_test pypi_push pypi_test pip_test pypi pip
 
 # Batched Commands
 # - Code & Style Linters
@@ -68,17 +68,6 @@ pypi_test: pypi_push_test
 pip_test: pypi_push_test
 pypi: pypi_push
 pip: pypi_push
-
-# Server Management
-# - PMA2020 Linode Production Deployment, as of 2018/05
-ssh:
-	ssh root@192.155.80.11
-
-
-# Application Management
-serve:server
-server:
-	gunicorn pmaapi.__main__:APP
 
 # Scripts
 paper:

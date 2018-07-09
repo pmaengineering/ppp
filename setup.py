@@ -7,7 +7,7 @@ packages.append('ppp.test')
 
 setup(
     name='odk_ppp',  # ppp was already taken
-    version='1.1.1',
+    version='1.1.3',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
@@ -35,5 +35,6 @@ setup(
     install_requires=[
         'xlrd>=0.9.3',
         'Jinja2>=2.9.6'
+        'pmix==0.2.2'
     ]
 )

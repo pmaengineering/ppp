@@ -1,0 +1,2552 @@
+<html>
+    <head>
+        <title>demo.xlsx</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<!--suppress CssUnusedSymbol -->
+<style>
+    /* Situational */
+    @media print {
+        @-moz-document url-prefix() {
+            .flex-container-column,
+            .flex-container-row {
+               display: block !important;
+            }
+        }
+    }
+    /* Elements */
+    body {
+        font-size: 14px;
+        font-family: 'Arial', serif;
+    }
+    table {
+        width: 100%;
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+    /*table tr {*/
+        /*page-break-before: always;*/
+        /*page-break-after: always;*/
+    /*}*/
+    h1 {
+        margin-bottom: 0;
+        font-size: 26px;
+        text-transform: uppercase;
+        padding-bottom: 30px;
+        border-bottom: 3px black solid;
+    }
+    h4{
+        font-weight: 100;
+    }
+    hr {
+        margin-top: 3px;
+        border-top: 1px black solid;
+        border-bottom: snow;
+    }
+    /* Classes - Positioning */
+    #survey {
+        max-width: 1200px;
+    }
+    #container {
+    }
+    #identification_section {
+    }
+    .section {
+        width: 80%;
+        margin: auto;
+    }
+    .next-section {
+        margin-top: 10px;
+        cursor: pointer;
+        outline: none;
+    }
+    .radio-container {
+    }
+    .center {
+        text-align: center;
+    }
+    .margin-fix {
+        margin: 5px 0;
+    }
+    .bottom-fix {
+        position: relative;
+        bottom: -250px;
+    }
+    .bottom-border {
+        border-bottom: 1px black solid;
+    }
+    .height-fix {
+        height:100%;
+    }
+    .align-top {
+        vertical-align: top;
+    }
+    .align-bottom {
+        vertical-align: bottom;
+    }
+    .align-text-top {
+        vertical-align: text-top;
+    }
+    .align-text-bottom {
+        vertical-align: text-bottom;
+    }
+    .align-left {
+        text-align: left;
+    }
+    .align-right {
+        text-align: right;
+    }
+    .header-container {
+        vertical-align: top;
+    }
+    /* Classes - Borders*/
+    .upper-border {
+        border-top: 1px black solid;
+    }
+    .left-border {
+        border-left: 1px black solid;
+    }
+    .response-cell {
+        width: 40%;
+        border-top: 1px black solid;
+        border-left: 1px black solid;
+        padding: 5px 5px 5px 5px;
+        height: 100%;
+    }
+    .flex-container-column {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+    .flex-container-row {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+    }
+    /*.response-cell div:first-child {*/
+        /*height: 100%;*/
+    /*}*/
+    .response-cell > :first-child {
+        height: 100%;
+    }
+    /*.input-container {*/
+        /*height: 100%;*/
+        /*vertical-align: middle;*/
+    /*}*/
+    /*.response-cell div:nth-child(2) {*/
+        /*height: 100%;*/
+        /*background-color: bisque;*/
+        /*vertical-align: middle;*/
+    /*}*/
+    .question-cell {
+        width: 60%;
+        border-top: 1px black solid;
+        padding: 5px 5px 5px 5px;
+    }
+    .border-top {
+        border-top: 1px black solid;
+    }
+    .upper-border-bolder {
+        border-top: 2px solid black;
+    }
+    .down-border {
+        border-bottom: 1px black solid;
+        border-top: 0.5px black solid;
+    }
+    .odk-table {
+        border-top: 1px solid;
+        padding: 0;
+    }
+    .odk-table-response-header {
+        border-bottom: 1px solid;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        border-left: 1px solid;
+    }
+    .odk-table-response {
+        text-align: center;
+        padding-top: 3px;
+        border-left: 1px solid;
+    }
+    .odk-table-item-label-cell {
+        width: 50%;
+        padding-left: 5px;
+        /*border-right: 1px solid;*/
+    }
+    /* Classes - Highlighting */
+    .bg-light-blue {
+        background-color: #e6ebf4;
+    }
+    .bg-light-green {
+        background-color: #e8f4e6;
+    }
+    .bg-light-red {
+        background-color: #f4e6ec;
+    }
+    /* Classes - Input */
+    .date-form {
+        text-align: right;
+    }
+    .input {
+        text-align: center;
+        border: none;
+        border-bottom: 1px black dashed;
+        width: 95%;
+        margin: 2.5%;
+        position: relative;
+        outline: none;
+    }
+    .date-input {
+        text-align: right;
+        border: none;
+        border-bottom: 1px black dashed;
+        outline: none;
+        width: 80%;
+    }
+    .textarea-input {
+        bottom: -15px;
+    }
+    .radio-input {
+        margin: 0;
+        position: relative;
+        top: 3px;
+        margin-left: 10px;
+    }
+    .input-margins {
+        /*margin-top: 20px;*/
+    }
+    .group-table {
+        border: 3px double;
+    }
+    .group-spacing {
+        height: 5px;
+    }
+    .group-header {
+        padding: 5px 5px 5px 5px;
+        vertical-align: top;
+    }
+    .table-header td {
+      border-top: none;
+    }
+    table td,
+    p {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      margin-top: 3px !important;
+      margin-bottom: 3px !important;
+    }
+    table td.question-cell {
+      padding-left: 0 !important;
+    }
+    .repeat-container {
+        /*width: 100%;*/
+        padding: 20px;
+        /*margin-left: -20px;*/
+        background-color: #e3e2e2;
+        border-top: 1px solid;
+    }
+    .repeat-table {
+        /*padding: 5% 5% 5% 5%;*/
+        background-color: white;
+    }
+    .repeat-header {
+        padding: 5px 5px 10px 5px;
+        vertical-align: top;
+        text-align: center;
+    }
+    .section-spacing {
+        height: 35px;
+        max-height: 35px;
+        border-top: 1px solid black;
+    }
+    /* Classes - Text */
+    #survey-heading {
+        text-align: center;
+    }
+    .section-header {
+        font-family: 'Arial', serif;
+        background-color: #D9D9D9;
+        text-align: center;
+        border-top: 1px solid black;
+        border-right: 1px solid black;
+        border-left: 1px solid black;
+        padding: 10px 5px 10px 5px;
+    }
+    .section-header-label {
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+    }
+    .section-header-hint {
+        font-style: italic;
+    }
+    .variable {
+        font-family: monospace;
+    }
+    .validation {
+        font-family: monospace;
+        /*margin: 5px 0 0 0;*/
+    }
+    .constraint {
+        font-family: monospace;
+        /*margin: 5px 0 0 0;*/
+    }
+    .relevant {
+        font-family: monospace;
+        text-align: right;
+        /*margin: 0 0 5px 0;*/
+        /*float: right;*/
+    }
+    .choice-filter {
+        font-family: monospace;
+        /*margin: 0 0 5px 0;*/
+        float: right;
+        text-align: right;
+    }
+    .choice-name {
+        font-family: monospace;
+        font-size: 0.9em;
+        color: #939393;
+    }
+    .link {
+        font-family: monospace;
+        color: blue;
+    }
+    .question-type {
+        /*font-size: 10px;*/
+        /*margin-left: 10px;*/
+        /*margin-top: 10px;*/
+        font-family: monospace;
+        text-align: left;
+        /*float: left;*/
+    }
+    .label {
+        font-family: 'Arial', serif;
+        font-size: 0.9em;
+    }
+    .hint {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        font-style: italic;
+    }
+    .media {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+    }
+    .media-items {
+        padding-bottom: 5px;
+    }
+    .validation-message {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        margin: 0;
+    }
+    .constraint-message {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        margin: 0;
+    }
+    .input-label {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+    }
+    .ppp-input {
+        font-style: italic;
+        padding: 0.4em 0 0.4em 0;
+    }
+    .side-letter-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -25px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-group-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -29px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-repeat-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -50px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-right {
+        font-family: 'Arial', serif;
+        margin-right: -25px;
+        float: right;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+    .side-letter-relevant {
+        margin-top: -15px
+    }
+    .side-letter-choice-filter {
+        margin-top: 0;
+    }
+    .side-letter-group-right {
+        font-family: 'Arial', serif;
+        margin-right: -29px;
+        float: right;
+        font-size: 13px;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+    .side-letter-repeat-right {
+        font-family: 'Arial', serif;
+        margin-right: -50px;
+        float: right;
+        font-size: 13px;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+
+    /*span.side-letter-group-right,*/
+    /*span.side-letter-choice-filter,*/
+    /*span.side-letter-choice-filter.side-letter-right,*/
+    /*span.side-letter-relevant.side-letter-right,*/
+    /*span.side-letter-relevant,*/
+    /*span.side-letter-right {*/
+      /*position: absolute;*/
+      /*margin: 0;*/
+      /*top: 0;*/
+    /*}*/
+
+    span.side-letter-group-right {
+      right: -28px;
+    }
+    span.side-letter-right {
+      right: -25px;
+    }
+    div.relevant.bg-light-green,
+    div.choice-filter.align-bottom.align-text-bottom.bg-light-green {
+      position: relative;
+    }
+
+
+</style>
+
+<!-- for some reason the below does not work -->
+    </head>
+    <body id="survey">
+        <div id="container">
+            <div id="identification_section" class="section">
+                <h2 id="survey-heading">demo.xlsx</h2>
+                <table>
+                  <tbody>                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">001b. Enter your name below. bla bla bla bla</p>
+                                  <p class="hint">Please record your name</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="text" class="input" title="" name="" id=""/>
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">Whoa - does this question sync? 2</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${begin_interview}='yes') and (${available}='yes')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Never attended <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Primary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Secondary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Tertiary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">No response <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Never Attended <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Primary (1-8) <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Secondary (9-12) <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Technical/Vocational <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Higher <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">Don’t know <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_12"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_12">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">001b. Enter your name below.</p>
+                                  <p class="hint">Please record your name</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="text" class="input" title="" name="" id=""/>
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">003a. Region</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">003b. Zone</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">003c. District</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">003d. Locality name</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">004. Enumeration area</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">005. Structure number</p>
+                                  <p class="hint">Please record the structure number from the household listing form.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="number" class="input" title="" name="hh_num" id="" min="0" />
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">006. Household number</p>
+                                  <p class="hint">Please record the household number from the household listing form.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="number" class="input" title="" name="hh_num" id="" min="0" />
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">CHECK: Have you already sent a form for this structure and household?</p>
+                                  <p class="hint">DO NOT DUPLICATE ANY FORM UNLESS YOU ARE CORRECTING A MISTAKE IN AN EARLIER FORM.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">WARNING: Please ensure that the data processing team is aware of the duplication.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${hh_duplicate_check} = 'yes')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">CHECK: Why are you resending this form?</p>
+                                  <p class="hint">Choose all that apply.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${hh_duplicate_check} = 'yes')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': 'There are new household members on this form'}" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">There are new household members on this form <span class="choice-name"></span></label>
+                                        <br/>
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': 'I am correcting a mistake made on a previous form'}" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">I am correcting a mistake made on a previous form <span class="choice-name"></span></label>
+                                        <br/>
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': 'The previous form disappeared from my phone without being sent'}" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">The previous form disappeared from my phone without being sent <span class="choice-name"></span></label>
+                                        <br/>
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': 'I submitted the previous form and my supervisor told me that it was not received'}" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">I submitted the previous form and my supervisor told me that it was not received <span class="choice-name"></span></label>
+                                        <br/>
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': 'Other reason(s)'}" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Other reason(s) <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">WARNING: Each household should have ONLY ONE household roster with all household members listed on the same form.</p>
+                                  <p class="hint">Please contact the central staff before sending this form.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    selected (${resubmit_reasons}, 'new_members')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">009. Is a member of the household and competent respondent present and available to be interviewed today?</p>
+                                  <p class="hint">You should try 2 times to find the same respondent that did the original HH interview.   After a second failed attempt you may interview a different household member.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">INFORMED CONSENT</p>
+                                  <p class="hint">Find a competent member of the household. Read the greeting on the following screen.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${available} = 'yes'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">Hello. My name is ______________________________ and I am working for the Addis Ababa University, and Federal Ministry of Health.  Now I will read a statement explaining this investigation. Our team collects information on family planning in Ethiopia. We would like to ask you about the characteristics of your household, as well as activities related to family planning. information about you may be used for activities and family planning services in Ethiopia. data collected will be analyzed by researchers, but your name will be removed from all analyzes, so that your information remains anonymous. You can refuse to answer questions you will be asked many times as you want, and decide to stop the survey at any time. Do you have questions about this survey?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">009a. May I begin the interview now?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${available} = 'yes'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">G. Do you recall a woman coming to your home asking questions about the members of your household, water, and sanitation?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${available}='yes')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">The enumerator interviewed someone else in my household previously, not me. <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">010. Interviewer's name: ${your_name}</p>
+                                  <p class="hint">Mark your name as a witness to the consent process.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1"> <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">010. Interviewer's name</p>
+                                  <p class="label">
+Please record your name as a witness to the consent process. You previously entered "${name_typed}."</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="text" class="input" title="" name="" id=""/>
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">011. Respondent's first name.</p>
+                                  <p class="hint">You should try 2 times to find the same respondent that did the original HH interview.   After a second failed attempt you may interview a different household member.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${begin_interview}='yes') and (${available}='yes')
+                                  </div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="text" class="input" title="" name="" id=""/>
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">I. What is the highest level of school you attended?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (${begin_interview}='yes') and (${available}='yes')
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Never attended <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Primary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Secondary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Tertiary <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">No response <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Never Attended <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Primary (1-8) <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Secondary (9-12) <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Technical/Vocational <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Higher <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">Don’t know <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_12"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_12">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                      <tr>
+                        <td class="section-spacing" colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class="section-header" colspan="2">
+                            <h3 class="section-header-label">Section 1 – Household Roster - Reinterview</h3>
+                            <p class="section-header-hint">I am now going to ask a series of questions about each usual member of the household or anyone who slept in the house last night.</p>
+                        </td>
+                      </tr>                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">101. Name of household member / visitor</p>
+                                  <p class="hint">Start with the head of the household</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="text" class="input" title="" name="" id=""/>
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">101a. Is this person the respondent?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                      <input type="checkbox" class="" name="{'name': '', 'value': '', 'label': ''}" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1"> <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">102. What is ${firstname}'s relationship to the head of household?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Head <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Wife/Husband <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Son/Daughter <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Son/Daughter-in-law <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Grandchild <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Parent <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Parent in law <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Brother/Sister <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">House help <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Other <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">Don't know <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_12"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_12">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">103. Is ${firstname} male or female?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Male <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Female <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">104. How old was ${firstname} at their last birthday?</p>
+                                  <p class="hint">If less than one year old, record 0</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class=" input-margins">
+
+
+                            <!--suppress XmlDuplicatedId -->
+                              <input type="number" class="input" title="" name="hh_num" id="" min="0" />
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">105. What is ${firstname}'s current marital status?</p>
+                                  <p class="hint">If not married, probe to determine if they have ever been married and, if so, if they are divorced/separated or widowed.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${age} >= 10
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Married <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Living with a partner <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Divorced / separated <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Widow / widower <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Never married <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">106. Does ${firstname} usually live here?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">107. Did ${firstname} stay here last night?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">ERROR: Members on household roster must usually live here or must have stayed here last night.</p>
+                                  <p class="label">Go back and remove this household member.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${usually_live} != 'yes' and ${last_night} != 'yes'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">LCL_101. What is the religion of ${firstname}?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${relationship} = 'head'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Orthodox <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Catholic <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Protestant <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Moslem <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Traditional <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Other <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">No religion <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">This person IS NOT eligible for the female respondent questionnaire.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    not(${eligible})
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">This person IS eligible for the female respondent questionnaire.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${eligible}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">108. Are there any other usual members of your household or persons who slept in the house last night?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">There are other members of the household.  Move forward and select "Add Group"</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${more_hh_members} = 'yes'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">There are no other members of the household.  Move forward and select "Do Not Add"</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${more_hh_members} = 'no'
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">ERROR: There is no household head. </p>
+                                  <p class="label">Go back, select a head.</p>
+                                  <p class="label">For each member, check that the relationship to the household head is accurate.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${heads} = 0 and ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">ERROR: There are ${heads} household heads selected: 
+${head_name_joined}</p>
+                                  <p class="label">Go back, select only one head.</p>
+                                  <p class="label">For each member, check that the relationship to the household head is accurate.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${heads} > 1
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">The respondent must be in the roster. Only one person in the roster can be marked as the respondent. Go back and make sure that only one person is selected as the respondent.</p>
+                                  <p class="label">You entered the the following household members: ${names}</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    (sum(${respondent_match}) != 1) and ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">109. READ THIS CHECK OUT LOUD: There are ${num_HH_members} household members who are named ${names}.  Is this a complete list of the household members?</p>
+                                  <p class="hint">Remember to include all children in the household.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Yes <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                      <tr>
+                        <td class="section-spacing" colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class="section-header" colspan="2">
+                            <h3 class="section-header-label">Section 3 - Household Observation</h3>
+                            <p class="section-header-hint">Please observe the floors, roof and exterior walls.</p>
+                        </td>
+                      </tr>                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">301. Main material of the floor</p>
+                                  <p class="hint">Observe.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Earth/Sand <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Dung <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Wood Planks <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Palm/Bamboo <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Parquet or polished wood <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Vinyl/Asphalt strips <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Ceramic Tile/Terazzo <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Cement <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Carpet <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Other <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">302. Main material of the roof</p>
+                                  <p class="hint">Observe.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">No Roof <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Thatch/Leaf/Mud <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Rustic Mat/Plastic Sheets <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Reed/Bamboo <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Wood Planks <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Cardboard <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Corrugated Iron/Metal <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Asbestos/Cement Fiber <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Cement/Concrete <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Roof Shingles <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">Other <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_12"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_12">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">303. Main material of the exterior walls</p>
+                                  <p class="hint">Observe.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                                  <div class="relevant">
+                                    ${consent_obtained}
+                                  </div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">No Walls <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Cane/Trunks/Bamboo/Reed <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Dirt <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Bamboo/Wood with Mud <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Stone with Mud <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Uncovered Adobe <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Plywood <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Cardboard <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Reused Wood <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_10"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_10">Corrugated Iron/Metal <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_11"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_11">Cement <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_12"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_12">Stone with Lime/Cement <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_13"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_13">Bricks <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_14"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_14">Cement Blocks <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_15"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_15">Covered Adobe <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_16"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_16">Wood Planks/Shingles <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_17"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_17">Other <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_18"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_18">No response <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">Thank the respondent for his/her time.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                      <tr>
+                        <td class="section-spacing" colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class="section-header" colspan="2">
+                            <h3 class="section-header-label">Location and Questionnaire result</h3>
+                        </td>
+                      </tr>                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">096. Location
+Take a GPS point near the entrance to the household. Record location when the accuracy is smaller than 6m.</p>
+                                  <p class="hint">Note that GPS Coordinates can only be collected when outside.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">098. In what language was this interview conducted?</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">English <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">Amharic <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Oromiffa <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Tigringna <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Other <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                    <tr>
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top">
+                            </div>
+                            <div>
+                            <div class="align-text-top">
+                                  <p class="label">099. Questionnaire Result</p>
+                                  <p class="hint">Record the result of the questionnaire.</p>
+                            </div>
+                                <div class="align-bottom align-text-bottom">
+                                </div>
+                            </div>
+                        </td>                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type"></div>
+                            </div>
+
+                            <div class="">
+
+                                  <p><!--<form>-->
+                                    <input type="radio" class="" name="" id="_1"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_1">Completed <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_2"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_2">No household member at home or no competent respondent at home at time of visit <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_3"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_3">Postponed <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_4"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_4">Refused <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_5"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_5">Partly completed <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_6"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_6">Dwelling vacant or address not a dwelling <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_7"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_7">Dwelling destroyed <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_8"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_8">Dwelling not found <span class="choice-name"></span></label>
+                                        <br/>
+                                    <input type="radio" class="" name="" id="_9"/>
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="_9">Entire household absent for extended period <span class="choice-name"></span></label>
+                                  </p><!--</form>-->
+
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom">
+                            </div>
+                          </div>
+
+                        </td>                    </tr>
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    <script>
+        if (None === false && false === false) {
+            console.log('Conversion OK!')
+        }
+
+        if (false != false) {
+            data = JSON.stringify(false); // JSON.stringify auto-expands the whole object.
+            console.log('Data: ');
+            console.log(false);
+            // console.log(data);
+        }
+
+        messages = {};
+        if (None != false) {
+            messages.info = None
+        }
+        if (false != false) {
+            messages.warnings = false
+        }
+
+        if (None != false || false != false) {
+            console.log('Messages: ');
+            console.log(messages);
+        }
+    </script>
+</html>

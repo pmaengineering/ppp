@@ -3,18 +3,16 @@ from setuptools import setup, find_packages
 
 
 packages = find_packages(exclude=['test'])
-packages.append('ppp.test')
 
 setup(
     name='odk_ppp',  # ppp was already taken
-    version='1.1.3',
+    version='1.1.4',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
     packages=packages,
     package_dir={
-        'ppp': 'ppp',
-        'ppp.test': 'test'
+        'ppp': 'ppp'
     },
     package_data={
         'ppp': [
@@ -25,12 +23,11 @@ setup(
             'templates/content/prompt/inputs/*.html',
             'templates/content/repeat/*.html',
             'templates/content/table/*.html'
-        ],
-        'ppp.test': ['files/*.xlsx']
+        ]
     },
-
     license='LICENSE.txt',
-    description='Converts ODK XlsForm Excel files into readable formats.',
+    description='Converts XlsForm Excel files (ODK, SurveyCTO, etc) into '
+                'readable formats.',
     long_description=open('README.md').read(),
     install_requires=[
         'xlrd>=0.9.3',

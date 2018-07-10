@@ -3,8 +3,9 @@ import textwrap
 
 from ppp.config import TEMPLATE_ENV
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, PRESETS, IGNORE_RELEVANT_TOKEN, \
-    RELEVANCE_FIELD_TOKENS, PPP_REPLACEMENTS_FIELDS
+    LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
+    PRESETS, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
+    PPP_REPLACEMENTS_FIELDS
 from ppp.definitions.error import OdkChoicesError
 
 
@@ -99,8 +100,8 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            if k.startswith('label') or k.startswith('hint') \
-                    or k.startswith('constraint_message'):
+            if True in [k.startswith(x) for x in
+                        LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS]:
                 if v:
                     row[k] = v.split('\n\n')
         return row
@@ -248,6 +249,21 @@ class OdkPrompt:
             if x in prompt:
                 if prompt[x] == IGNORE_RELEVANT_TOKEN:
                     prompt[x] = ''
+        return prompt
+
+    @staticmethod
+    def streamline_constraint_message(prompt):
+        """Ensure constraint_message field name is consistent.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        old, new = 'constraint message', 'constraint_message'
+        if old in prompt:
+            prompt[new] = prompt[old]
         return prompt
 
     @staticmethod
@@ -456,6 +472,7 @@ class OdkPrompt:
         prompt = self.reformat_default_lang_vars(prompt, lang)
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
+        prompt = self.streamline_constraint_message(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
 

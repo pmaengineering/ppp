@@ -1,15 +1,24 @@
 # PPP
 ## About
-PPP is a Python3 tool that converts ODK XlsForm specification .xlsx Excel files to more human-readable, printable formats, commonly called "paper questionnaires".
+PPP is a project with the purpose of helping people convert XlsForm Excel files into more human-readable, printable formats, commonly called "paper questionnaires". Officially, PPP stands for "Pretty PDF Printer", but other formats are supported. The project consists of...
 
-Officially, PPP stands for "Pretty PDF Printer", but other formats are supported (see: the `--format` option described in the "CLI How-to").
+- A [web application](https://github.com/pma-2020/ppp)
+- A [command line tool](https://github.com/pma-2020/ppp-web)
+
+Both tools are open source and free to install. You can also use it online with no installation necessary, at http://ppp.pma2020.org.
+
+#### Samples
+- Source Excel file: [demo.xlsx](docs/demo.xlsx)
+- Converted to PDF: [demo.pdf](docs/demo.pdf)
+- Converted to DOC: [demo.doc](docs/demo.doc)
+- Manually saved as DOCX from DOC: [demo.docx](docs/demo.docx)
+- Converted to HTML: [demo.html](docs/demo.html)
+
+**Example Screenshot**
+
+![demo.png](docs/demo.png)
 
 ## Documentation for end users
-### Web App
-PPP also exists on the web!
-- Convert XlsForms online: http://ppp.pma2020.org
-- GitHub: https://github.com/pma-2020/ppp-web
-
 ### CLI
 #### Positional Arguments
 | Argument | Description |

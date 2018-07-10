@@ -1,3 +1,6 @@
+v1.1.4, 2016-07-10
+* Fixed a bug where the following elements were occasionally not being rendered: choice names/values, constraint messages. These issues typically affected only SurveyCTO forms.
+
 v1.1.3, 2016-07-09
 * Fixed a bug in which pmix dependency was not being installed correctly.
 
@@ -17,9 +20,8 @@ v1.0.2, 2016-06-12
  * Fix to include package data.
 
 v1.0.0, 2016-06-12
- * Initial release
+ * Initial release of independent package separate from Pmix package.
 
-#### Before splitting into repo independent from Pmix package.
 v0.2.1, 2017-11-04
  * Workbook and Xlsform classes for modeling Excel files
  * PPP sub-package to convert an ODK form to PDF and HTML

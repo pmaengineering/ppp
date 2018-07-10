@@ -26,8 +26,12 @@ MEDIA_FIELDS = tuple(x for x in XLSFORM_SUPPORTED_MULTIMEDIA_TYPES) + \
 #     MEDIA_FIELDS.append(x)
 #     for y in SYNTAX['xlsforms']['language_field_delimiters']:
 #         MEDIA_FIELDS.append('media' + y + x)
-LANGUAGE_DEPENDENT_FIELDS = \
-    ('label', 'hint', 'constraint_message', 'ppp_input') + MEDIA_FIELDS
+CONSTRAINT_MESSAGE_VARIATIONS = \
+    tuple('constraint{}message'.format(x) for x in [' ', '_'])
+LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS = ('label', 'hint', 'ppp_input') + \
+                            CONSTRAINT_MESSAGE_VARIATIONS
+LANGUAGE_DEPENDENT_FIELDS = LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS + \
+                            MEDIA_FIELDS
 RELEVANCE_FIELD_TOKENS = ('relevant', 'relevance')
 TRUNCATABLE_FIELDS = ('constraint',) + RELEVANCE_FIELD_TOKENS
 MULTI_ARGUMENT_CONVERSION_OPTIONS = ('preset', 'format', 'language')
@@ -59,8 +63,7 @@ PRESETS = {
     'minimal': {
         'field_replacements': PPP_REPLACEMENTS_FIELDS,
         'field_exclusions':
-            ('constraint', 'constraint_message', 'type') +
-            CHOICE_NAME_VARIATIONS,
+        ('constraint', 'constraint_message', 'type') + CHOICE_NAME_VARIATIONS,
         'other_specific_exclusions': ('choice names',),
         'general_exclusions': True,
         'render_settings': {

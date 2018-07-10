@@ -79,7 +79,7 @@ class OdkChoices:
             formatted_row = {'label': labels[i]}
             for x in CHOICE_NAME_VARIATIONS:
                 if x in row:
-                    formatted_row[x] = row[x]
+                    formatted_row['name'] = row[x]
             formatted_rows.append(formatted_row)
         return formatted_rows
 

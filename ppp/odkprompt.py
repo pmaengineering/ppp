@@ -1,4 +1,5 @@
 """Module for the OdkPrompt class."""
+import re
 import textwrap
 
 from ppp.config import TEMPLATE_ENV
@@ -252,6 +253,39 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
+    def _extract_question_numbers(prompt):
+        """Extracts question no. from label field and sets to question_number.
+
+        First, it standardizes the label it's searching through to a string, as
+        it is possible for OdkPrompt to have converted the label into a 'list'
+        object. Then, it looks for a substring that matches a 'question number
+        pattern', which is (1) a 'question number' (can include letters and
+        some other special characters), followed by (2) a period, followed by
+        (3) 1 or more spaces, followed by (4) a letter. After this, it then
+        sets the question number to be equal to the text matching (1) as just
+        described.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        label = prompt['label']
+        label = label if type(label).__name__ == 'str' else label[0] \
+            if type(label) == 'list' else None
+        match = re.search(r'[a-zA-Z0-9._\-](.+?).[ \n\t](.+?)[a-zA-Z].', label)
+        if match:
+            q_number = match.group(0) # gets the first match
+            # removes . and anything to the right of it from q_number
+            for i in range(len(q_number)):
+                if q_number[-i] == '.':
+                    q_number = q_number[0:-i]
+                    break
+            prompt['question_number'] = q_number
+        return prompt
+
+    @staticmethod
     def streamline_constraint_message(prompt):
         """Ensure constraint_message field name is consistent.
 
@@ -473,6 +507,7 @@ class OdkPrompt:
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
         prompt = self.streamline_constraint_message(prompt)
+        prompt = self._extract_question_numbers(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
 

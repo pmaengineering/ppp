@@ -6,7 +6,7 @@ packages = find_packages(exclude=['test'])
 
 setup(
     name='odk_ppp',  # ppp was already taken
-    version='1.1.4',
+    version='1.2.0',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',

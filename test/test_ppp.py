@@ -163,9 +163,59 @@ class OdkPromptTest(PppTest):
         for dummy, form in forms.items():
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
+                    msg = ''
+                    self.assertTrue(item.choices is not None, msg=msg)
                     if item.odktype in item.select_types:
                         msg = 'No choices found in \'{}\'.'.format(item)
                         self.assertTrue(item.choices is not None, msg=msg)
+
+    def test_question_number_field_from_form(self):
+        """Test that question numbers are geing generated as expected."""
+        expected_outputs = {
+            'ever_birth': '200',
+            'fb_note': '205',
+            'birth_events_yes': 'LCL201',
+            'children_living': '201a'
+        }
+        test_language = 'English'
+        forms = []
+        forms.append(OdkForm.from_file(TEST_FILES_DIR + 'OdkFormTest.xlsx'))
+        for form in forms:
+            for item in form.questionnaire:
+                if isinstance(item, OdkPrompt):
+                    row = item.to_dict(lang=test_language)
+                    if row['name'] in expected_outputs:
+                        msg = 'Question number \'{}\' did not match what was ' \
+                              'expected for the following question: \n\n{}'\
+                            .format(row['question_number'], row['label'])
+                        self.assertTrue(
+                            row['question_number'] == expected_outputs[row['name']]
+                            , msg=msg)
+
+    def test_question_number_field_statically(self):
+        """Test that question numbers are geing generated as expected."""
+        inputs_to_outputs = {
+            '201. Random question': '201',
+            'LCL_202. Random question': 'LCL_202',
+            'CRVS-203. Random question': 'CRVS-203',
+            '204.A. Random question': '204.A',
+            '205.1. Random question': '205.1',
+            '206.a. Random question': '206.a',
+            '207.i. Random question': '207.i',
+            '208.C.ii.1. Random question': '208.C.ii.1',
+            '209.C.ii.1_v2. Random question': '209.C.ii.1_v2',
+            '210.C.ii.1_v2-2. Random question': '210.C.ii.1_v2-2',
+        }
+        for k, v in inputs_to_outputs.items():
+            prompt = {
+                'label': k
+            }
+            question_number = \
+                OdkPrompt._extract_question_numbers(prompt)['question_number']
+            msg = 'Question number \'{}\' did not match what was ' \
+                  'expected for the following question: \n\n{}'\
+                .format(question_number, k)
+            self.assertTrue(question_number == v, msg=msg)
 
 
 class OdkGroupTest(unittest.TestCase):

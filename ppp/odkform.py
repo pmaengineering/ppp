@@ -72,7 +72,6 @@ class OdkForm:
          'phonenumber', 'hidden', 'hidden string', 'hidden int',
          'hidden geopoint']
     warnings = None
-    # from pdb import set_trace; set_trace()
 
     @classmethod
     def from_file(cls, path):
@@ -86,6 +85,7 @@ class OdkForm:
             Odkform
         """
         xlsform = Xlsform(path)
+
         return cls(xlsform)
 
     @staticmethod

@@ -163,8 +163,6 @@ class OdkPromptTest(PppTest):
         for dummy, form in forms.items():
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
-                    msg = ''
-                    self.assertTrue(item.choices is not None, msg=msg)
                     if item.odktype in item.select_types:
                         msg = 'No choices found in \'{}\'.'.format(item)
                         self.assertTrue(item.choices is not None, msg=msg)

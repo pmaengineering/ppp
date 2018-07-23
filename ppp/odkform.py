@@ -1,16 +1,25 @@
 """Module for the OdkForm class."""
 import os
 
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.definitions.error import OdkFormError
 from ppp.odkcalculate import OdkCalculate
 from ppp.odkchoices import OdkChoices
-from ppp.odkgroup import OdkGroup
-from ppp.odkprompt import OdkPrompt
-from ppp.odkrepeat import OdkRepeat
+from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
+from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
+from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
 from ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
+  odkgroup_template(template)
+  odkpromt_template(template)
+  odkrepeat_template(template)
 
 class OdkForm:
     """Class to represent an entire XLSForm.

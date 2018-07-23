@@ -1,8 +1,14 @@
 """Module for the OdkTable class."""
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.definitions.utils import exclusion
 # from ppp.definitions.error import OdkformError
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
 
 class OdkTable:
     """Class to represent a single ODK table from an XLSForm.

@@ -1,9 +1,16 @@
 """Module for the OdkGroup class."""
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.odkprompt import OdkPrompt
-from ppp.odktable import OdkTable
+from ppp.odktable import OdkTable, set_template_env as odktable_template
 from ppp.definitions.utils import exclusion
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
+  odktable_template(template)
 
 class OdkGroup:
     """Class to represent a field-list group in XLSForm.

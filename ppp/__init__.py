@@ -27,7 +27,7 @@ from collections import OrderedDict
 
 from ppp.definitions.error import OdkException, InvalidLanguageException
 from ppp.definitions.constants import MULTI_ARGUMENT_CONVERSION_OPTIONS
-from ppp.odkform import OdkForm
+from ppp.odkform import OdkForm, set_template_env
 
 
 def convert_file(in_file, language=None, outpath=None, **kwargs):
@@ -46,6 +46,9 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
     """
+    
+    set_template_env(kwargs['template'] if 'template' in kwargs else 'default')
+
     form = OdkForm.from_file(in_file)
 
     try:

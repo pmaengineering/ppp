@@ -1,0 +1,31 @@
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    <script>
+        if ({{ info }} === false && {{ warnings }} === false) {
+            console.log('Conversion OK!')
+        }
+
+        if ({{ data }} != false) {
+            data = JSON.stringify({{ data }}); // JSON.stringify auto-expands the whole object.
+            console.log('Data: ');
+            console.log({{ data }});
+            // console.log(data);
+        }
+
+        messages = {};
+        if ({{ info }} != false) {
+            messages.info = {{ info }}
+        }
+        if ({{ warnings }} != false) {
+            messages.warnings = {{ warnings }}
+        }
+
+        if ({{ info }} != false || {{ warnings }} != false) {
+            console.log('Messages: ');
+            console.log(messages);
+        }
+    </script>
+</html>

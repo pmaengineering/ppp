@@ -1,0 +1,74 @@
+                        {% if question.in_repeat == True %}
+                            {% set side_letter_styling = ' side-letter-repeat-right' %}
+                        {% endif %}
+                        {% if question.in_group == True %}
+                            {% set side_letter_styling = ' side-letter-group-right' %}
+                        {% else %}
+                            {% set side_letter_styling = ' side-letter-right' %}
+                        {% endif %}
+                        {% if highlighting %}
+                            {% set type_highlight = ' bg-light-blue' %}
+                            {% set relevant_highlight = ' bg-light-green' %}
+                            {% set input_highlight = ' bg-light-red' %}
+                            {% set filter_highlight = ' bg-light-green' %}
+                        {% endif %}
+                        {% if question.simple_type in ['text', 'integer', 'decimal', 'image', 'date', 'dateTime'] %}
+                          {% set input_margins = ' input-margins' %}
+                        {% else %}
+                          {% set input_margins = '' %}
+                        {% endif %}
+                        <td class="response-cell align-top">
+
+                          <div class="flex-container-column">
+                            <div class="flex-container-row">
+                              <div class="question-type{{ type_highlight }}">{{ question.type }}</div>
+                              {% if question.relevant %}
+                                  <div class="relevant{{ relevant_highlight }}">
+                                    {{ question.relevant }}
+                                    {% if side_letters %}<span class="side-letter-relevant{{ side_letter_styling }}">R</span>{% endif %}
+                                  </div>
+                              {% endif %}
+                            </div>
+
+                            <div class="{{ input_highlight }}{{ input_margins }}">
+                              {% if question.ppp_input %}
+                                <div class="ppp-input">
+                                  {{ question.ppp_input }}
+                                </div>
+                              {% else %}
+
+                                {% if question.simple_type in ['select_one', 'select_multiple'] %}
+                                  <p><!--<form>-->
+                                    {% for option in question.input_field %}
+                                      {% set select_option = question %}
+                                      {% include "content/prompt/inputs/selects.html" %}
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="{{ question.name }}_{{ loop.index }}">{{ option.label }} <span class="choice-name">{{ option.name }}</span></label>
+                                      {% if loop.last == False %}
+                                        <br/>
+                                      {% endif %}
+                                    {% endfor %}
+                                  </p><!--</form>-->
+                                {% endif %}
+
+                                {% if question.simple_type in ['text', 'integer', 'decimal', 'image'] %}
+                                  {% include "content/prompt/inputs/single-value.html" %}
+                                {% endif %}
+                                {% if question.simple_type in ['date', 'dateTime'] %}
+                                  {% include "content/prompt/inputs/date.html" %}
+                                {% endif %}
+                                {% if question.simple_type == 'note' %}
+                                  {% include "content/prompt/inputs/note.html" %}
+                                {% endif %}
+                              {% endif %}
+                            </div>
+
+                            <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
+                              {% if question.choice_filter %}
+                                {{ question.choice_filter }}
+                                {% if side_letters %}<span class="side-letter-choice-filter{{ side_letter_styling }}">F</span>{% endif %}
+                              {% endif %}
+                            </div>
+                          </div>
+
+                        </td>

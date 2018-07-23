@@ -1,0 +1,32 @@
+                            {% if question.simple_type in ['date', 'dateTime'] %}
+                              <table>
+                                <tr>
+                                  {% if question.appearance == 'year' %}
+                                    {# {% set fields = ['Year'] %} #}
+                                    {% set fields = ['Année'] %}
+                                  {% elif question.appearance == 'month-year' %}
+                                    {# {% set fields = ['Month', 'Year'] %} #}
+                                    {% set fields = ['Mois', 'Année'] %}
+                                  {% elif question.appearance == 'no-calendar' %}
+                                    {# {% set fields = ['Day', 'Month', 'Year'] %} #}
+                                    {% set fields = ['Jour', 'Mois', 'Année'] %}
+                                  {% else %}
+                                    {# {% set fields = ['Day', 'Month', 'Year'] %} #}
+                                    {% set fields = ['Jour', 'Mois', 'Année'] %}
+                                  {% endif %}
+                                  <td align="right">
+                                  {% for field in fields %}
+                                    <!--<div class="form-group date-form" style="display: flex; flex-direction: column;">-->
+                                    <div class="form-group date-form">
+                                      <!--suppress XmlInvalidId -->
+                                      <label for="{{ question.name }}_{{ loop.index }}" class="input-label">
+                                        {{ field }}:
+                                      </label>
+                                      &nbsp;
+                                      <input type="text" class="date-input" title="" name="{{ question.name }}_{{ loop.index }}" id="{{ question.name }}_{{ loop.index }}"/>
+                                    </div>
+                                  {% endfor %}
+                                  </td>
+                                </tr>
+                              </table>
+                            {% endif %}

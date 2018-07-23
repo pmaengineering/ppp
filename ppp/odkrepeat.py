@@ -1,11 +1,17 @@
 """Module for the OdkRepeat class."""
 import textwrap
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.odkgroup import OdkGroup
 from ppp.odkprompt import OdkPrompt
 from ppp.odktable import OdkTable
 from ppp.definitions.utils import exclusion
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
 
 class OdkRepeat:
     """Class to represent repeat construct from XLSForm.

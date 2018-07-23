@@ -74,7 +74,7 @@ def _non_preset_optional_fields(parser):
     #   type='single selection', default:'default'
     template_help = ('Choose template to render results.')
     parser.add_argument('-t', '--template', nargs = '+',
-                        choices = ('default', 'alternative', 'training_manual', 'grey_header'),
+                        choices = ('default', 'alternative', 'training_manual', 'grey_header', 'new'),
                         default = 'default',
                         help = template_help)
     return parser

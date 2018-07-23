@@ -1,0 +1,455 @@
+<!--suppress CssUnusedSymbol -->
+<style>
+    /* Situational */
+    @media print {
+        @-moz-document url-prefix() {
+            .flex-container-column,
+            .flex-container-row {
+               display: block !important;
+            }
+        }
+    }
+    /* Elements */
+    body {
+        font-size: 14px;
+        font-family: 'Arial', serif;
+    }
+    table {
+        width: 100%;
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+    /*table tr {*/
+        /*page-break-before: always;*/
+        /*page-break-after: always;*/
+    /*}*/
+    h1 {
+        margin-bottom: 0;
+        font-size: 26px;
+        text-transform: uppercase;
+        padding-bottom: 30px;
+        border-bottom: 3px black solid;
+    }
+    h4{
+        font-weight: 100;
+    }
+    hr {
+        margin-top: 3px;
+        border-top: 1px black solid;
+        border-bottom: snow;
+    }
+    /* Classes - Positioning */
+    #survey {
+        max-width: 1200px;
+    }
+    #container {
+    }
+    #identification_section {
+    }
+    .section {
+        width: 80%;
+        margin: auto;
+    }
+    .next-section {
+        margin-top: 10px;
+        cursor: pointer;
+        outline: none;
+    }
+    .radio-container {
+    }
+    .center {
+        text-align: center;
+    }
+    .margin-fix {
+        margin: 5px 0;
+    }
+    .bottom-fix {
+        position: relative;
+        bottom: -250px;
+    }
+    .bottom-border {
+        border-bottom: 1px black solid;
+    }
+    .height-fix {
+        height:100%;
+    }
+    .align-top {
+        vertical-align: top;
+    }
+    .align-bottom {
+        vertical-align: bottom;
+    }
+    .align-text-top {
+        vertical-align: text-top;
+    }
+    .align-text-bottom {
+        vertical-align: text-bottom;
+    }
+    .align-left {
+        text-align: left;
+    }
+    .align-right {
+        text-align: right;
+    }
+    .header-container {
+        vertical-align: top;
+    }
+    /* Classes - Borders*/
+    .upper-border {
+        border-top: 1px black solid;
+    }
+    .left-border {
+        border-left: 1px black solid;
+    }
+    .response-cell {
+        width: 40%;
+        border-top: 1px black solid;
+        border-left: 1px black solid;
+        padding: 5px 5px 5px 5px;
+        height: 100%;
+    }
+    .flex-container-column {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+    .flex-container-row {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+    }
+    /*.response-cell div:first-child {*/
+        /*height: 100%;*/
+    /*}*/
+    .response-cell > :first-child {
+        height: 100%;
+    }
+    /*.input-container {*/
+        /*height: 100%;*/
+        /*vertical-align: middle;*/
+    /*}*/
+    /*.response-cell div:nth-child(2) {*/
+        /*height: 100%;*/
+        /*background-color: bisque;*/
+        /*vertical-align: middle;*/
+    /*}*/
+    .question-cell {
+        width: 60%;
+        border-top: 1px black solid;
+        padding: 5px 5px 5px 5px;
+    }
+    .border-top {
+        border-top: 1px black solid;
+    }
+    .upper-border-bolder {
+        border-top: 2px solid black;
+    }
+    .down-border {
+        border-bottom: 1px black solid;
+        border-top: 0.5px black solid;
+    }
+    .odk-table {
+        border-top: 1px solid;
+        padding: 0;
+    }
+    .odk-table-response-header {
+        border-bottom: 1px solid;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        border-left: 1px solid;
+    }
+    .odk-table-response {
+        text-align: center;
+        padding-top: 3px;
+        border-left: 1px solid;
+    }
+    .odk-table-item-label-cell {
+        width: 50%;
+        padding-left: 5px;
+        /*border-right: 1px solid;*/
+    }
+    /* Classes - Highlighting */
+    .bg-light-blue {
+        background-color: #e6ebf4;
+    }
+    .bg-light-green {
+        background-color: #e8f4e6;
+    }
+    .bg-light-red {
+        background-color: #f4e6ec;
+    }
+    /* Classes - Input */
+    .date-form {
+        text-align: right;
+    }
+    .input {
+        text-align: center;
+        border: none;
+        border-bottom: 1px black dashed;
+        width: 95%;
+        margin: 2.5%;
+        position: relative;
+        outline: none;
+    }
+    .date-input {
+        text-align: right;
+        border: none;
+        border-bottom: 1px black dashed;
+        outline: none;
+        width: 80%;
+    }
+    .textarea-input {
+        bottom: -15px;
+    }
+    .radio-input {
+        margin: 0;
+        position: relative;
+        top: 3px;
+        margin-left: 10px;
+    }
+    .input-margins {
+        /*margin-top: 20px;*/
+    }
+    .group-table {
+        border: 3px double;
+    }
+    .group-spacing {
+        height: 5px;
+    }
+    .group-header {
+        padding: 5px 5px 5px 5px;
+        vertical-align: top;
+    }
+    .table-header td {
+      border-top: none;
+    }
+    table td,
+    p {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      margin-top: 3px !important;
+      margin-bottom: 3px !important;
+    }
+    table td.question-cell {
+      padding-left: 0 !important;
+    }
+    .repeat-container {
+        /*width: 100%;*/
+        padding: 20px;
+        /*margin-left: -20px;*/
+        background-color: #e3e2e2;
+        border-top: 1px solid;
+    }
+    .repeat-table {
+        /*padding: 5% 5% 5% 5%;*/
+        background-color: white;
+    }
+    .repeat-header {
+        padding: 5px 5px 10px 5px;
+        vertical-align: top;
+        text-align: center;
+    }
+    .section-spacing {
+        height: 35px;
+        max-height: 35px;
+        border-top: 1px solid black;
+    }
+    /* Classes - Text */
+    #survey-heading {
+        text-align: center;
+    }
+    .section-header {
+        font-family: 'Arial', serif;
+        background-color: #D9D9D9;
+        text-align: center;
+        border-top: 1px solid black;
+        border-right: 1px solid black;
+        border-left: 1px solid black;
+        padding: 10px 5px 10px 5px;
+    }
+    .section-header-label {
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+    }
+    .section-header-hint {
+        font-style: italic;
+    }
+    .variable {
+        font-family: monospace;
+    }
+    .validation {
+        font-family: monospace;
+        /*margin: 5px 0 0 0;*/
+    }
+    .constraint {
+        font-family: monospace;
+        /*margin: 5px 0 0 0;*/
+    }
+    .relevant {
+        font-family: monospace;
+        text-align: right;
+        /*margin: 0 0 5px 0;*/
+        /*float: right;*/
+    }
+    .choice-filter {
+        font-family: monospace;
+        /*margin: 0 0 5px 0;*/
+        float: right;
+        text-align: right;
+    }
+    .choice-name {
+        font-family: monospace;
+        font-size: 0.9em;
+        color: #939393;
+    }
+    .link {
+        font-family: monospace;
+        color: blue;
+    }
+    .question-type {
+        /*font-size: 10px;*/
+        /*margin-left: 10px;*/
+        /*margin-top: 10px;*/
+        font-family: monospace;
+        text-align: left;
+        /*float: left;*/
+    }
+    .label {
+        font-family: 'Arial', serif;
+        font-size: 0.9em;
+    }
+    .hint {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        font-style: italic;
+    }
+    .media {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+    }
+    .media-items {
+        padding-bottom: 5px;
+    }
+    .validation-message {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        margin: 0;
+    }
+    .constraint-message {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+        margin: 0;
+    }
+    .input-label {
+        font-family: 'Arial', serif;
+        font-size: 0.8em;
+    }
+    .ppp-input {
+        font-style: italic;
+        padding: 0.4em 0 0.4em 0;
+    }
+    .side-letter-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -25px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-group-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -29px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-repeat-left {
+        font-family: 'Arial', serif;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        margin-left: -50px;
+        float: left;
+        /* margin-top: 1px; */
+        text-align: right;
+        width: 15px;
+    }
+    .side-letter-right {
+        font-family: 'Arial', serif;
+        margin-right: -25px;
+        float: right;
+        /*font-size: 13px;*/
+        font-size: 0.8em;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+    .side-letter-relevant {
+        margin-top: -15px
+    }
+    .side-letter-choice-filter {
+        margin-top: 0;
+    }
+    .side-letter-group-right {
+        font-family: 'Arial', serif;
+        margin-right: -29px;
+        float: right;
+        font-size: 13px;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+    .side-letter-repeat-right {
+        font-family: 'Arial', serif;
+        margin-right: -50px;
+        float: right;
+        font-size: 13px;
+        /* margin-top: 1px; */
+        text-align: left;
+        width: 15px;
+    }
+
+    /*span.side-letter-group-right,*/
+    /*span.side-letter-choice-filter,*/
+    /*span.side-letter-choice-filter.side-letter-right,*/
+    /*span.side-letter-relevant.side-letter-right,*/
+    /*span.side-letter-relevant,*/
+    /*span.side-letter-right {*/
+      /*position: absolute;*/
+      /*margin: 0;*/
+      /*top: 0;*/
+    /*}*/
+
+    span.side-letter-group-right {
+      right: -28px;
+    }
+    span.side-letter-right {
+      right: -25px;
+    }
+    div.relevant.bg-light-green,
+    div.choice-filter.align-bottom.align-text-bottom.bg-light-green {
+      position: relative;
+    }
+
+
+</style>
+
+<!-- for some reason the below does not work -->
+{% if format == 'html '%}
+<style>
+    span.side-letter-group-right,
+    span.side-letter-choice-filter,
+    span.side-letter-choice-filter.side-letter-right,
+    span.side-letter-relevant.side-letter-right,
+    span.side-letter-relevant,
+    span.side-letter-right {
+      position: absolute;
+      margin: 0;
+      top: 0;
+    }
+</style>
+{% endif %}

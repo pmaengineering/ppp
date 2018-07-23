@@ -346,25 +346,31 @@ class MultiConversionTest(unittest.TestCase):
                    '-l', 'English', 'Français']
         subprocess.call(command)
 
-        out_dir_ls_input = str(os.listdir(out_dir))
-        expected_output = \
-            str(['BFR5-Selection-v2-jef-Français-minimal.html',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-full.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-full.doc',
-                 'BFR5-Selection-v2-jef-Français-full.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-full.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.html',
-                 'BFR5-Selection-v2-jef-Français-full.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-English-full.html',
-                 'BFR5-Selection-v2-jef-English-minimal.doc',
-                 'BFR5-Selection-v2-jef-English-minimal.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.html',
-                 'BFR5-Selection-v2-jef-Français-minimal.doc',
-                 'BFR5-Selection-v2-jef-English-full.doc',
-                 'BFR5-Selection-v2-jef-English-full.html'])
-        self.assertEqual(expected_output, str(out_dir_ls_input))
+        out_dir_ls_input_unsorted = os.listdir(out_dir)
+
+        expected_output_unsorted = \
+            ['BFR5-Selection-v2-jef-Français-minimal.html',
+             'BFR5-Female-Questionnaire-v13-jef-Français-full.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-minimal.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-full.doc',
+             'BFR5-Selection-v2-jef-Français-full.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-full.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-minimal.html',
+             'BFR5-Selection-v2-jef-Français-full.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-minimal.doc',
+             'BFR5-Female-Questionnaire-v13-jef-English-full.html',
+             'BFR5-Selection-v2-jef-English-minimal.doc',
+             'BFR5-Selection-v2-jef-English-minimal.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-minimal.html',
+             'BFR5-Selection-v2-jef-Français-minimal.doc',
+             'BFR5-Selection-v2-jef-English-full.doc',
+             'BFR5-Selection-v2-jef-English-full.html']
+
+        out_dir_ls_input = sorted(expected_output_unsorted)
+        expected_output = sorted(out_dir_ls_input_unsorted)
+
+        self.assertEqual(expected_output, out_dir_ls_input)
+        # self.assertEqual(str(expected_output), str(out_dir_ls_input))
 
 
 class MultipleFieldLanguageDelimiterSupport(PppTest):

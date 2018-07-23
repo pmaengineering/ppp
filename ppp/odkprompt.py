@@ -7,7 +7,7 @@ from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
     PRESETS, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
     PPP_REPLACEMENTS_FIELDS
-from ppp.definitions.error import OdkChoicesError
+from ppp.definitions.error import OdkException, OdkChoicesError
 
 
 class OdkPrompt:
@@ -272,8 +272,16 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         label = prompt['label']
-        label = label if type(label).__name__ == 'str' else label[0] \
-            if type(label) == 'list' else None
+        label_type = type(label).__name__
+        if label_type == 'str':
+            label = label
+        elif label_type == 'list':
+            label = label[0]
+        else:
+            msg = "Unsure how to handle label with type {} in the following " \
+                  "label.\n\n{}.".format(label_type, label)
+            raise OdkException(msg)
+
         match = re.search(r'[a-zA-Z0-9._\-](.+?).[ \n\t](.+?)[a-zA-Z].', label)
         if match:
             q_number = match.group(0) # gets the first match

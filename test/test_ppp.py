@@ -70,7 +70,7 @@ class PppTest(unittest.TestCase):
 
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python', '-m', 'ppp'] + in_files + ['-o', out_dir]
+        command = ['python3', '-m', 'ppp'] + in_files + ['-o', out_dir]
         subprocess.call(command)
 
         expected = 'N files: ' + str(len(in_files))
@@ -179,18 +179,19 @@ class OdkPromptTest(PppTest):
         }
         test_language = 'English'
         forms = []
-        forms.append(OdkForm.from_file(TEST_FILES_DIR + 'OdkFormTest.xlsx'))
+        form_names = ['OdkFormTest', 'QuestionNumberExtractionTest']
+        for form in form_names:
+            forms.append(OdkForm.from_file(TEST_FILES_DIR + form + '.xlsx'))
         for form in forms:
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
                     row = item.to_dict(lang=test_language)
                     if row['name'] in expected_outputs:
-                        msg = 'Question number \'{}\' did not match what was ' \
+                        msg = 'Question number \'{}\' did not match what was '\
                               'expected for the following question: \n\n{}'\
                             .format(row['question_number'], row['label'])
-                        self.assertTrue(
-                            row['question_number'] == expected_outputs[row['name']]
-                            , msg=msg)
+                        self.assertTrue(row['question_number'] ==
+                                        expected_outputs[row['name']], msg=msg)
 
     def test_question_number_field_statically(self):
         """Test that question numbers are geing generated as expected."""
@@ -332,6 +333,8 @@ class OdkFormTest(PppTest):
 class MultiConversionTest(unittest.TestCase):
     """Test conversion of n files in n languages for n option combinations."""
 
+    maxDiff = None  # Allows to see full error output for this test.
+
     def test_multi_conversion(self):
         src_dir = TEST_FILES_DIR + 'multiple_file_language_option_conversion/'
         out_dir = src_dir + 'ignored/'
@@ -340,7 +343,7 @@ class MultiConversionTest(unittest.TestCase):
             [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python', '-m', 'ppp'] + src_files + \
+        command = ['python3', '-m', 'ppp'] + src_files + \
                   ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full',
                    '-l', 'English', 'Français']
         subprocess.call(command)

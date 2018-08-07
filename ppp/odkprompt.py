@@ -258,12 +258,12 @@ class OdkPrompt:
 
         First, it standardizes the label it's searching through to a string, as
         it is possible for OdkPrompt to have converted the label into a 'list'
-        object. Then, it looks for a substring that matches a 'question number
-        pattern', which is (1) a 'question number' (can include letters and
-        some other special characters), followed by (2) a period, followed by
-        (3) 1 or more spaces, followed by (4) a letter. After this, it then
-        sets the question number to be equal to the text matching (1) as just
-        described.
+        object. Then, it uses a regexp (regular expression) to look for a
+        substring that matches a 'question number pattern', which is (1) a
+        'question number' (can include letters and some other special
+        characters), followed by (2) a period, followed by (3) 1 or more
+        spaces, followed by (4) a letter. After this, it then sets the question
+        number to be equal to the text matching (1) as just described.
 
         Args:
             prompt (dict): Dictionary representation of prompt.
@@ -271,6 +271,7 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
+        prompt['question_number'] = ''
         label = prompt['label']
         label_type = type(label).__name__
         if label_type == 'str':
@@ -282,7 +283,8 @@ class OdkPrompt:
                   "label.\n\n{}.".format(label_type, label)
             raise OdkException(msg)
 
-        match = re.search(r'[a-zA-Z0-9._\-](.+?).[ \n\t](.+?)[a-zA-Z].', label)
+        # TODO: Why is it matching even if there is no .?
+        match = re.search(r'[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].', label)
         if match:
             q_number = match.group(0) # gets the first match
             # removes . and anything to the right of it from q_number
@@ -291,6 +293,7 @@ class OdkPrompt:
                     q_number = q_number[0:-i]
                     break
             prompt['question_number'] = q_number
+
         return prompt
 
     @staticmethod

@@ -204,6 +204,7 @@ class OdkPromptTest(PppTest):
             '208.C.ii.1. Random question': '208.C.ii.1',
             '209.C.ii.1_v2. Random question': '209.C.ii.1_v2',
             '210.C.ii.1_v2-2. Random question': '210.C.ii.1_v2-2',
+            'State: ${level1_unlinked}': ''
         }
         for k, v in inputs_to_outputs.items():
             prompt = {

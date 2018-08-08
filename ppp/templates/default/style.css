@@ -1,0 +1,44 @@
+/*** Document header. ***/
+/*
+.document-header h2 {
+  float: left;
+}
+
+.document-header img.logo {
+  float: right;
+}
+*/
+/*** Table. ***/
+table {
+  width: 100%;
+}
+/*
+table tr.header {
+  background: #CACACA;
+}
+*/
+/*** Misc. ***/
+.label {
+  font-weight: bold;
+}
+
+.hint {
+  font-style: italic;
+}
+
+@page {
+       @bottom-left {
+            content: counter(page) "/" counter(pages);
+        }
+     }
+     
+/*** Floating elements fix. ***/
+/*
+.clearfix:after {
+   content: " ";
+   visibility: hidden;
+   display: block;
+   height: 0;
+   clear: both;
+}
+*/

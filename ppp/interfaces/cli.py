@@ -158,7 +158,7 @@ def _preset_optional_fields(parser):
     #      'function of text replacement is to render more human readable '
     #      'variable names, but can also be used to remove sensitive information'
     #      'or add brevity or clarity where needed.')
-    # parser.add_argument('-t', '--text-replacements', action='store_true',
+    # parser.add_argument('-T', '--text-replacements', action='store_true',
     #                     help=text_replacements_help)
     return parser
 

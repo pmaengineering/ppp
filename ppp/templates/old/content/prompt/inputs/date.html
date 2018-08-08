@@ -16,7 +16,9 @@
                                   {% endif %}
                                   <td align="right">
                                   {% for field in fields %}
+                                    <!--<div class="form-group date-form" style="display: flex; flex-direction: column;">-->
                                     <div class="form-group date-form">
+                                      <!--suppress XmlInvalidId -->
                                       <label for="{{ question.name }}_{{ loop.index }}" class="input-label">
                                         {{ field }}:
                                       </label>

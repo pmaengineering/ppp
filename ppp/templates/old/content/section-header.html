@@ -3,13 +3,16 @@
                       {% else %}
                         {% set bottom_border = '' %}
                       {% endif %}
-                      <tr bgcolor="#CACACA">
-                        <td colspan="4">
+                      <tr>
+                        <td class="section-spacing" colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class="section-header{{ bottom_border }}" colspan="2">
                           {% for label in question.label %}
-                            <h3>{{ label }}</h3>
+                            <h3 class="section-header-label">{{ label }}</h3>
                           {% endfor %}
                           {% for p in question.hint %}
-                            <p>{{ p }}</p>
+                            <p class="section-header-hint">{{ p }}</p>
                           {% endfor %}
                         </td>
                       </tr>

@@ -11,8 +11,7 @@
                             {% set label_hint_highlight = ' bg-light-green' %}
                             {% set constraint_highlight = ' bg-light-red' %}
                         {% endif %}
-                        <td class="number" valign="top">{{ question.question_number }}</td>
-                        <td class="question-cell" valign="top">
+                        <td class="question-cell align-top">
                             <div class="align-top align-text-top{{ name_highlight }}">
                                 {% if question.name %}
                                     {% if side_letters %}<span class="{{ side_letter_styling }}">N</span>{% endif %}

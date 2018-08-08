@@ -3,13 +3,19 @@ from sys import stderr
 import re
 import textwrap
 
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
     PRESETS, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
     PPP_REPLACEMENTS_FIELDS
 from ppp.definitions.error import OdkException, OdkChoicesError
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
 
 class OdkPrompt:
     """Class to represent a single ODK prompt from an XLSForm.

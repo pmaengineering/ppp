@@ -1,0 +1,13 @@
+                            <!--suppress XmlDuplicatedId -->
+                            {% if question.simple_type == 'text' %}
+                              <input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>
+                            {% endif %}
+                            {% if question.simple_type == 'integer' %}
+                              <input type="number" class="input" title="" name="hh_num" id="{{ question.name }}" min="0" />
+                            {% endif %}
+                            {% if question.simple_type == 'decimal' %}
+                              <input type="number" class="input" title="" name="hh_num" id="{{ question.name }}" min="0" />
+                            {% endif %}
+                            {% if question.simple_type == 'image'%}
+                              <input type="text" class="input" title="" name="{{ question.variable }}" id="{{ question.name }}"/>
+                            {% endif %}

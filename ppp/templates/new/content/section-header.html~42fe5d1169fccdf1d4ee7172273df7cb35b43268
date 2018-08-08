@@ -1,0 +1,18 @@
+                      {% if question.bottom_border == True %}
+                        {% set bottom_border = ' bottom-border' %}
+                      {% else %}
+                        {% set bottom_border = '' %}
+                      {% endif %}
+                      <tr>
+                        <td class="section-spacing" colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class="section-header{{ bottom_border }}" colspan="2">
+                          {% for label in question.label %}
+                            <h3 class="section-header-label">{{ label }}</h3>
+                          {% endfor %}
+                          {% for p in question.hint %}
+                            <p class="section-header-hint">{{ p }}</p>
+                          {% endfor %}
+                        </td>
+                      </tr>

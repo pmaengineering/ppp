@@ -1,0 +1,26 @@
+                      {% if highlighting %}
+                        {% set name_highlight = ' bg-light-blue' %}
+                        {% set label_hint_highlight = ' bg-light-green' %}
+                        {% set relevant_highlight = ' bg-light-green' %}
+                      {% endif %}
+                      <tr>
+                        <td class="repeat-header" colspan="2">
+                          <div class="header-container flex-container-row">
+                            <div class="align-left {{ name_highlight }}">
+                              {% if question.name %}
+                                {% if side_letters %}<span class="side-letter-left">N</span>{% endif %}
+                                <div class="variable">{{ question.name }}</div>
+                              {% endif %}
+                            </div>
+
+                            {% if question.relevant %}
+                              <div class="relevant{{ relevant_highlight }} align-right">
+                                {{ question.relevant }}
+                                {% if side_letters %}<span class="side-letter-right">R</span>{% endif %}
+                              </div>
+                            {% endif %}
+                          </div>
+
+                          {% include 'content/prompt/label-hint-media-block.html' %}
+                        </td>
+                      </tr>

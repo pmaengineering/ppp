@@ -1,0 +1,10 @@
+                                  {% if format == 'html' %}
+                                    <input type="radio" class="" name="{{ select_option.name }}" id="{{ select_option.name }}{% if loop %}_{{ loop.index }}{% endif %}"/>
+                                  {% elif format == 'doc' %}
+                                    <!--Bullseye: &#9675;-->
+                                    <!--Radio button: &#128280;-->
+                                    <!--Large circle: &#9711;-->
+                                    &#9711;
+                                  {% else %}
+                                    {{ "Output format must be supplied."/0 }}  {# Error #}
+                                  {% endif %}

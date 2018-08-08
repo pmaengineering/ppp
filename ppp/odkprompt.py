@@ -1,4 +1,5 @@
 """Module for the OdkPrompt class."""
+from sys import stderr
 import re
 import textwrap
 
@@ -271,8 +272,17 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        prompt['question_number'] = ''
-        label = prompt['label']
+        # TODO: Won't need if better regexp. Current one matches sentences with
+        # multiple spaces and include a number in them.
+        arbitrary_character_threshold = 20
+        warning = ''
+        prompt['question_number'] = \
+            prompt['question_number'] if 'question_number' in prompt else ''
+        # This could be better. Doesn't get at default language.
+        lang_labels = [x for x in prompt if x.startswith('label:')]
+        label = prompt['label'] if 'label' in prompt \
+            else prompt['label::English'] if 'label::English' in prompt \
+            else prompt[lang_labels[0]]
         label_type = type(label).__name__
         if label_type == 'str':
             label = label
@@ -283,16 +293,27 @@ class OdkPrompt:
                   "label.\n\n{}.".format(label_type, label)
             raise OdkException(msg)
 
-        # TODO: Why is it matching even if there is no .?
-        match = re.search(r'[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].', label)
+        match = \
+            re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].',
+                      label[0:arbitrary_character_threshold])
+        # Tries to match with space after '.'. If not, looks for w/ no space.
+        if not match:
+            match = re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[a-zA-Z].',
+                      label[0:arbitrary_character_threshold])
+            if match:
+                warning = 'Warning: Question number {} does not have a space '\
+                          'after \'.\''
+
         if match:
-            q_number = match.group(0) # gets the first match
+            q_number = match.group(0)  # gets the first match
             # removes . and anything to the right of it from q_number
             for i in range(len(q_number)):
                 if q_number[-i] == '.':
                     q_number = q_number[0:-i]
                     break
             prompt['question_number'] = q_number
+        if warning:
+            print(warning.format(prompt['question_number']), file=stderr)
 
         return prompt
 
@@ -528,7 +549,6 @@ class OdkPrompt:
             prompt['bottom_border'] = True
         if 'preset' in kwargs:
             prompt = self.handle_preset(prompt, lang, kwargs['preset'])
-
         return prompt
 
     @staticmethod

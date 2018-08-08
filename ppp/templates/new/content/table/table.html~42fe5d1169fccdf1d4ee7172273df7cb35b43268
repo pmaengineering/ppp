@@ -1,0 +1,33 @@
+                    <tr>
+                      <td colspan="2" class="odk-table">
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td class="odk-table-item-label-cell"></td><!--<th>--><!--</th>-->
+                              {% for field in table[0].input_field %}
+                                <td class="odk-table-response odk-table-response-header"><!--<th>-->
+                                  <span class="label">{{ field.label }}</span> <span class="choice-name">{{ field.name }}</span>
+                                </td><!--</th>-->
+                              {% endfor %}
+                            </tr>
+
+                            {% for row in table[1:] %}
+
+                              <tr>
+                                <td class=" odk-table-item-label-cell">
+                                  <span class="label">{{ row.label }}</span> <span class="choice-name">{{ row.name }}</span>
+                                </td>
+                                {% for option in row.input_field %}
+                                  <td class="odk-table-response">
+                                    {% set select_option = row %}
+                                    {% include "content/prompt/inputs/selects.html" %}
+                                  </td>
+                                {% endfor %}
+                              </tr>
+
+
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>

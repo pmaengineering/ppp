@@ -6,7 +6,7 @@ import os
 import subprocess
 from glob import glob
 
-from ppp.odkform import OdkForm
+from ppp.odkform import OdkForm, set_template_env
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
 from test.config import TEST_FILES_DIR, TEST_PACKAGES
@@ -334,6 +334,7 @@ class OdkFormTest(PppTest):
         self.assertTrue(expected == actual, msg)
 
     def test_to_html(self):
+        set_template_env('old')
         """Test to_html method."""
         forms = self.get_forms(self.data)
         for dummy, form in forms.items():

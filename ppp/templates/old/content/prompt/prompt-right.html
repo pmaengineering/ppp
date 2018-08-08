@@ -17,7 +17,7 @@
                         {% else %}
                           {% set input_margins = '' %}
                         {% endif %}
-                        <td class="response-cell" valign="top">
+                        <td class="response-cell align-top">
 
                           <div class="flex-container-column">
                             <div class="flex-container-row">
@@ -38,16 +38,17 @@
                               {% else %}
 
                                 {% if question.simple_type in ['select_one', 'select_multiple'] %}
-                                  <p>
+                                  <p><!--<form>-->
                                     {% for option in question.input_field %}
                                       {% set select_option = question %}
                                       {% include "content/prompt/inputs/selects.html" %}
+                                      <!--suppress XmlInvalidId -->
                                       <label for="{{ question.name }}_{{ loop.index }}">{{ option.label }} <span class="choice-name">{{ option.name }}</span></label>
                                       {% if loop.last == False %}
                                         <br/>
                                       {% endif %}
                                     {% endfor %}
-                                  </p>
+                                  </p><!--</form>-->
                                 {% endif %}
 
                                 {% if question.simple_type in ['text', 'integer', 'decimal', 'image'] %}
@@ -70,9 +71,4 @@
                             </div>
                           </div>
 
-                        </td>
-                        <td class="skip" valign="top">
-                          {% if question.relevant %}
-                            {{ question.relevant }}
-                          {% endif %}
                         </td>

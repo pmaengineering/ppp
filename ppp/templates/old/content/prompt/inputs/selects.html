@@ -1,0 +1,6 @@
+                                      {% if select_option.simple_type == 'select_one' %}
+                                        {% include "content/prompt/inputs/select-one.html" %}
+                                      {% endif %}
+                                      {% if select_option.simple_type == 'select_multiple' %}
+                                        {% include "content/prompt/inputs/select-multiple.html" %}
+                                      {% endif %}

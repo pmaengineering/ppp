@@ -6,7 +6,7 @@ import os
 import subprocess
 from glob import glob
 
-from ppp.odkform import OdkForm
+from ppp.odkform import OdkForm, set_template_env
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
 from test.config import TEST_FILES_DIR, TEST_PACKAGES
@@ -204,6 +204,7 @@ class OdkPromptTest(PppTest):
             '208.C.ii.1. Random question': '208.C.ii.1',
             '209.C.ii.1_v2. Random question': '209.C.ii.1_v2',
             '210.C.ii.1_v2-2. Random question': '210.C.ii.1_v2-2',
+            'State: ${level1_unlinked}': ''
         }
         for k, v in inputs_to_outputs.items():
             prompt = {
@@ -315,7 +316,25 @@ class OdkFormTest(PppTest):
             # noinspection PyTypeChecker
             self.assertTrue(isinstance(got, expected), msg)
 
+    def test__add_prompt_iteration_numbers_to_form(self):
+        """Test _add_prompt_iteration_numbers_to_form method.
+
+            This test pulls from uses a particular file which has had a special
+            column added to it called "i". For any row in the form file which
+            has data, there is a value for "i" that has been pre-set to what
+            we would expect.
+        """
+        rel_file_path = 'test__add_prompt_iteration_numbers_to_form/1.xlsx'
+        form = OdkForm.from_file(TEST_FILES_DIR + rel_file_path)
+        with_iterations = form._add_i_nums_to_questions(form.questionnaire)
+        expected = 137
+        actual = int(with_iterations[-1].row['i'])
+        msg = 'Expected iteration {} does not match actual value of {}.'\
+            .format(expected, actual)
+        self.assertTrue(expected == actual, msg)
+
     def test_to_html(self):
+        set_template_env('old')
         """Test to_html method."""
         forms = self.get_forms(self.data)
         for dummy, form in forms.items():

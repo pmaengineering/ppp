@@ -9,6 +9,7 @@ from ppp.odkchoices import OdkChoices
 from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
 from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
+from ppp.odktable import OdkTable, set_template_env as odktable_template
 from ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
@@ -20,6 +21,7 @@ def set_template_env(template):
   odkgroup_template(template)
   odkpromt_template(template)
   odkrepeat_template(template)
+  odktable_template(template)
 
 class OdkForm:
     """Class to represent an entire XLSForm.
@@ -246,6 +248,50 @@ class OdkForm:
             return json.dumps(raw_survey, indent=2)
         return json.dumps(raw_survey)
 
+    @staticmethod
+    def _add_i_nums_to_questions(obj, data={'qnum':'', 'i':0}, depth=0):
+        """Add iteration numbers to unique question prompts.
+
+        Possible improvements: Make it so that this doesn't depend on
+        OdkPrompt._extract_question_numbers.
+
+        Args:
+            obj (list): From either: OdkForm.questionnaire, OdkGroup.row, or
+            OdkRepeat.row.
+            data (dict): Running data. Tracks current question number 'qnum'
+            and also current iteration 'i'. The 'i' should increment by 1 for
+            each new question number. In this case, a question number is
+            rigidly considered "new" if it is not exactly equal to whatever
+            was considered to be the immediately preceding question number
+            in the form.
+            depth (int): Recursion depth. Starts at 0. Increments by 1 each
+            time this function recurses, which happens every time an OdkRepeat
+            or OdkGroup is encountered.
+
+        Returns:
+            list: OdkForm.questionnaire with new 'i' values included.
+        """
+        for i, element in enumerate(obj):
+            if isinstance(element, OdkGroup) or isinstance(element, OdkRepeat):
+                element.data, data = OdkForm._add_i_nums_to_questions(
+                    element.data, data, depth+1)
+            elif isinstance(element, OdkPrompt):
+                element.row = OdkPrompt._extract_question_numbers(element.row)
+                qnum = element.row['question_number']
+                if qnum not in (data['qnum'], ''):
+                    data['i'] += 1
+                    data['qnum'] = qnum
+                element.row['i'] = data['i']
+            elif isinstance(element, OdkCalculate):
+                element.row['i'] = data['i']
+            elif isinstance(element, OdkTable):  # TODO
+                pass
+            else:
+                pass
+        if depth == 0:
+            return obj
+        return obj, data
+
     def to_html(self, lang=None, **kwargs):
         """Get the JSON representation of an entire XLSForm.
 
@@ -271,7 +317,8 @@ class OdkForm:
             'footer': {
                 'data': self.to_json(pretty=True) if debug else 'false'
             },
-            'questionnaire': self.questionnaire
+            'questionnaire': OdkForm._add_i_nums_to_questions(
+                self.questionnaire)
         }
 
         # - Render Header

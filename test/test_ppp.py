@@ -316,6 +316,23 @@ class OdkFormTest(PppTest):
             # noinspection PyTypeChecker
             self.assertTrue(isinstance(got, expected), msg)
 
+    def test__add_prompt_iteration_numbers_to_form(self):
+        """Test _add_prompt_iteration_numbers_to_form method.
+
+            This test pulls from uses a particular file which has had a special
+            column added to it called "i". For any row in the form file which
+            has data, there is a value for "i" that has been pre-set to what
+            we would expect.
+        """
+        rel_file_path = 'test__add_prompt_iteration_numbers_to_form/1.xlsx'
+        form = OdkForm.from_file(TEST_FILES_DIR + rel_file_path)
+        with_iterations = form._add_i_nums_to_questions(form.questionnaire)
+        expected = 137
+        actual = int(with_iterations[-1].row['i'])
+        msg = 'Expected iteration {} does not match actual value of {}.'\
+            .format(expected, actual)
+        self.assertTrue(expected == actual, msg)
+
     def test_to_html(self):
         """Test to_html method."""
         forms = self.get_forms(self.data)

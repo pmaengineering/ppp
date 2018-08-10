@@ -4,7 +4,7 @@
                         {% set bottom_border = '' %}
                       {% endif %}
                       <tr bgcolor="#CACACA">
-                        <td colspan="4">
+                        <td colspan="4" style="border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black;">
                           {% for label in question.label %}
                             <h3>{{ label }}</h3>
                           {% endfor %}
@@ -13,3 +13,5 @@
                           {% endfor %}
                         </td>
                       </tr>
+
+                      

@@ -11,10 +11,10 @@
                             {% set label_hint_highlight = ' bg-light-green' %}
                             {% set constraint_highlight = ' bg-light-red' %}
                         {% endif %}
-                        <td style="{% if question.question_number %}border-top: 1px solid black; {% endif %}border-left: 1px solid black; border-right: 1px solid black; break-word: break-all;" width="10%" class="number" valign="top">
+                        <td width="7%" style="{% if question.question_number %}border-top: 1px solid black; {% endif %}border-left: 1px solid black; border-right: 1px solid black; break-word: break-all;" class="number" valign="top">
                           {{ question.question_number|question_number }}
                         </td>
-                        <td style="border-top: 1px solid black; border-right: 1px solid black;" width="45%" class="question-cell" valign="top">
+                        <td width="48%" style="border-top: 1px solid black; border-right: 1px solid black;" class="question-cell" valign="top">
                             <div class="align-top align-text-top{{ name_highlight }}">
                                 {% if question.name %}
                                     {% if side_letters %}<span class="{{ side_letter_styling }}">N</span>{% endif %}

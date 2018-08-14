@@ -17,14 +17,13 @@
                         {% else %}
                           {% set input_margins = '' %}
                         {% endif %}
-                        <td width="30%" class="response-cell" valign="top">
+                        <td style="border-top: 1px solid black; border-right: 1px solid black;" width="25%" class="response-cell" valign="top">
 
                           <div class="flex-container-column">
                             <div class="flex-container-row">
                               <div class="question-type{{ type_highlight }}">{{ question.type }}</div>
                               {% if question.relevant %}
                                   <div class="relevant{{ relevant_highlight }}">
-                                    {{ question.relevant }}
                                     {% if side_letters %}<span class="side-letter-relevant{{ side_letter_styling }}">R</span>{% endif %}
                                   </div>
                               {% endif %}
@@ -71,7 +70,7 @@
                           </div>
 
                         </td>
-                        <td width="15%" class="skip" valign="top">
+                        <td style="word-wrap:break-word; border-top: 1px solid black; border-right: 1px solid black" width="20%" class="skip" valign="top">
                           {% if question.relevant %}
                             {{ question.relevant }}
                           {% endif %}

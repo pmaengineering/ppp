@@ -3,9 +3,11 @@
                         {% set label_hint_highlight = ' bg-light-green' %}
                         {% set relevant_highlight = ' bg-light-green' %}
                       {% endif %}
-                      <tr class="table-header" colspan="4">
-                        <td class="question-cell"></td>
-                        <td class="response-cell">
+                      {% if question.relevant %}
+                      <tr class="table-header">
+                        <td style="border-left: 1px solid black; border-top: 1px solid black;"></td>
+                        <td style="border-top: 1px solid black; border-right: 1px solid black;" class="question-cell"></td>
+                        <td style="border-top: 1px solid black;" class="response-cell">
                           <div class="header-container flex-container-row">
                             <div class="align-left {{ name_highlight }}">
                               {% if question.name %}
@@ -24,4 +26,6 @@
 
                           {% include 'content/prompt/label-hint-media-block.html' %}
                         </td>
+                        <td style="border-top: 1px solid black; border-right: 1px solid black;"></td>
                       </tr>
+                      {% endif %}

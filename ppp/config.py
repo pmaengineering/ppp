@@ -4,6 +4,20 @@ from jinja2 import Environment, PackageLoader
 import re
 
 def question_number(question_number, max_length = 4):
+    """Splitting question number.
+
+    Splitting string first by separator chars, then separating
+    letters from numbers, and then splitting just by length.
+    All actions performed one-by-one and only if needed.
+
+    Args:
+        question_number: Question number in a string representation.
+        max_length: Max length of each chunk, with a default value = 4.
+        
+    Returns:
+        Original question number, splitted to (=< max_lengh) chunks
+        and then joined to one string with a space char as a glue.
+    """
   # If question's length is less then limit, return immediately.
   if len(question_number) <= max_length:
     return question_number

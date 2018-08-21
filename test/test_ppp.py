@@ -432,6 +432,11 @@ class SurveyCtoSupport(PppTest):
     def test_convert(self):
         self.standard_conversion_test()
 
+class IdStringSupport(PppTest):
+    """Successfully creates a form when the form ID is called "id_string" rather than "form_id"."""
+
+    def test_convert(self):
+        self.standard_conversion_test()
 
 if __name__ == '__main__':
     PARAMS = get_args()

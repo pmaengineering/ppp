@@ -1,0 +1,7 @@
+                                  {% if format == 'html' %}
+                                      <input type="checkbox" class="" name="{{ option }}" id="{{ select_option.name }}{% if loop %}_{{ loop.index }}{% endif %}"/>
+                                  {% elif format == 'doc' %}
+                                    &#9744;
+                                  {% else %}
+                                    {{ "Output format must be supplied."/0 }}  {# Error #}
+                                  {% endif %}

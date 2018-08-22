@@ -1,0 +1,12 @@
+                    {% if question.is_section %}
+                      {% include "content/section-header.html" %}
+                    {% elif question.is_group_header == True %}
+                      {% include "content/group/group-header.html" %}
+                    {% elif question.is_repeat_header == True %}
+                      {% include "content/repeat/repeat-header.html" %}
+                    {% else %}
+                    <tr>
+                      {% include "content/prompt/prompt-left.html" %}
+                      {% include "content/prompt/prompt-right.html" %}
+                    </tr>
+                    {% endif %}

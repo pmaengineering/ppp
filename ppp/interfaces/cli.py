@@ -70,6 +70,13 @@ def _non_preset_optional_fields(parser):
     parser.add_argument('-f', '--format', nargs='+',
                         choices=SUPPORTED_FORMATS, default='doc',
                         help=format_help)
+    # Choose Template
+    #   type='single selection', default:'default'
+    template_help = ('Choose template to render results.')
+    parser.add_argument('-t', '--template', nargs = '+',
+                        choices = ('default', 'old', 'test'),
+                        default = 'default',
+                        help = template_help)
     return parser
 
 
@@ -151,7 +158,7 @@ def _preset_optional_fields(parser):
     #      'function of text replacement is to render more human readable '
     #      'variable names, but can also be used to remove sensitive information'
     #      'or add brevity or clarity where needed.')
-    # parser.add_argument('-t', '--text-replacements', action='store_true',
+    # parser.add_argument('-T', '--text-replacements', action='store_true',
     #                     help=text_replacements_help)
     return parser
 
@@ -225,7 +232,7 @@ def cli():
         run(files=list(args.xlsxfiles),
             languages=[l for l in args.language] if args.language else [None],
             format=args.format, outpath=args.outpath,
-            debug=args.debug, highlight=args.highlight, preset=args.preset)
+            debug=args.debug, highlight=args.highlight, preset=args.preset, template=args.template)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
             .format(args.xlsxfiles, err)

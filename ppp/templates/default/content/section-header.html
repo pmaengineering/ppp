@@ -1,0 +1,17 @@
+                      {% if question.bottom_border == True %}
+                        {% set bottom_border = ' bottom-border' %}
+                      {% else %}
+                        {% set bottom_border = '' %}
+                      {% endif %}
+                      <tr bgcolor="#CACACA">
+                        <td colspan="4" style="border-top: 1px solid black; border-left: 1px solid black; border-right: 1px solid black;">
+                          {% for label in question.label %}
+                            <h3>{{ label }}</h3>
+                          {% endfor %}
+                          {% for p in question.hint %}
+                            <p>{{ p }}</p>
+                          {% endfor %}
+                        </td>
+                      </tr>
+
+                      

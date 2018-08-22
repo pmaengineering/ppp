@@ -1,13 +1,21 @@
 """Module for the OdkPrompt class."""
+from sys import stderr
+import re
 import textwrap
 
-from ppp.config import TEMPLATE_ENV
+#from ppp.config import TEMPLATE_ENV
+from ppp.config import get_template_env
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
     PRESETS, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
     PPP_REPLACEMENTS_FIELDS
-from ppp.definitions.error import OdkChoicesError
+from ppp.definitions.error import OdkException, OdkChoicesError
 
+TEMPLATE_ENV = None
+
+def set_template_env(template):
+  global TEMPLATE_ENV
+  TEMPLATE_ENV = get_template_env(template)
 
 class OdkPrompt:
     """Class to represent a single ODK prompt from an XLSForm.
@@ -252,6 +260,70 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
+    def _extract_question_numbers(prompt):
+        """Extracts question no. from label field and sets to question_number.
+
+        First, it standardizes the label it's searching through to a string, as
+        it is possible for OdkPrompt to have converted the label into a 'list'
+        object. Then, it uses a regexp (regular expression) to look for a
+        substring that matches a 'question number pattern', which is (1) a
+        'question number' (can include letters and some other special
+        characters), followed by (2) a period, followed by (3) 1 or more
+        spaces, followed by (4) a letter. After this, it then sets the question
+        number to be equal to the text matching (1) as just described.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        # TODO: Won't need if better regexp. Current one matches sentences with
+        # multiple spaces and include a number in them.
+        arbitrary_character_threshold = 20
+        warning = ''
+        prompt['question_number'] = \
+            prompt['question_number'] if 'question_number' in prompt else ''
+        # This could be better. Doesn't get at default language.
+        lang_labels = [x for x in prompt if x.startswith('label:')]
+        label = prompt['label'] if 'label' in prompt \
+            else prompt['label::English'] if 'label::English' in prompt \
+            else prompt[lang_labels[0]]
+        label_type = type(label).__name__
+        if label_type == 'str':
+            label = label
+        elif label_type == 'list':
+            label = label[0]
+        else:
+            msg = "Unsure how to handle label with type {} in the following " \
+                  "label.\n\n{}.".format(label_type, label)
+            raise OdkException(msg)
+
+        match = \
+            re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].',
+                      label[0:arbitrary_character_threshold])
+        # Tries to match with space after '.'. If not, looks for w/ no space.
+        if not match:
+            match = re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[a-zA-Z].',
+                      label[0:arbitrary_character_threshold])
+            if match:
+                warning = 'Warning: Question number {} does not have a space '\
+                          'after \'.\''
+
+        if match:
+            q_number = match.group(0)  # gets the first match
+            # removes . and anything to the right of it from q_number
+            for i in range(len(q_number)):
+                if q_number[-i] == '.':
+                    q_number = q_number[0:-i]
+                    break
+            prompt['question_number'] = q_number
+        if warning:
+            print(warning.format(prompt['question_number']), file=stderr)
+
+        return prompt
+
+    @staticmethod
     def streamline_constraint_message(prompt):
         """Ensure constraint_message field name is consistent.
 
@@ -473,6 +545,7 @@ class OdkPrompt:
         prompt = self.truncate_fields(prompt)
         prompt = self.reformat_double_line_breaks(prompt)
         prompt = self.streamline_constraint_message(prompt)
+        prompt = self._extract_question_numbers(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
 
@@ -482,7 +555,6 @@ class OdkPrompt:
             prompt['bottom_border'] = True
         if 'preset' in kwargs:
             prompt = self.handle_preset(prompt, lang, kwargs['preset'])
-
         return prompt
 
     @staticmethod

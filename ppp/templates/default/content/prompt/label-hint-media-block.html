@@ -1,0 +1,21 @@
+                          {% if question.label or question.hint %}
+                            <div class="align-text-top{{ label_hint_highlight }}">
+                              {% if question.label %}
+                                {% for p in question.label %}
+                                  <p class="label">{{ p }}</p>
+                                {% endfor %}
+                              {% endif %}
+                              {% if question.hint %}
+                                {% for p in question.hint %}
+                                  <p class="hint">{{ p }}</p>
+                                {% endfor %}
+                              {% endif %}
+                              {% if question.media %}
+                                <div class="media-items">
+                                  {% for item in question.media %}
+                                    <div class="media">{{ item }}</div>
+                                  {% endfor %}
+                                </div>
+                              {% endif %}
+                            </div>
+                          {% endif %}

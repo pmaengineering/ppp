@@ -1,0 +1,38 @@
+                        {% if question.in_repeat == True %}
+                            {% set side_letter_styling = 'side-letter-repeat-left' %}
+                        {% endif %}
+                        {% if question.in_group == True %}
+                            {% set side_letter_styling = 'side-letter-group-left' %}
+                        {% else %}
+                            {% set side_letter_styling = 'side-letter-left' %}
+                        {% endif %}
+                        {% if highlighting %}
+                            {% set name_highlight = ' bg-light-blue' %}
+                            {% set label_hint_highlight = ' bg-light-green' %}
+                            {% set constraint_highlight = ' bg-light-red' %}
+                        {% endif %}
+                        <td class="question-cell align-top">
+                            <div class="align-top align-text-top{{ name_highlight }}">
+                                {% if question.name %}
+                                    {% if side_letters %}<span class="{{ side_letter_styling }}">N</span>{% endif %}
+                                    <div class="variable">{{ question.name }}</div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% include 'content/prompt/label-hint-media-block.html' %}
+                                <div class="align-bottom align-text-bottom{{ constraint_highlight }}">
+                                    {% if question.constraint %}
+                                        {% if side_letters %}<span class="{{ side_letter_styling }}">C</span>{% endif %}
+                                        <div class="constraint">{{ question.constraint }}</div>
+                                    {% endif %}
+                                    {% if question.constraint_message %}
+                                        {% if side_letters %}<span class="{{ side_letter_styling }}">M</span>{% endif %}
+                                        <div>
+                                          {% for p in question.constraint_message %}
+                                            <p class="constraint-message">{{ p }}</p>
+                                          {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>

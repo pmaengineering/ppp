@@ -6,7 +6,7 @@ import os
 import subprocess
 from glob import glob
 
-from ppp.odkform import OdkForm
+from ppp.odkform import OdkForm, set_template_env
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
 from test.config import TEST_FILES_DIR, TEST_PACKAGES
@@ -70,7 +70,7 @@ class PppTest(unittest.TestCase):
 
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python', '-m', 'ppp'] + in_files + ['-o', out_dir]
+        command = ['python3', '-m', 'ppp'] + in_files + ['-o', out_dir]
         subprocess.call(command)
 
         expected = 'N files: ' + str(len(in_files))
@@ -166,6 +166,56 @@ class OdkPromptTest(PppTest):
                     if item.odktype in item.select_types:
                         msg = 'No choices found in \'{}\'.'.format(item)
                         self.assertTrue(item.choices is not None, msg=msg)
+
+    def test_question_number_field_from_form(self):
+        """Test that question numbers are geing generated as expected."""
+        expected_outputs = {
+            'ever_birth': '200',
+            'fb_note': '205',
+            'birth_events_yes': 'LCL201',
+            'children_living': '201a'
+        }
+        test_language = 'English'
+        forms = []
+        form_names = ['OdkFormTest', 'QuestionNumberExtractionTest']
+        for form in form_names:
+            forms.append(OdkForm.from_file(TEST_FILES_DIR + form + '.xlsx'))
+        for form in forms:
+            for item in form.questionnaire:
+                if isinstance(item, OdkPrompt):
+                    row = item.to_dict(lang=test_language)
+                    if row['name'] in expected_outputs:
+                        msg = 'Question number \'{}\' did not match what was '\
+                              'expected for the following question: \n\n{}'\
+                            .format(row['question_number'], row['label'])
+                        self.assertTrue(row['question_number'] ==
+                                        expected_outputs[row['name']], msg=msg)
+
+    def test_question_number_field_statically(self):
+        """Test that question numbers are geing generated as expected."""
+        inputs_to_outputs = {
+            '201. Random question': '201',
+            'LCL_202. Random question': 'LCL_202',
+            'CRVS-203. Random question': 'CRVS-203',
+            '204.A. Random question': '204.A',
+            '205.1. Random question': '205.1',
+            '206.a. Random question': '206.a',
+            '207.i. Random question': '207.i',
+            '208.C.ii.1. Random question': '208.C.ii.1',
+            '209.C.ii.1_v2. Random question': '209.C.ii.1_v2',
+            '210.C.ii.1_v2-2. Random question': '210.C.ii.1_v2-2',
+            'State: ${level1_unlinked}': ''
+        }
+        for k, v in inputs_to_outputs.items():
+            prompt = {
+                'label': k
+            }
+            question_number = \
+                OdkPrompt._extract_question_numbers(prompt)['question_number']
+            msg = 'Question number \'{}\' did not match what was ' \
+                  'expected for the following question: \n\n{}'\
+                .format(question_number, k)
+            self.assertTrue(question_number == v, msg=msg)
 
 
 class OdkGroupTest(unittest.TestCase):
@@ -266,7 +316,25 @@ class OdkFormTest(PppTest):
             # noinspection PyTypeChecker
             self.assertTrue(isinstance(got, expected), msg)
 
+    def test__add_prompt_iteration_numbers_to_form(self):
+        """Test _add_prompt_iteration_numbers_to_form method.
+
+            This test pulls from uses a particular file which has had a special
+            column added to it called "i". For any row in the form file which
+            has data, there is a value for "i" that has been pre-set to what
+            we would expect.
+        """
+        rel_file_path = 'test__add_prompt_iteration_numbers_to_form/1.xlsx'
+        form = OdkForm.from_file(TEST_FILES_DIR + rel_file_path)
+        with_iterations = form._add_i_nums_to_questions(form.questionnaire)
+        expected = 137
+        actual = int(with_iterations[-1].row['i'])
+        msg = 'Expected iteration {} does not match actual value of {}.'\
+            .format(expected, actual)
+        self.assertTrue(expected == actual, msg)
+
     def test_to_html(self):
+        set_template_env('old')
         """Test to_html method."""
         forms = self.get_forms(self.data)
         for dummy, form in forms.items():
@@ -282,6 +350,8 @@ class OdkFormTest(PppTest):
 class MultiConversionTest(unittest.TestCase):
     """Test conversion of n files in n languages for n option combinations."""
 
+    maxDiff = None  # Allows to see full error output for this test.
+
     def test_multi_conversion(self):
         src_dir = TEST_FILES_DIR + 'multiple_file_language_option_conversion/'
         out_dir = src_dir + 'ignored/'
@@ -290,30 +360,36 @@ class MultiConversionTest(unittest.TestCase):
             [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python', '-m', 'ppp'] + src_files + \
+        command = ['python3', '-m', 'ppp'] + src_files + \
                   ['-o', out_dir, '-f', 'doc', 'html', '-p', 'minimal', 'full',
                    '-l', 'English', 'Français']
         subprocess.call(command)
 
-        out_dir_ls_input = str(os.listdir(out_dir))
-        expected_output = \
-            str(['BFR5-Selection-v2-jef-Français-minimal.html',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-full.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-full.doc',
-                 'BFR5-Selection-v2-jef-Français-full.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-full.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.html',
-                 'BFR5-Selection-v2-jef-Français-full.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-Français-minimal.doc',
-                 'BFR5-Female-Questionnaire-v13-jef-English-full.html',
-                 'BFR5-Selection-v2-jef-English-minimal.doc',
-                 'BFR5-Selection-v2-jef-English-minimal.html',
-                 'BFR5-Female-Questionnaire-v13-jef-English-minimal.html',
-                 'BFR5-Selection-v2-jef-Français-minimal.doc',
-                 'BFR5-Selection-v2-jef-English-full.doc',
-                 'BFR5-Selection-v2-jef-English-full.html'])
-        self.assertEqual(expected_output, str(out_dir_ls_input))
+        out_dir_ls_input_unsorted = os.listdir(out_dir)
+
+        expected_output_unsorted = \
+            ['BFR5-Selection-v2-jef-Français-minimal.html',
+             'BFR5-Female-Questionnaire-v13-jef-Français-full.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-minimal.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-full.doc',
+             'BFR5-Selection-v2-jef-Français-full.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-full.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-minimal.html',
+             'BFR5-Selection-v2-jef-Français-full.doc',
+             'BFR5-Female-Questionnaire-v13-jef-Français-minimal.doc',
+             'BFR5-Female-Questionnaire-v13-jef-English-full.html',
+             'BFR5-Selection-v2-jef-English-minimal.doc',
+             'BFR5-Selection-v2-jef-English-minimal.html',
+             'BFR5-Female-Questionnaire-v13-jef-English-minimal.html',
+             'BFR5-Selection-v2-jef-Français-minimal.doc',
+             'BFR5-Selection-v2-jef-English-full.doc',
+             'BFR5-Selection-v2-jef-English-full.html']
+
+        out_dir_ls_input = sorted(expected_output_unsorted)
+        expected_output = sorted(out_dir_ls_input_unsorted)
+
+        self.assertEqual(expected_output, out_dir_ls_input)
+        # self.assertEqual(str(expected_output), str(out_dir_ls_input))
 
 
 class MultipleFieldLanguageDelimiterSupport(PppTest):
@@ -356,6 +432,11 @@ class SurveyCtoSupport(PppTest):
     def test_convert(self):
         self.standard_conversion_test()
 
+class IdStringSupport(PppTest):
+    """Successfully creates a form when the form ID is called "id_string" rather than "form_id"."""
+
+    def test_convert(self):
+        self.standard_conversion_test()
 
 if __name__ == '__main__':
     PARAMS = get_args()

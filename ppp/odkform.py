@@ -69,11 +69,17 @@ class OdkForm:
             **self.metadata,
             **{
                 'file_name': os.path.split(wb.file)[1],
-                'form_id': self.settings.get('form_id'),
-                'country': self.settings.get('form_id')[3:5],
-                'round': self.settings.get('form_id')[6:7],
-                'type_of_form': self.settings.get('form_id')[0:2],
+                'form_id': self.settings.get('form_id') if self.settings.get('form_id') else self.settings.get('id_string'),
+                'country': lambda:self.metadata['form_id'][3:5],
+                'round': lambda:self.metadata['form_id'][6:7],
+                'type_of_form': lambda:self.metadata['form_id'][0:2],
             }
+        }
+        self.metadata = {
+            **self.metadata,
+            'country': self.metadata['country'](),
+            'round': self.metadata['round'](),
+            'type_of_form': self.metadata['type_of_form'](),
         }
         self.questionnaire = self.convert_survey(wb, self.choices,
                                                  self.ext_choices)

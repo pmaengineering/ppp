@@ -334,8 +334,8 @@ class OdkFormTest(PppTest):
         self.assertTrue(expected == actual, msg)
 
     def test_to_html(self):
-        set_template_env('old')
         """Test to_html method."""
+        set_template_env('old')
         forms = self.get_forms(self.data)
         for dummy, form in forms.items():
             kwargs = {'format': 'html'}
@@ -432,11 +432,13 @@ class SurveyCtoSupport(PppTest):
     def test_convert(self):
         self.standard_conversion_test()
 
+
 class IdStringSupport(PppTest):
-    """Successfully creates a form when the form ID is called "id_string" rather than "form_id"."""
+    """Creates a form when the form ID is called "id_string" or "form_id"."""
 
     def test_convert(self):
         self.standard_conversion_test()
+
 
 if __name__ == '__main__':
     PARAMS = get_args()

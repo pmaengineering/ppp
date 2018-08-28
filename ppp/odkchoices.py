@@ -52,8 +52,9 @@ class OdkChoices:
         """
         label_variations = ['label']
         if lang:
-            label_variations += \
+            label_variations = \
                 [x.format(lang) for x in ('label::{}', 'label:{}')]
+            label_variations.append('label')
         try:
             for label in label_variations:
                 if label in self.data[0]:

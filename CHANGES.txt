@@ -1,28 +1,31 @@
-v1.2.0, 2016-07-17
+v1.2.1, 2018-08-28
+* Fixed a bug in which, occasionally, the language of choice options would not match the language of the question text.
+
+v1.2.0, 2018-07-17
 * Added question number field to OdkPrompt, available for use in templates.
 
-v1.1.4, 2016-07-10
+v1.1.4, 2018-07-10
 * Fixed a bug where the following elements were occasionally not being rendered: choice names/values, constraint messages. These issues typically affected only SurveyCTO forms.
 
-v1.1.3, 2016-07-09
+v1.1.3, 2018-07-09
 * Fixed a bug in which pmix dependency was not being installed correctly.
 
-v1.1.2, 2016-07-09
+v1.1.2, 2018-07-09
 * Fixed a bug in which pmix dependency was not being installed correctly.
 
-v1.1.1, 2016-06-22
+v1.1.1, 2018-06-22
 * Fixed a bug in which the following tests were not passing: test_multi_conversion.
 
-v1.1.0, 2016-06-22
+v1.1.0, 2018-06-22
  * Began adding support for several XlsForm variations that can appear in SurveyCTO forms.
 
-v1.0.3, 2016-06-12
+v1.0.3, 2018-06-12
  * Removed currently unsupported options from the CLI.
 
-v1.0.2, 2016-06-12
+v1.0.2, 2018-06-12
  * Fix to include package data.
 
-v1.0.0, 2016-06-12
+v1.0.0, 2018-06-12
  * Initial release of independent package separate from Pmix package.
 
 v0.2.1, 2017-11-04

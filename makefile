@@ -2,8 +2,10 @@ PYTHON=python3
 SRC=./pmix/
 TEST=./test/
 
-
-.PHONY: lint tags ltags test all lint_all codestyle docstyle lint_src lint_test doctest doc docs code linters_all code_src code_test doc_src doc_test paper build dist pypi_push_test pypi_push pypi_test pip_test pypi pip
+.PHONY: lint tags ltags test all lint_all codestyle docstyle lint_src \
+lint_test doctest doc docs code linters_all code_src code_test doc_src \
+doc_test paper build dist pypi_push_test pypi_push pypi_test pip_test pypi \
+pip demo
 
 # Batched Commands
 # - Code & Style Linters
@@ -55,6 +57,15 @@ testdoc:
 test_all: test testdoc
 test_survey_cto: #TODO: run a single unit test
 	${PYTHON} -m unittest discover -v
+DEMO_IN=test/files/multiple_file_language_option_conversion
+DEMO_OUT=~/Desktop/ppp-demo
+demo:
+	mkdir ${DEMO_OUT}
+	for file in ${DEMO_IN}/*.xlsx; do \
+		cp $$file ${DEMO_OUT}; \
+	done
+	python3 -m ppp ${DEMO_OUT}/*.xlsx -f doc html -p minimal full -l English Français
+
 
 # Package Management
 build:

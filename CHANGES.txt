@@ -1,3 +1,7 @@
+v1.2.3, 2018-07-17
+* Bugfix. Added missing CSS files to template package data.
+* Makefile updates
+
 v1.2.2, 2018-07-17
 * Bugfix. Added missing templates. Should recursively add templates now, so shouldn't happen again.
 

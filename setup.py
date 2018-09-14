@@ -44,7 +44,7 @@ def get_pkg_data(pkg_name, data_dirs, extensions):
 
 setup(
     name='odk_ppp',  # The name 'ppp' was already taken.
-    version='1.2.2',
+    version='1.2.3',
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
@@ -55,7 +55,7 @@ setup(
     package_data={
         'ppp': get_pkg_data(pkg_name='ppp',
                             data_dirs=['templates'],
-                            extensions=['html'])
+                            extensions=['html', 'css'])
     },
     license='LICENSE.txt',
     description='Converts XlsForm Excel files (ODK, SurveyCTO, etc) into '

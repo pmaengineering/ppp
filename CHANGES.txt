@@ -1,3 +1,6 @@
+v1.2.2, 2018-07-17
+* Bugfix. Added missing templates. Should recursively add templates now, so shouldn't happen again.
+
 v1.2.1, 2018-08-28
 * Fixed a bug in which, occasionally, the language of choice options would not match the language of the question text.
 

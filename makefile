@@ -2,48 +2,48 @@ PYTHON=python3
 SRC=./pmix/
 TEST=./test/
 
-.PHONY: lint tags ltags test all lint_all codestyle docstyle lint_src \
-lint_test doctest doc docs code linters_all code_src code_test doc_src \
-doc_test paper build dist pypi_push_test pypi_push pypi_test pip_test pypi \
+.PHONY: lint tags ltags test all lintall codestyle docstyle lintsrc \
+linttest doctest doc docs code linters_all codesrc codetest docsrc \
+doctest paper build dist pypi-push-test pypi-push pypi-test pip-test pypi \
 pip demo
 
 # Batched Commands
 # - Code & Style Linters
-all: linters_all test_all
-lint: lint_src code_src doc_src
-linters_all: doc code lint_all
+all: linters_all testall
+lint: lintsrc codesrc docsrc
+linters_all: doc code lintall
 
 # Pylint Only
 PYLINT_BASE =${PYTHON} -m pylint --output-format=colorized --reports=n
-lint_all: lint_src lint_test
-lint_src:
+lintall: lintsrc linttest
+lintsrc:
 	${PYLINT_BASE} ${SRC}
-lint_test:
+linttest:
 	${PYLINT_BASE} ${TEST}
 
 # PyCodeStyle Only
 PYCODESTYLE_BASE=${PYTHON} -m pycodestyle
-codestyle: codestyle_src codestyle_test
-code_src: codestyle_src
-code_test: codestyle_test
+codestyle: codestylesrc codestyletest
+codesrc: codestylesrc
+codetest: codestyletest
 code: codestyle
-codestyle_src:
+codestylesrc:
 	${PYCODESTYLE_BASE} ${SRC}
-codestyle_test:
+codestyletest:
 	 ${PYCODESTYLE_BASE} ${TEST}
 
 # PyDocStyle Only
 PYDOCSTYLE_BASE=${PYTHON} -m pydocstyle
-docstyle: docstyle_src docstyle_test
-doc_src: docstyle_src
-doc_test: docstyle_test
+docstyle: docstylesrc docstyletest
+docsrc: docstylesrc
+doctest: docstyletest
 docs: docstyle
-docstyle_src:
+docstylesrc:
 	${PYDOCSTYLE_BASE} ${SRC}
-docstyle_test:
+docstyletest:
 	${PYDOCSTYLE_BASE} ${TEST}
 codetest:
-	${CODE_TEST}
+	${CODE-test}
 codeall: code codetest
 doc: docstyle
 doc:
@@ -54,8 +54,8 @@ test:
 	${PYTHON} -m unittest discover -v
 testdoc:
 	${PYTHON} -m test.test --doctests-only
-test_all: test testdoc
-test_survey_cto: #TODO: run a single unit test
+testall: test testdoc
+test-survey-cto: #TODO: run a single unit test
 	${PYTHON} -m unittest discover -v
 DEMO_IN=test/files/multiple_file_language_option_conversion
 DEMO_OUT=~/Desktop/ppp-demo
@@ -71,14 +71,14 @@ demo:
 build:
 	rm -rf ./dist && rm -rf ./build && ${PYTHON} setup.py sdist bdist_wheel
 dist: build
-pypi_push_test:
+pypi-push-test:
 	make build && twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-pypi_push:
+pypi-push:
 	make build && twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-pypi_test: pypi_push_test
-pip_test: pypi_push_test
-pypi: pypi_push
-pip: pypi_push
+pypi-test: pypi-push-test
+pip-test: pypi-push-test
+pypi: pypi-push
+pip: pypi-push
 
 # Scripts
 paper:

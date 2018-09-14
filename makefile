@@ -72,10 +72,10 @@ remove-previous-build:
 	rm -rf ./dist; 
 	rm -rf ./build; 
 	rm -rf ./*.egg-info
-build:
+build: remove-previous-build
 	python3 setup.py sdist bdist_wheel
 dist: build
-pypi-push-test: remove-previous-build build
+pypi-push-test: build
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 pypi-push:
 	twine upload --repository-url https://upload.pypi.org/legacy/ dist/*; \

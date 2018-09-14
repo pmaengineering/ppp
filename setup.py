@@ -3,6 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 
+version = '1.2.4'
 packages = find_packages(exclude=['test'])
 
 
@@ -44,7 +45,7 @@ def get_pkg_data(pkg_name, data_dirs, extensions):
 
 setup(
     name='odk_ppp',  # The name 'ppp' was already taken.
-    version='1.2.3',
+    version=version,
     author='Joe Flack',
     author_email='jflack@jhu.edu',
     url='http://www.pma2020.org',
@@ -62,8 +63,7 @@ setup(
                 'readable formats.',
     long_description=open('README.md').read(),
     install_requires=[
-        'xlrd>=0.9.3',
-        'Jinja2>=2.9.6'
-        'pmix==0.2.2'
+        'Jinja2>=2.9.6',
+        'pmix>=0.2.2'
     ]
 )

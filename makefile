@@ -1,11 +1,10 @@
-PYTHON=python3
-SRC=./pmix/
+SRC=./ppp/
 TEST=./test/
 
 .PHONY: lint tags ltags test all lintall codestyle docstyle lintsrc \
 linttest doctest doc docs code linters_all codesrc codetest docsrc \
 doctest paper build dist pypi-push-test pypi-push pypi-test pip-test pypi \
-pip demo
+pip demo remove-previous-build
 
 # Batched Commands
 # - Code & Style Linters
@@ -14,7 +13,7 @@ lint: lintsrc codesrc docsrc
 linters_all: doc code lintall
 
 # Pylint Only
-PYLINT_BASE =${PYTHON} -m pylint --output-format=colorized --reports=n
+PYLINT_BASE =python3 -m pylint --output-format=colorized --reports=n
 lintall: lintsrc linttest
 lintsrc:
 	${PYLINT_BASE} ${SRC}
@@ -22,7 +21,7 @@ linttest:
 	${PYLINT_BASE} ${TEST}
 
 # PyCodeStyle Only
-PYCODESTYLE_BASE=${PYTHON} -m pycodestyle
+PYCODESTYLE_BASE=python3 -m pycodestyle
 codestyle: codestylesrc codestyletest
 codesrc: codestylesrc
 codetest: codestyletest
@@ -33,7 +32,7 @@ codestyletest:
 	 ${PYCODESTYLE_BASE} ${TEST}
 
 # PyDocStyle Only
-PYDOCSTYLE_BASE=${PYTHON} -m pydocstyle
+PYDOCSTYLE_BASE=python3 -m pydocstyle
 docstyle: docstylesrc docstyletest
 docsrc: docstylesrc
 doctest: docstyletest
@@ -51,12 +50,12 @@ doc:
 
 # Testing
 test:
-	${PYTHON} -m unittest discover -v
+	python3 -m unittest discover -v
 testdoc:
-	${PYTHON} -m test.test --doctests-only
+	python3 -m test.test --doctests-only
 testall: test testdoc
 test-survey-cto: #TODO: run a single unit test
-	${PYTHON} -m unittest discover -v
+	python3 -m unittest discover -v
 DEMO_IN=test/files/multiple_file_language_option_conversion
 DEMO_OUT=~/Desktop/ppp-demo
 demo:
@@ -64,17 +63,23 @@ demo:
 	for file in ${DEMO_IN}/*.xlsx; do \
 		cp $$file ${DEMO_OUT}; \
 	done
-	python3 -m ppp ${DEMO_OUT}/*.xlsx -f doc html -p minimal full -l English Français
-
+	python3 -m ppp ${DEMO_OUT}/*.xlsx --format doc html \
+	--preset minimal full \
+	--language English Français
 
 # Package Management
+remove-previous-build:
+	rm -rf ./dist; 
+	rm -rf ./build; 
+	rm -rf ./*.egg-info
 build:
-	rm -rf ./dist && rm -rf ./build && ${PYTHON} setup.py sdist bdist_wheel
+	python3 setup.py sdist bdist_wheel
 dist: build
-pypi-push-test:
-	make build && twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+pypi-push-test: remove-previous-build build
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 pypi-push:
-	make build && twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+	twine upload --repository-url https://upload.pypi.org/legacy/ dist/*; \
+	make remove-previous-build
 pypi-test: pypi-push-test
 pip-test: pypi-push-test
 pypi: pypi-push

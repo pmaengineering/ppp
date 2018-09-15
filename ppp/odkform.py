@@ -1,7 +1,6 @@
 """Module for the OdkForm class."""
 import os
 
-#from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.definitions.error import OdkFormError
 from ppp.odkcalculate import OdkCalculate
@@ -15,13 +14,16 @@ from pmix.xlsform import Xlsform
 
 TEMPLATE_ENV = None
 
+
 def set_template_env(template):
-  global TEMPLATE_ENV
-  TEMPLATE_ENV = get_template_env(template)
-  odkgroup_template(template)
-  odkpromt_template(template)
-  odkrepeat_template(template)
-  odktable_template(template)
+    """Set template env."""
+    global TEMPLATE_ENV
+    TEMPLATE_ENV = get_template_env(template)
+    odkgroup_template(template)
+    odkpromt_template(template)
+    odkrepeat_template(template)
+    odktable_template(template)
+
 
 class OdkForm:
     """Class to represent an entire XLSForm.
@@ -69,10 +71,12 @@ class OdkForm:
             **self.metadata,
             **{
                 'file_name': os.path.split(wb.file)[1],
-                'form_id': self.settings.get('form_id') if self.settings.get('form_id') else self.settings.get('id_string'),
-                'country': lambda:self.metadata['form_id'][3:5],
-                'round': lambda:self.metadata['form_id'][6:7],
-                'type_of_form': lambda:self.metadata['form_id'][0:2],
+                'form_id': self.settings.get('form_id') if
+                self.settings.get('form_id')
+                else self.settings.get('id_string'),
+                'country': lambda: self.metadata['form_id'][3:5],
+                'round': lambda: self.metadata['form_id'][6:7],
+                'type_of_form': lambda: self.metadata['form_id'][0:2],
             }
         }
         self.metadata = {
@@ -255,7 +259,7 @@ class OdkForm:
         return json.dumps(raw_survey)
 
     @staticmethod
-    def _add_i_nums_to_questions(obj, data={'qnum':'', 'i':0}, depth=0):
+    def _add_i_nums_to_questions(obj, data={'qnum': '', 'i': 0}, depth=0):
         """Add iteration numbers to unique question prompts.
 
         Possible improvements: Make it so that this doesn't depend on
@@ -304,7 +308,7 @@ class OdkForm:
         Args:
             lang (str): The language.
             **highlight (bool): For color highlighting of various components
-                of html template.
+
             **debug (bool): For inclusion of debug information to be printed
                 in the JavaScript console.
 
@@ -330,7 +334,7 @@ class OdkForm:
         # - Render Header
         # pylint: disable=no-member
         header = TEMPLATE_ENV.get_template('header.html')\
-            .render(data=data['header'], **kwargs)
+            .render(data=data['header'], **kwargs, settings=kwargs)
         # pylint: disable=no-member
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()
@@ -338,9 +342,7 @@ class OdkForm:
 
         # - Render Body
         prev_item = None
-        hlt = kwargs['highlight'] if 'highlight' in kwargs else False
         for index, item in enumerate(data['questionnaire']):
-
             if exclusion(item=item, settings=kwargs):
                 continue
 
@@ -352,16 +354,16 @@ class OdkForm:
             if isinstance(item, OdkPrompt) and item.is_section_header and \
                     isinstance(data['questionnaire'][index+1], OdkGroup):
                 html_questionnaire += \
-                    item.to_html(language, hlt, **kwargs, bottom_border=True)
+                    item.to_html(lang=language, **kwargs, bottom_border=True)
             else:
-                html_questionnaire += item.to_html(language, hlt, **kwargs)
+                html_questionnaire += item.to_html(lang=language, **kwargs)
             prev_item = item
         OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
 
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
             .render(info=None, warnings=OdkForm.warnings,
-                    data=data['footer']['data'], **kwargs)
+                    data=data['footer']['data'], **kwargs, settings=kwargs)
         html_questionnaire += footer
 
         return html_questionnaire

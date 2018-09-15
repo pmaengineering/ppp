@@ -85,11 +85,7 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
             try:
                 print(output)
             except BrokenPipeError:  # If output is piped.
-                try:
-                    signal(SIGPIPE, SIG_DFL)
-                # noinspection PyBroadException
-                except:
-                    pass
+                signal(SIGPIPE, SIG_DFL)
                 print(output)
     except InvalidLanguageException as err:
         if str(err):

@@ -1,14 +1,17 @@
 """Module for the OdkTable class."""
-#from ppp.config import TEMPLATE_ENV
+# from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.definitions.utils import exclusion
 # from ppp.definitions.error import OdkformError
 
 TEMPLATE_ENV = None
 
+
 def set_template_env(template):
-  global TEMPLATE_ENV
-  TEMPLATE_ENV = get_template_env(template)
+    """Set template env"""
+    global TEMPLATE_ENV
+    TEMPLATE_ENV = get_template_env(template)
+
 
 class OdkTable:
     """Class to represent a single ODK table from an XLSForm.
@@ -52,7 +55,7 @@ class OdkTable:
         Returns:
             dict: Reformatted row.
         """
-        settings = prompt.html_options(**kwargs)
+        settings = prompt.html_options(lang=lang, **kwargs)
         table_row = prompt.to_dict(lang=lang, **settings)
         return table_row
 
@@ -120,7 +123,7 @@ class OdkTable:
         result = 'ODK TABLE TEXT'  # Placeholder
         return result
 
-    def to_html(self, lang, highlighting, **kwargs):
+    def to_html(self, lang, **kwargs):
         """Convert to html.
 
         Args:
@@ -145,5 +148,4 @@ class OdkTable:
 
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/table/table.html')\
-            .render(table=table, lang=lang, highlighting=highlighting,
-                    **kwargs)
+            .render(table=table, lang=lang, **kwargs, settings=kwargs)

@@ -9,7 +9,7 @@ from glob import glob
 from ppp.odkform import OdkForm, set_template_env
 from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
-from test.config import TEST_FILES_DIR, TEST_PACKAGES
+from test.config import TEST_STATIC_DIR, TEST_PACKAGES
 from test.utils import get_args, get_test_suite
 # from pmix.odkchoices import OdkChoices  # TODO
 # from pmix.odkrepeat import OdkRepeat  # TODO
@@ -27,7 +27,7 @@ class MockForm(OdkForm):
             mock_file (str): File name.
             mock_dir (str): Directory.
         """
-        path = mock_dir + mock_file if mock_dir else TEST_FILES_DIR + mock_file
+        path = mock_dir + mock_file if mock_dir else TEST_STATIC_DIR + mock_file
         form = super().from_file(path)
         super().__init__(form)
 
@@ -41,7 +41,7 @@ class PppTest(unittest.TestCase):
     @classmethod
     def files_dir(cls):
         """Return name of test class."""
-        return TEST_FILES_DIR + cls.__name__
+        return TEST_STATIC_DIR + cls.__name__
 
     def input_path(self):
         """Return path of input file folder for test class."""
@@ -60,26 +60,35 @@ class PppTest(unittest.TestCase):
         return sans_temp_files
 
     def output_files(self):
-        """Return paths of input files for test class."""
+        """Return paths of input files for test class.
+
+        Args:
+            options (list): Of the form '['--template', 'old', ...]
+        """
         return glob(self.output_path() + '*')
 
-    def standard_convert(self):
+    def standard_convert(self, options=[]):
         """Converts input/* --> output/*. Returns n files each."""
         in_files = self.input_files()
         out_dir = self.output_path()
 
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
-        command = ['python3', '-m', 'ppp'] + in_files + ['-o', out_dir]
+        command = \
+            ['python3', '-m', 'ppp'] + in_files + ['-o', out_dir] + options
         subprocess.call(command)
 
         expected = 'N files: ' + str(len(in_files))
         actual = 'N files: ' + str(len(self.output_files()))
         return expected, actual
 
-    def standard_conversion_test(self):
-        """Checks standard convert success."""
-        expected, actual = self.standard_convert()
+    def standard_conversion_test(self, options=[]):
+        """Checks standard convert success.
+
+        Args:
+            options (list): Of the form '['--template', 'old', ...]
+        """
+        expected, actual = self.standard_convert(options)
         self.assertEqual(expected, actual)
 
     @staticmethod
@@ -93,7 +102,7 @@ class PppTest(unittest.TestCase):
             except KeyError:
                 file = datum['inputs']['file']
             if file not in forms:
-                forms[file] = OdkForm.from_file(TEST_FILES_DIR + file)
+                forms[file] = OdkForm.from_file(TEST_STATIC_DIR + file)
         return forms
 
 
@@ -179,7 +188,7 @@ class OdkPromptTest(PppTest):
         forms = []
         form_names = ['OdkFormTest', 'QuestionNumberExtractionTest']
         for form in form_names:
-            forms.append(OdkForm.from_file(TEST_FILES_DIR + form + '.xlsx'))
+            forms.append(OdkForm.from_file(TEST_STATIC_DIR + form + '.xlsx'))
         for form in forms:
             for item in form.questionnaire:
                 if isinstance(item, OdkPrompt):
@@ -325,7 +334,7 @@ class OdkFormTest(PppTest):
             we would expect.
         """
         rel_file_path = 'test__add_prompt_iteration_numbers_to_form/1.xlsx'
-        form = OdkForm.from_file(TEST_FILES_DIR + rel_file_path)
+        form = OdkForm.from_file(TEST_STATIC_DIR + rel_file_path)
         with_iterations = form._add_i_nums_to_questions(form.questionnaire)
         expected = 137
         actual = int(with_iterations[-1].row['i'])
@@ -353,7 +362,7 @@ class MultiConversionTest(unittest.TestCase):
     maxDiff = None  # Allows to see full error output for this test.
 
     def test_multi_conversion(self):
-        src_dir = TEST_FILES_DIR + 'multiple_file_language_option_conversion/'
+        src_dir = TEST_STATIC_DIR + 'multiple_file_language_option_conversion/'
         out_dir = src_dir + 'ignored/'
         src_dir_ls_input = os.listdir(src_dir)
         src_files = \

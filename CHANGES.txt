@@ -1,61 +1,67 @@
-v1.2.4, 2018-07-17
-* Bugfix. Issue existed in setup.py; Uncaught syntax error in dependency list.
+# # v1.2.5, 2018-09-14
+## Bugfixes
+- Fixed an issue where French date widget text was being displayed for non-French languages.
+- Fixed an issue where brackets were appearing around skip pattern expressions.
+- Fixed an issue where bullets were not appearing for choice lists.
 
-v1.2.3, 2018-07-17
-* Bugfix. Added missing CSS files to template package data.
-* Makefile updates
+# v1.2.4, 2018-09-14
+- Bugfix. Issue existed in setup.py; Uncaught syntax error in dependency list.
 
-v1.2.2, 2018-07-17
-* Bugfix. Added missing templates. Should recursively add templates now, so shouldn't happen again.
+# v1.2.3, 2018-09-14
+- Bugfix. Added missing CSS files to template package data.
+- Makefile updates
 
-v1.2.1, 2018-08-28
-* Fixed a bug in which, occasionally, the language of choice options would not match the language of the question text.
+# v1.2.2, 2018-09-14
+- Bugfix. Added missing templates. Should recursively add templates now, so shouldn't happen again.
 
-v1.2.0, 2018-07-17
-* Added question number field to OdkPrompt, available for use in templates.
+# v1.2.1, 2018-08-28
+- Fixed a bug in which, occasionally, the language of choice options would not match the language of the question text.
 
-v1.1.4, 2018-07-10
-* Fixed a bug where the following elements were occasionally not being rendered: choice names/values, constraint messages. These issues typically affected only SurveyCTO forms.
+# v1.2.0, 2018-07-17
+- Added question number field to OdkPrompt, available for use in templates.
 
-v1.1.3, 2018-07-09
-* Fixed a bug in which pmix dependency was not being installed correctly.
+# v1.1.4, 2018-07-10
+- Fixed a bug where the following elements were occasionally not being rendered: choice names/values, constraint messages. These issues typically affected only SurveyCTO forms.
 
-v1.1.2, 2018-07-09
-* Fixed a bug in which pmix dependency was not being installed correctly.
+# v1.1.3, 2018-07-09
+- Fixed a bug in which pmix dependency was not being installed correctly.
 
-v1.1.1, 2018-06-22
-* Fixed a bug in which the following tests were not passing: test_multi_conversion.
+# v1.1.2, 2018-07-09
+- Fixed a bug in which pmix dependency was not being installed correctly.
 
-v1.1.0, 2018-06-22
- * Began adding support for several XlsForm variations that can appear in SurveyCTO forms.
+# v1.1.1, 2018-06-22
+- Fixed a bug in which the following tests were not passing: test_multi_conversion.
 
-v1.0.3, 2018-06-12
- * Removed currently unsupported options from the CLI.
+# v1.1.0, 2018-06-22
+- Began adding support for several XlsForm variations that can appear in SurveyCTO forms.
 
-v1.0.2, 2018-06-12
- * Fix to include package data.
+# v1.0.3, 2018-06-12
+- Removed currently unsupported options from the CLI.
 
-v1.0.0, 2018-06-12
- * Initial release of independent package separate from Pmix package.
+# v1.0.2, 2018-06-12
+- Fix to include package data.
 
-v0.2.1, 2017-11-04
- * Workbook and Xlsform classes for modeling Excel files
- * PPP sub-package to convert an ODK form to PDF and HTML
- * Various utilities: cascade, sheet-to-csv, analytics, numbering
- * Qlang removed
- * Added unit tests
+# v1.0.0, 2018-06-12
+- Initial release of independent package separate from Pmix package.
 
-v0.2.0, 2016-10-05
- * Renamed package to 'pmix'
- * Expanded to contain borrow.py, functionality to grab translations
- * Efficiencies from internals: more of an OO-design rather than functional
+# v0.2.1, 2017-11-04
+- Workbook and Xlsform classes for modeling Excel files
+- PPP sub-package to convert an ODK form to PDF and HTML
+- Various utilities: cascade, sheet-to-csv, analytics, numbering
+- Qlang removed
+- Added unit tests
 
-v0.1.2, 2016-08-29
- * Copy all worksheets from original file, not just survey, choices, settings
+# v0.2.0, 2016-10-05
+- Renamed package to 'pmix'
+- Expanded to contain borrow.py, functionality to grab translations
+- Efficiencies from internals: more of an OO-design rather than functional
 
-v0.1.1, 2016-05-23
- * Conditional formatting to highlight missing languages (English and translations)
+# v0.1.2, 2016-08-29
+- Copy all worksheets from original file, not just survey, choices, settings
 
-v0.1.0, 2016-03-04
- * Initial release
- * Included command-line interface
+# v0.1.1, 2016-05-23
+- Conditional formatting to highlight missing languages (English and translations)
+
+# v0.1.0, 2016-03-04
+- Initial release
+- Included command-line interface

@@ -7,8 +7,7 @@ dist/
 build/
 __pycache__
 *.pyc
-test/files/ignored/*
-test/files/multiple_file_language_option_conversion/ignored/*
+ignored/*
 *~$*
 *.DS_Store
 MANIFEST

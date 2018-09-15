@@ -3,7 +3,6 @@ from sys import stderr
 import re
 import textwrap
 
-#from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
@@ -13,9 +12,12 @@ from ppp.definitions.error import OdkException, OdkChoicesError
 
 TEMPLATE_ENV = None
 
+
 def set_template_env(template):
-  global TEMPLATE_ENV
-  TEMPLATE_ENV = get_template_env(template)
+    """Set template env."""
+    global TEMPLATE_ENV
+    TEMPLATE_ENV = get_template_env(template)
+
 
 class OdkPrompt:
     """Class to represent a single ODK prompt from an XLSForm.
@@ -95,7 +97,7 @@ class OdkPrompt:
         return text
 
     @staticmethod
-    def reformat_double_line_breaks(row):
+    def _reformat_double_line_breaks(row):
         """Convert labels and hints from strings to lists.
 
         This conversion process allows for line breaks to be rendered properly
@@ -115,7 +117,7 @@ class OdkPrompt:
         return row
 
     @staticmethod
-    def reformat_default_lang_vars(row, lang):
+    def _reformat_default_lang_vars(row, lang):
         """Reformat default language variables.
 
         Reformat '::/:<language_name>' style variable names to remove the
@@ -172,7 +174,7 @@ class OdkPrompt:
         return row
 
     @staticmethod
-    def set_grouped_media_field(row):
+    def _set_grouped_media_field(row):
         """Populate media field with all media for prompt.
 
         Args:
@@ -195,7 +197,7 @@ class OdkPrompt:
         """Find the relevant text for this row."""
         pass
 
-    def truncate_fields(self, row):
+    def _truncate_fields(self, row):
         """Call truncate_text() method for all truncatable fields in component.
 
         Args:
@@ -211,7 +213,7 @@ class OdkPrompt:
                 new_row[field] = self.truncate_text(new_row[field])
         return new_row
 
-    def format_media_labels(self, row):
+    def _format_media_labels(self, row):
         """Format text for all media labels to be enclosed in brackets.
 
         Args:
@@ -305,7 +307,7 @@ class OdkPrompt:
         # Tries to match with space after '.'. If not, looks for w/ no space.
         if not match:
             match = re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[a-zA-Z].',
-                      label[0:arbitrary_character_threshold])
+                              label[0:arbitrary_character_threshold])
             if match:
                 warning = 'Warning: Question number {} does not have a space '\
                           'after \'.\''
@@ -324,7 +326,7 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
-    def streamline_constraint_message(prompt):
+    def _streamline_constraint_message(prompt):
         """Ensure constraint_message field name is consistent.
 
         Args:
@@ -338,8 +340,21 @@ class OdkPrompt:
             prompt[new] = prompt[old]
         return prompt
 
+
     @staticmethod
-    def set_descriptive_metadata(prompt):
+    def _streamline_relevant(prompt):
+        """Streamline relevant, stringifying it if is list.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        return prompt
+
+    @staticmethod
+    def _set_descriptive_metadata(prompt):
         """Set descriptive metadata.
 
         Args:
@@ -381,7 +396,10 @@ class OdkPrompt:
                     if key == replace_with and prompt[replace_with]:
                         for x in PPP_REPLACEMENTS_FIELDS:
                             if to_replace.startswith(x):
-                                prompt[to_replace] = [prompt[replace_with]]
+                                if x == 'label':
+                                    prompt[to_replace] = [prompt[replace_with]]
+                                elif x in RELEVANCE_FIELD_TOKENS:
+                                    prompt[to_replace] = prompt[replace_with]
 
             if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
@@ -437,7 +455,8 @@ class OdkPrompt:
         formatted_relevant = None
         relevant_text = self.text_field('relevant_text', lang)
         if relevant_text:
-            formatted_relevant = '[{}]'.format(relevant_text).rjust(50)
+            # formatted_relevant = '[{}]'.format(relevant_text).rjust(50)
+            formatted_relevant = '{}'.format(relevant_text).rjust(50)
         return formatted_relevant
 
     def to_text_response(self, lang, numbered=False):
@@ -538,13 +557,14 @@ class OdkPrompt:
             dict: The text from all parts of the prompt.
         """
         # TODO: Refactor so that the dict row is only looped through once.
-        prompt = self.format_media_labels(self.row)
-        prompt = self.set_grouped_media_field(prompt)
-        prompt = self.set_descriptive_metadata(prompt)
-        prompt = self.reformat_default_lang_vars(prompt, lang)
-        prompt = self.truncate_fields(prompt)
-        prompt = self.reformat_double_line_breaks(prompt)
-        prompt = self.streamline_constraint_message(prompt)
+        prompt = self._format_media_labels(self.row)
+        prompt = self._set_grouped_media_field(prompt)
+        prompt = self._set_descriptive_metadata(prompt)
+        prompt = self._reformat_default_lang_vars(prompt, lang)
+        prompt = self._truncate_fields(prompt)
+        prompt = self._reformat_double_line_breaks(prompt)
+        prompt = self._streamline_constraint_message(prompt)
+        prompt = self._streamline_relevant(prompt)
         prompt = self._extract_question_numbers(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
@@ -558,10 +578,11 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
-    def html_options(**kwargs):
+    def html_options(lang, **kwargs):
         """HTML options.
 
         Args:
+            lang (str): The language.
             **kwargs (dict): Keyword arguments.
 
         Returns:
@@ -572,22 +593,23 @@ class OdkPrompt:
         for k, v in PRESETS[kwargs['preset']]['render_settings']['html']\
                 .items():
             kwargs[k] = v
+        if 'language' not in kwargs:
+            # noinspection PyTypeChecker
+            kwargs['language'] = lang
         return kwargs
 
-    def to_html(self, lang, highlighting, **kwargs):
+    def to_html(self, lang, **kwargs):
         """Convert to html.
 
         Args:
             lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
             **kwargs: Arbitrary keyword arguments delegated fully to to_dict().
 
         Returns:
             str: A rendered html template.
         """
-        settings = self.html_options(**kwargs)
+        settings = self.html_options(lang=lang, **kwargs)
+        question = self.to_dict(lang=lang, **settings)
         # pylint: disable=no-member
         return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=self.to_dict(lang=lang, **settings),
-                    highlighting=highlighting, **settings)
+            .render(question=question, **settings)

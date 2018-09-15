@@ -1,6 +1,6 @@
 """Module for the OdkRepeat class."""
 import textwrap
-#from ppp.config import TEMPLATE_ENV
+# from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
@@ -9,12 +9,15 @@ from ppp.definitions.utils import exclusion
 
 TEMPLATE_ENV = None
 
+
 def set_template_env(template):
-  global TEMPLATE_ENV
-  TEMPLATE_ENV = get_template_env(template)
-  odkgroup_template(template)
-  odkpromt_template(template)
-  odktable_template(template)
+    """Set template env"""
+    global TEMPLATE_ENV
+    TEMPLATE_ENV = get_template_env(template)
+    odkgroup_template(template)
+    odkpromt_template(template)
+    odktable_template(template)
+
 
 class OdkRepeat:
     """Class to represent repeat construct from XLSForm.
@@ -40,7 +43,7 @@ class OdkRepeat:
         return "<OdkRepeat {}: {}>".format(self.opener['name'], self.data)
 
     @staticmethod
-    def render_header(i, lang, highlighting, **kwargs):
+    def render_header(i, lang, **kwargs):
         """Render repeat group header.
 
         A repeat group header consists of some opening html tags, followed by
@@ -49,8 +52,8 @@ class OdkRepeat:
         Args:
             i (dict): A dictionary row representing first row of repeat group.
             lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
+
+
             **kwargs: Keyword arguments.
 
         Returns:
@@ -58,11 +61,11 @@ class OdkRepeat:
         """
         # pylint: disable=no-member
         html = TEMPLATE_ENV.get_template('content/repeat/repeat-opener.html')\
-            .render()
+            .render(**kwargs, settings=kwargs)
         i['simple_type'] = i['type']
         i['in_repeat'] = True
         i['is_repeat_header'] = True
-        html += OdkPrompt(i).to_html(lang, highlighting, **kwargs)
+        html += OdkPrompt(i).to_html(lang, **kwargs, settings=kwargs)
         return html
 
     @staticmethod
@@ -103,13 +106,13 @@ class OdkRepeat:
         wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
         return wrapped
 
-    def to_html(self, lang, highlighting, **kwargs):
+    def to_html(self, lang, **kwargs):
         """Convert repeat group components to html and return concatenation.
 
         Args:
             lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
+
+
             **kwargs: Keyword arguments.
 
         Returns:
@@ -118,7 +121,7 @@ class OdkRepeat:
         html = ''
 
         # - Render header
-        html += self.render_header(self.opener, lang, highlighting, **kwargs)
+        html += self.render_header(self.opener, lang, **kwargs)
 
         # - Render body
         for i in self.data:
@@ -127,15 +130,14 @@ class OdkRepeat:
 
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = True
-                html += i.to_html(lang, highlighting, **kwargs)
+                html += i.to_html(lang, **kwargs)
             elif isinstance(i, OdkGroup):
                 i.in_repeat = True
-                html += i.to_html(lang, highlighting, **kwargs)
+                html += i.to_html(lang, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = True
-
-        # - Render footer
-                html += i.to_html(lang, highlighting, **kwargs)
+                # - Render footer
+                html += i.to_html(lang, **kwargs)
         html += self.render_footer()
 
         return html

@@ -1,5 +1,5 @@
 """Module for the OdkGroup class."""
-#from ppp.config import TEMPLATE_ENV
+# from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
 from ppp.odktable import OdkTable, set_template_env as odktable_template
@@ -7,11 +7,14 @@ from ppp.definitions.utils import exclusion
 
 TEMPLATE_ENV = None
 
+
 def set_template_env(template):
-  global TEMPLATE_ENV
-  TEMPLATE_ENV = get_template_env(template)
-  odktable_template(template)
-  odkpromt_template(template)
+    """Set template env."""
+    global TEMPLATE_ENV
+    TEMPLATE_ENV = get_template_env(template)
+    odktable_template(template)
+    odkpromt_template(template)
+
 
 class OdkGroup:
     """Class to represent a field-list group in XLSForm.
@@ -22,7 +25,6 @@ class OdkGroup:
         pending_table (OdkTable): A variable for storing an OdkTable object as
             it is being constructed.
         in_repeat (bool): Is this group part of a repeat group?
-
     """
 
     def __init__(self, opener):
@@ -104,13 +106,11 @@ class OdkGroup:
         group_text = sep.join(obj_texts)
         return group_text
 
-    def to_html(self, lang, highlighting, **kwargs):
+    def to_html(self, lang, **kwargs):
         """Convert group components to html and return concatenation.
 
         Args:
             lang (str): The language.
-            highlighting (bool): For color highlighting of various components
-                of html template.
 
         Returns:
             str: A rendered html concatenation of component templates.
@@ -120,10 +120,10 @@ class OdkGroup:
 
         # - Render header
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
-            .render(**kwargs)
+            .render(**kwargs, settings=kwargs)
         header = self.format_header(self.opener)
 
-        html += OdkPrompt(header).to_html(lang, highlighting, **kwargs)
+        html += OdkPrompt(header).to_html(lang, **kwargs)
 
         # - Render body
         for i in self.data:
@@ -133,14 +133,14 @@ class OdkGroup:
             if isinstance(i, OdkPrompt):
                 i.row['in_repeat'] = self.in_repeat
                 i.row['in_group'] = True
-                html += i.to_html(lang, highlighting, **kwargs)
+                html += i.to_html(lang, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = self.in_repeat
-                html += i.to_html(lang, highlighting, **kwargs)
+                html += i.to_html(lang, **kwargs)
 
         # - Render footer
         # pylint: disable=no-member
         html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
-            .render(**kwargs)
+            .render(**kwargs, settings=kwargs)
 
         return html

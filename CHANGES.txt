@@ -1,8 +1,11 @@
-# # v1.2.5, 2018-09-14
+# v1.2.6, 2018-09-17
 ## Bugfixes
-- Fixed an issue where French date widget text was being displayed for non-French languages.
 - Fixed an issue where brackets were appearing around skip pattern expressions.
 - Fixed an issue where bullets were not appearing for choice lists.
+
+# v1.2.5, 2018-09-14
+## Bugfixes
+- Fixed an issue where French date widget text was being displayed for non-French languages.
 
 # v1.2.4, 2018-09-14
 - Bugfix. Issue existed in setup.py; Uncaught syntax error in dependency list.

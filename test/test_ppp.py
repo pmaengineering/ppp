@@ -27,7 +27,8 @@ class MockForm(OdkForm):
             mock_file (str): File name.
             mock_dir (str): Directory.
         """
-        path = mock_dir + mock_file if mock_dir else TEST_STATIC_DIR + mock_file
+        path = \
+            mock_dir + mock_file if mock_dir else TEST_STATIC_DIR + mock_file
         form = super().from_file(path)
         super().__init__(form)
 
@@ -60,15 +61,15 @@ class PppTest(unittest.TestCase):
         return sans_temp_files
 
     def output_files(self):
-        """Return paths of input files for test class.
+        """Return paths of input files for test class."""
+        return glob(self.output_path() + '*')
+
+    def standard_convert(self, options=[]):
+        """Converts input/* --> output/*. Returns n files each.
 
         Args:
             options (list): Of the form '['--template', 'old', ...]
         """
-        return glob(self.output_path() + '*')
-
-    def standard_convert(self, options=[]):
-        """Converts input/* --> output/*. Returns n files each."""
         in_files = self.input_files()
         out_dir = self.output_path()
 

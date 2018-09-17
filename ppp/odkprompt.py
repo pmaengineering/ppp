@@ -340,19 +340,6 @@ class OdkPrompt:
             prompt[new] = prompt[old]
         return prompt
 
-
-    @staticmethod
-    def _streamline_relevant(prompt):
-        """Streamline relevant, stringifying it if is list.
-
-        Args:
-            prompt (dict): Dictionary representation of prompt.
-
-        Returns
-            dict: Reformatted representation.
-        """
-        return prompt
-
     @staticmethod
     def _set_descriptive_metadata(prompt):
         """Set descriptive metadata.
@@ -564,7 +551,6 @@ class OdkPrompt:
         prompt = self._truncate_fields(prompt)
         prompt = self._reformat_double_line_breaks(prompt)
         prompt = self._streamline_constraint_message(prompt)
-        prompt = self._streamline_relevant(prompt)
         prompt = self._extract_question_numbers(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)

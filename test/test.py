@@ -11,9 +11,6 @@ from ppp.odkprompt import OdkPrompt
 from ppp.odkgroup import OdkGroup
 from test.config import TEST_STATIC_DIR, TEST_PACKAGES
 from test.utils import get_args, get_test_suite
-# from pmix.odkchoices import OdkChoices  # TODO
-# from pmix.odkrepeat import OdkRepeat  # TODO
-# from pmix.odktable import OdkTable  # TODO
 
 
 # # Mock Objects
@@ -445,6 +442,20 @@ class SurveyCtoSupport(PppTest):
 
 class IdStringSupport(PppTest):
     """Creates a form when the form ID is called "id_string" or "form_id"."""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class ExcelErrorCells(PppTest):
+    """f"""
+
+    def test_convert(self):
+        self.standard_conversion_test()
+
+
+class NoSpaceAfterPeriodError(PppTest):
+    """f"""
 
     def test_convert(self):
         self.standard_conversion_test()

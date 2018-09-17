@@ -105,7 +105,7 @@ class OdkForm:
         Returns:
             Odkform
         """
-        xlsform = Xlsform(path)
+        xlsform = Xlsform(path, strict_validation=False)
 
         return cls(xlsform)
 

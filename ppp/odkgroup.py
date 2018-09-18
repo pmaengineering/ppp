@@ -93,7 +93,7 @@ class OdkGroup:
             self.pending_table = None
 
     def to_text(self, lang):
-        """Get the text representation of the full group.
+        """Get the text representation of the detailed group.
 
         Args:
             lang (str): The language.

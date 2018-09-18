@@ -38,7 +38,7 @@ MULTI_ARGUMENT_CONVERSION_OPTIONS = ('preset', 'format', 'language')
 PPP_REPLACEMENTS_FIELDS = ('label',) + RELEVANCE_FIELD_TOKENS
 CHOICE_NAME_VARIATIONS = ('name', 'value')
 PRESETS = {
-    'full': {
+    'detailed': {
         'field_replacements': (),
         'field_exclusions': (),
         'other_specific_exclusions': (),
@@ -60,7 +60,7 @@ PRESETS = {
             }
         }
     },
-    'minimal': {
+    'standard': {
         'field_replacements': PPP_REPLACEMENTS_FIELDS,
         'field_exclusions':
         ('constraint', 'constraint_message', 'type') + CHOICE_NAME_VARIATIONS,
@@ -84,6 +84,7 @@ PRESETS = {
         }
     },
 }
-PRESETS['developer'] = PRESETS['full']  # alias
-PRESETS['standard'] = PRESETS['minimal']  # alias
-PRESETS['basic'] = PRESETS['minimal']  # alias
+PRESETS['full'] = PRESETS['detailed']
+PRESETS['developer'] = PRESETS['detailed']  # alias
+PRESETS['minimal'] = PRESETS['standard']  # alias
+PRESETS['basic'] = PRESETS['standard']  # alias

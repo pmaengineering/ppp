@@ -24,22 +24,18 @@ def _required_fields(parser):
     #   type:'string'
     file_help = 'Path to source XLSForm(s).'
     parser.add_argument('xlsxfiles', nargs='+', help=file_help)
-    # Bundled Option Presets
-    #   type='single selection', options:'custom, developer/full, internal,
-    #   public', default:'public'
-    #   note='the CLI does not have 'custom'. Leaving this option blank in the
-    #   CLI os the same as 'custom'.'
     presets_help = \
         ('Select from a preset of bundled options. The \'developer\' or '
-         '\'full\' preset'
+         '\'detailed\' preset'
          ' renders a form that is the most similar to the original XlsForm. '
          'The \'internal\' preset is more human readable but is not stripped '
          'of sensitive information. The \'public\' option is like the '
          '\'internal\' optoin, only with sensitive information removed.')
     parser.add_argument('-p', '--preset', nargs='+',
-                        choices=('public', 'internal', 'full', 'developer',
-                                 'minimal'),
-                        default='full', help=presets_help)
+                        choices=('standard', 'detailed'),
+                        # choices=('public', 'internal', 'standard',
+                        # 'detailed')  # TODO
+                        default='standard', help=presets_help)
     return parser
 
 
@@ -72,11 +68,11 @@ def _non_preset_optional_fields(parser):
                         help=format_help)
     # Choose Template
     #   type='single selection', default:'default'
-    template_help = ('Choose template to render results.')
-    parser.add_argument('-t', '--template', nargs = '+',
-                        choices = ('default', 'old', 'test'),
-                        default = 'default',
-                        help = template_help)
+    template_help = 'Choose template to render results.'
+    parser.add_argument('-t', '--template', nargs='+',
+                        choices=('default', 'old', 'test'),
+                        default='default',
+                        help=template_help)
     return parser
 
 
@@ -99,18 +95,19 @@ def _preset_optional_fields(parser):
     """
     # TODO: Input replacement
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer/full'
+    #   FALSE if developer/detailed'
     # input_replacement_help = \
     #     ('Adding this option will toggle replacement of visible choice '
     #      'options in input fields. Instead of the normal choice options, '
-    #      'whatever has been placed in the \'ppp_input\' field of the XlsForm '
+    #      'whatever has been placed in the \'ppp_input\' field of the
+    # XlsForm '
     #      'will be used. This is normally to hide sensitive information.')
     # parser.add_argument('-i', '--input-replacement', action='store_true',
     #                     help=input_replacement_help)
 
     # TODO: Exclusion
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer/full
+    #   FALSE if developer/detailed
     # exclusion_help = \
     #     ('Adding this option will toggle exclusion of certain survey form '
     #      'compoments from the rendered form. This can be used to remove '
@@ -122,7 +119,7 @@ def _preset_optional_fields(parser):
 
     # TODO: Human-readable relevant text
     #   type='boolean', default:'TRUE if public else TRUE if internal else
-    #   FALSE if developer/full
+    #   FALSE if developer/detailed
     # hr_relevant_help = \
     #     ('Adding this option will toggle display of human readable '
     #      '\'relevant\' text, rather than the syntax-heavy codified logic of '
@@ -132,31 +129,34 @@ def _preset_optional_fields(parser):
 
     # TODO: Human-readable constraint text
     #   type='boolean', default:'TRUE if public else FALSE if internal else
-    #   FALSE if developer/full
+    #   FALSE if developer/detailed
     # hr_constraint_help = \
     #     ('Adding this option will toggle display of human readable '
-    #      '\'constraint\' text, rather than the syntax-heavy codified logic of '
+    #      '\'constraint\' text, rather than the syntax-heavy codified logic
+    # of '
     #      'the original XlsForm.')
     # parser.add_argument('-c', '--hr-constraint', action='store_true',
     #                     help=hr_constraint_help)
 
     # TODO: No constraint text
     #   type='boolean', default:'FALSE if public else FALSE if internal
-    #   else FALSE if developer/full
+    #   else FALSE if developer/detailed
     # no_constraint_help = \
-    #     ('Adding this option will toggle removal of all constraints from the '
+    #     ('Adding this option will toggle removal of all constraints from
+    # the '
     #      'rendered form.')
     # parser.add_argument('-C', '--no-constraint', action='store_true',
     #                     help=no_constraint_help)
 
     # TODO: General text replacements
     #   type='boolean', default:'TRUE if public else TRUE if internal else
-    #   FALSE if developer/full
+    #   FALSE if developer/detailed
     # text_replacements_help = \
     #     ('Adding this option will toggle text replacements as shown in the '
     #      '\'text_replacements\' worksheet of the XlsForm. The most common '
     #      'function of text replacement is to render more human readable '
-    #      'variable names, but can also be used to remove sensitive information'
+    #      'variable names, but can also be used to remove sensitive
+    # information'
     #      'or add brevity or clarity where needed.')
     # parser.add_argument('-T', '--text-replacements', action='store_true',
     #                     help=text_replacements_help)
@@ -231,8 +231,12 @@ def cli():
     try:
         run(files=list(args.xlsxfiles),
             languages=[l for l in args.language] if args.language else [None],
-            format=args.format, outpath=args.outpath,
-            debug=args.debug, highlight=args.highlight, preset=args.preset, template=args.template)
+            format=args.format,
+            debug=args.debug,
+            highlight=args.highlight,
+            preset=args.preset,
+            template=args.template,
+            outpath=args.outpath)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\
             .format(args.xlsxfiles, err)

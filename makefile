@@ -5,7 +5,9 @@ TEST=./test/
 linttest doctest doc docs code linters_all codesrc codetest docsrc \
 doctest paper build dist pypi-push-test pypi-push pypi-test pip-test pypi \
 pip demo remove-previous-build git-hash install upgrade-once upgrade \
-uninstall reinstall
+uninstall reinstall install-internal-dependencies upgrade-latest \
+upgrade-stable install-latest-internal-dependencies install-latest \
+install-stable
 
 # Batched Commands
 # - Code & Style Linters
@@ -65,7 +67,7 @@ demo:
 		cp $$file ${DEMO_OUT}; \
 	done
 	python3 -m ppp ${DEMO_OUT}/*.xlsx --format doc html \
-	--preset minimal full \
+	--preset standard detailed \
 	--language English Français
 
 # Package Management
@@ -91,24 +93,37 @@ pip: pypi-push
 # need to --upgrade using --no-cache-dir.
 git-hash:
 	git rev-parse --verify HEAD
+install-internal-dependencies:
+	pip install git+https://github.com/PMA-2020/pmix@master --upgrade
+install-latest-internal-dependencies:
+	pip install git+https://github.com/PMA-2020/pmix@develop --upgrade
 install:
+	make install-internal-dependencies; \
 	pip install -r requirements-unlocked.txt --no-cache-dir; \
-	pip freeze > requirements.txt; \
-	make upgrade-once
-upgrade-once:
-	pip install -r requirements-unlocked.txt --no-cache-dir --upgrade; \
 	pip freeze > requirements.txt
+#	make upgrade-once
+#upgrade-once:
+#	pip install -r requirements-unlocked.txt --no-cache-dir --upgrade; \
+#	pip freeze > requirements.txt
 upgrade:
-	make upgrade-once; \
-	make upgrade-once
+	make install-latest-internal-dependencies; \
+	pip freeze > requirements.txt
+#	make upgrade-once; \
+#	make upgrade-once
 uninstall:
 	workon ppp-web; \
 	bash -c "pip uninstall -y -r <(pip freeze)"
 reinstall:
 	make uninstall; \
 	make install; \
-	make upgrade
-
+#	make upgrade
+install-latest: install
+install-stable:
+	make install-internal-dependencies; \
+	pip install -r requirements-unlocked.txt --no-cache-dir; \
+	pip freeze > requirements.txt
+upgrade-latest: install-latest-internal-dependencies
+upgrade-stable: install-internal-dependencies
 
 # Scripts
 paper:

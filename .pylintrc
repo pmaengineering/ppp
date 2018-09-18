@@ -81,7 +81,7 @@ output-format=text
 # and it will be removed in Pylint 2.0.
 files-output=no
 
-# Tells whether to display a full report or only the messages
+# Tells whether to display a detailed report or only the messages
 reports=yes
 
 # Python expression which should return a note less than 10 (10 is the highest

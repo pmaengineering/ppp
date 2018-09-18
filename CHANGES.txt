@@ -1,3 +1,6 @@
+# v1.2.8, 2018-09-18
+- Print warnings when excel error cells are present.
+
 # v1.2.7, 2018-09-17
 - Changed excel error cells to print warning rather than throw exception.
 

@@ -4,10 +4,8 @@ TEST=./test/
 .PHONY: lint tags ltags test all lintall codestyle docstyle lintsrc \
 linttest doctest doc docs code linters_all codesrc codetest docsrc \
 doctest paper build dist pypi-push-test pypi-push pypi-test pip-test pypi \
-pip demo remove-previous-build install-pmix install-regular upgrade-pmix \
-install uninstall reinstall update-pmix pmix-update pmix-upgrade \
-uninstall-everything pip-uninstall-everything pip-reinstall \
-pip-reinstall-everything
+pip demo remove-previous-build git-hash install upgrade-once upgrade \
+uninstall reinstall
 
 # Batched Commands
 # - Code & Style Linters
@@ -88,42 +86,29 @@ pip-test: pypi-push-test
 pypi: pypi-push
 pip: pypi-push
 
-install-pmix:
-	python3 -m pip install \
-	  --no-cache-dir \
-	  --upgrade pmix
-install-regular:
-	pip install -r requirements-unlocked.txt; \
+## Dependency Management
+# For some reason, if something has been uploaded to pip very recently, you
+# need to --upgrade using --no-cache-dir.
+git-hash:
+	git rev-parse --verify HEAD
+install:
+	pip install -r requirements-unlocked.txt --no-cache-dir; \
+	pip freeze > requirements.txt; \
+	make upgrade-once
+upgrade-once:
+	pip install -r requirements-unlocked.txt --no-cache-dir --upgrade; \
 	pip freeze > requirements.txt
 upgrade:
-	pip install -r requirements-unlocked.txt --upgrade; \
-	pip freeze > requirements.txt
-upgrade-pmix:
-	python3 -m pip uninstall pmix; \
-	make install-pmix; \
-	python3 -m pip uninstall pmix; \
-	make install-pmix; \
-	pip freeze > requirements.txt; \
-	echo ""; \
-	echo "Warning: Sometimes the cache is slow to update. You may need to run \
-	this command twice or more to truly update to the most recent version of \
-	dependency, if it was very recently uploaded to PyPi."
-install:
-	make install-pmix; \
-	make install-regular
+	make upgrade-once; \
+	make upgrade-once
 uninstall:
-	workon ppp; \
+	workon ppp-web; \
 	bash -c "pip uninstall -y -r <(pip freeze)"
 reinstall:
 	make uninstall; \
-	make install
-update-pmix: upgrade-pmix
-pmix-update: upgrade-pmix
-pmix-upgrade: upgrade-pmix
-uninstall-everything: uninstall
-pip-uninstall-everything: uninstall
-pip-reinstall: reinstall
-pip-reinstall-everything: reinstall
+	make install; \
+	make upgrade
+
 
 # Scripts
 paper:

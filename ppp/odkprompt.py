@@ -509,7 +509,7 @@ class OdkPrompt:
         return field
 
     def to_text(self, lang):
-        """Get the text representation of the full prompt.
+        """Get the text representation of the detailed prompt.
 
         Args:
             lang (str): The language.
@@ -533,7 +533,7 @@ class OdkPrompt:
         return result
 
     def to_dict(self, lang, **kwargs):
-        """Get the text representation of the full prompt.
+        """Get the text representation of the detailed prompt.
 
         Args:
             lang (str): The language.
@@ -589,7 +589,7 @@ class OdkPrompt:
 
         Args:
             lang (str): The language.
-            **kwargs: Arbitrary keyword arguments delegated fully to to_dict().
+            **kwargs: Arbitrary keyword arguments delegated detailedy to to_dict().
 
         Returns:
             str: A rendered html template.

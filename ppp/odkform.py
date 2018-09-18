@@ -1,5 +1,6 @@
 """Module for the OdkForm class."""
 import os
+from sys import stderr
 
 from ppp.config import get_template_env
 from ppp.definitions.error import OdkFormError
@@ -106,8 +107,17 @@ class OdkForm:
             Odkform
         """
         xlsform = Xlsform(path, strict_validation=False)
-
-        return cls(xlsform)
+        odkform = cls(xlsform)
+        if xlsform.warnings:
+            msg = 'Warning! File {} contained spreadsheet errors. This may ' \
+                  'or may not cause problems in the resulting converted ' \
+                  'files. Just to be on the safe side, you may want to open ' \
+                  'the original spreadsheet file, take a look at the errors,' \
+                  ' and fix and convert again if you feel the need.\nThe ' \
+                  'errors found are as follows:\n{}'\
+                .format(odkform.title, xlsform.warnings)
+            print(msg, file=stderr)
+        return odkform
 
     @staticmethod
     def get_settings(wb):
@@ -200,7 +210,7 @@ class OdkForm:
             lang (str): The language.
 
         Returns:
-            str: The full string of the XLSForm, ready to print or save.
+            str: The detailed string of the XLSForm, ready to print or save.
         """
         title_lines = (
             '+{:-^50}+'.format(''),
@@ -223,7 +233,7 @@ class OdkForm:
     #         lang (str): The language.
     #
     #     Returns:
-    #         dict: A full dictionary representation of the XLSForm.
+    #         dict: A detailed dictionary representation of the XLSForm.
     #
     #     """
     #     lang = lang if lang \
@@ -244,7 +254,7 @@ class OdkForm:
                 several kinds of whitespace for readability.
 
         Returns:
-            json: A full JSON representation of the XLSForm.
+            json: A detailed JSON representation of the XLSForm.
         """
         import json
         raw_survey = []
@@ -313,7 +323,7 @@ class OdkForm:
                 in the JavaScript console.
 
         Returns:
-            str: A full HTML representation of the XLSForm.
+            str: A detailed HTML representation of the XLSForm.
         """
         language = lang if lang else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False

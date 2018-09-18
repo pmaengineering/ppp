@@ -68,8 +68,8 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
                 base_filename = os.path.basename(os.path.splitext(in_file)[0])
                 lang = '-' + language if language else ''
                 options_affix = '-' + kwargs['preset'] \
-                    if 'preset' in kwargs and kwargs['preset'] != 'developer' \
-                    else ''
+                    if 'preset' in kwargs and kwargs['preset'] \
+                       not in ('standard', 'minimal') else ''
                 out_file = '{}{}{}{}.{}'.format(outpath, base_filename, lang,
                                                 options_affix, output_format)
 

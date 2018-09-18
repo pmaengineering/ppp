@@ -65,7 +65,7 @@ demo:
 		cp $$file ${DEMO_OUT}; \
 	done
 	python3 -m ppp ${DEMO_OUT}/*.xlsx --format doc html \
-	--preset minimal full \
+	--preset standard detailed \
 	--language English Français
 
 # Package Management

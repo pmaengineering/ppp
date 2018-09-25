@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 
-version = '1.2.8'
+version = '1.2.9'
 packages = find_packages(exclude=['test'])
 
 

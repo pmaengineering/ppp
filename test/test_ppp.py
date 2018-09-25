@@ -396,7 +396,6 @@ class MultiConversionTest(unittest.TestCase):
 
         out_dir_ls_input = sorted(expected_output_unsorted)
         expected_output = sorted(out_dir_ls_input_unsorted)
-
         self.assertEqual(len(expected_output), len(out_dir_ls_input))
 
 

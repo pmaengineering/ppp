@@ -131,11 +131,12 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         new_row = row.copy()
-        for field in LANGUAGE_DEPENDENT_FIELDS:
-            if field + '::' + lang in new_row:
-                new_row[field] = new_row[field + '::' + lang]
-            elif field + ':' + lang in new_row:
-                new_row[field] = new_row[field + ':' + lang]
+        if lang:
+            for field in LANGUAGE_DEPENDENT_FIELDS:
+                if field + '::' + lang in new_row:
+                    new_row[field] = new_row[field + '::' + lang]
+                elif field + ':' + lang in new_row:
+                    new_row[field] = new_row[field + ':' + lang]
         return new_row
 
     # pylint: disable=too-many-branches
@@ -184,11 +185,12 @@ class OdkPrompt:
             dict: Reformatted representation of prompt.
         """
         new_row = row.copy()
-        for key, val in new_row.items():
-            for field in MEDIA_FIELDS:
-                if val and key.startswith(field) \
-                        and val not in new_row['media']:
-                    new_row['media'].append(val)
+        if 'media' in new_row:
+            for key, val in new_row.items():
+                for field in MEDIA_FIELDS:
+                    if val and key.startswith(field) \
+                            and val not in new_row['media']:
+                        new_row['media'].append(val)
         return new_row
 
     @staticmethod
@@ -376,17 +378,20 @@ class OdkPrompt:
                     prompt[key] = ''
                     continue
 
-            for to_replace in PRESETS[preset]['field_replacements']:
-                replace_withs = ['ppp_'+to_replace+'::'+lang,
-                                 'ppp_'+to_replace+':'+lang]
-                for replace_with in replace_withs:
-                    if key == replace_with and prompt[replace_with]:
-                        for x in PPP_REPLACEMENTS_FIELDS:
-                            if to_replace.startswith(x):
-                                if x == 'label':
-                                    prompt[to_replace] = [prompt[replace_with]]
-                                elif x in RELEVANCE_FIELD_TOKENS:
-                                    prompt[to_replace] = prompt[replace_with]
+            if lang:
+                for to_replace in PRESETS[preset]['field_replacements']:
+                    replace_withs = ['ppp_'+to_replace+'::'+lang,
+                                     'ppp_'+to_replace+':'+lang]
+                    for replace_with in replace_withs:
+                        if key == replace_with and prompt[replace_with]:
+                            for x in PPP_REPLACEMENTS_FIELDS:
+                                if to_replace.startswith(x):
+                                    if x == 'label':
+                                        prompt[to_replace] = \
+                                            [prompt[replace_with]]
+                                    elif x in RELEVANCE_FIELD_TOKENS:
+                                        prompt[to_replace] = \
+                                            prompt[replace_with]
 
             if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
@@ -588,8 +593,9 @@ class OdkPrompt:
         """Convert to html.
 
         Args:
-            lang (str): The language.
-            **kwargs: Arbitrary keyword arguments delegated detailedy to to_dict().
+            lang (str): The language.=======
+            **kwargs: Arbitrary keyword arguments delegated detailedy to
+            to_dict().
 
         Returns:
             str: A rendered html template.

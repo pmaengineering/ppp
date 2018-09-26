@@ -427,7 +427,7 @@ class OdkForm:
         simple_row['choice_list'] = choice_list
 
         appearance = row.get('appearance', '')
-        if 'label' in appearance or 'list-nolabel' in appearance:
+        if appearance in ('label', 'list-nolabel'):
             simple_row['token_type'] = 'table'
 
         return simple_row
@@ -772,14 +772,15 @@ class OdkForm:
             Raises:
                 OdkFormError: If the parsing rules are broken based on the
                     current context.
-
             """
             if self.pending_stack:
                 last_pending = self.pending_stack[-1]
                 if not isinstance(last_pending, OdkGroup):
-                    msg = 'A table can only be in a group.'
+                    msg = 'A table can only be in a group. Errored on: {}'\
+                        .format(prompt.row)
                     raise OdkFormError(msg)
                 last_pending.add_table(prompt)
             else:
-                msg = 'A table can only be in a group, no group found.'
+                msg = 'A table can only be in a group, no group found. ' \
+                      'Errored on {}'.format(prompt.row)
                 raise OdkFormError(msg)

@@ -1,3 +1,8 @@
+# v1.2.9, 2018-09-26
+- Fixed an bug in which forms with no default_language and no languages specified under 'label', etc, were not converting.
+- Fixed an bug in which questions where the appearance attribute was not equal to, but included 'label' or 'list-nolabel', and were not part of a 'table' (i.e. a 'field-list' group), were being mis-identified as such.
+- Improved error text for situations where questions with appearance attribute 'label' or 'list-nolabel' are theoretically being misused (i.e. not part of a 'table' / 'field-list' group).
+
 # v1.2.8, 2018-09-18
 - Print warnings when excel error cells are present.
 

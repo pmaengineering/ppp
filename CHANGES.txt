@@ -1,3 +1,11 @@
+# v1.2.10, 2018-09-27
+## Bugfixes
+- Fixed an error in which inconsistent language use between survey and choices worksheet was not throwing an error.
+## Developer updates
+- Test files: Pruning out currently unnecessary static test files.
+- Test files: Distinguished between tests for unhandled and handled exceptions (for now).
+- Refactor: OdkChoices.labels()
+
 # v1.2.9, 2018-09-26
 - Fixed an bug in which forms with no default_language and no languages specified under 'label', etc, were not converting.
 - Fixed an bug in which questions where the appearance attribute was not equal to, but included 'label' or 'list-nolabel', and were not part of a 'table' (i.e. a 'field-list' group), were being mis-identified as such.

@@ -38,7 +38,7 @@ class OdkChoices:
         """
         self.data.append(choice)
 
-    def labels(self, lang):
+    def labels(self, lang=''):
         """Get the labels for this choice list in the desired language.
 
         Args:
@@ -50,17 +50,23 @@ class OdkChoices:
         Raises:
             InvalidLanguageException
         """
-        label_variations = ['label']
+        label_variations = []
         if lang:
-            label_variations = \
+            label_variations += \
                 [x.format(lang) for x in ('label::{}', 'label:{}')]
+        else:
             label_variations.append('label')
+
         try:
+            col_header = ''
             for label in label_variations:
                 if label in self.data[0]:
-                    return [d[label] for d in self.data]
+                    col_header = label
+            if not col_header:
+                raise KeyError
+            return [d[col_header] for d in self.data]
         except (KeyError, IndexError):
-            msg = 'Language {} not found in choice list {}.'\
+            msg = 'Language \'{}\' not found in choice list \'{}\'.' \
                 .format(lang, self.list_name)
             raise InvalidLanguageException(msg)
 

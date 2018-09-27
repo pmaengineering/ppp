@@ -66,7 +66,13 @@ class OdkChoices:
                 raise KeyError
             return [d[col_header] for d in self.data]
         except (KeyError, IndexError):
-            msg = 'Language \'{}\' not found in choice list \'{}\'.' \
+            msg = 'InvalidLanguageException: ' \
+                  'Language \'{}\' not found in choice list \'{}\'.\n' \
+                  'You may want to check for the following:\n' \
+                  '- Are the languages in the \'survey\' and \'choices\' ' \
+                  'worksheets consistent?\n' \
+                  '- Is there an issue with \'default_language\' in the ' \
+                  '\'settings\' worksheet?'\
                 .format(lang, self.list_name)
             raise InvalidLanguageException(msg)
 

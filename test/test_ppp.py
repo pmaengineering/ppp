@@ -218,7 +218,7 @@ class OdkPromptTest(PppTest):
                 'label': k
             }
             question_number = \
-                OdkPrompt._extract_question_numbers(prompt)['question_number']
+                OdkPrompt.extract_question_numbers(prompt)['question_number']
             msg = 'Question number \'{}\' did not match what was ' \
                   'expected for the following question: \n\n{}'\
                 .format(question_number, k)

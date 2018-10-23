@@ -296,7 +296,7 @@ class OdkForm:
                 element.data, data = OdkForm._add_i_nums_to_questions(
                     element.data, data, depth+1)
             elif isinstance(element, OdkPrompt):
-                element.row = OdkPrompt._extract_question_numbers(element.row)
+                element.row = OdkPrompt.extract_question_numbers(element.row)
                 qnum = element.row['question_number']
                 if qnum not in (data['qnum'], ''):
                     data['i'] += 1

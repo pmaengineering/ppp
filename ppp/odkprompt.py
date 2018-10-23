@@ -264,7 +264,7 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
-    def _extract_question_numbers(prompt):
+    def extract_question_numbers(prompt):
         """Extracts question no. from label field and sets to question_number.
 
         First, it standardizes the label it's searching through to a string, as
@@ -556,7 +556,7 @@ class OdkPrompt:
         prompt = self._truncate_fields(prompt)
         prompt = self._reformat_double_line_breaks(prompt)
         prompt = self._streamline_constraint_message(prompt)
-        prompt = self._extract_question_numbers(prompt)
+        prompt = self.extract_question_numbers(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
 

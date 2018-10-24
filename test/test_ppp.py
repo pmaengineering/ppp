@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import os
+import re
 import subprocess
 import unittest
 from glob import glob
@@ -61,11 +62,37 @@ class PppTest(unittest.TestCase):
         """Return paths of input files for test class."""
         return glob(self.output_path() + '*')
 
+    @staticmethod
+    def _dict_options_to_list(options):
+        """Converts a dictionary of options to a list.
+
+        Args:
+            options (dict): Options in dictionary form, e.g. {
+                'OPTION_NAME': 'VALUE',
+                'OPTION_2_NAME': ...
+            }
+
+        Returns:
+            list: A single list of strings of all options of the form
+            ['--OPTION_NAME', 'VALUE', '--OPTION_NAME', ...]
+
+        """
+        new_options = []
+
+        for k, v in options.items():
+            new_options += ['--'+k, v]
+
+        return new_options
+
     def standard_convert(self, options=[]):
         """Converts input/* --> output/*. Returns n files each.
 
         Args:
             options (list): Of the form '['--template', 'old', ...]
+
+        Returns:
+            1. str: String representing expected number of files converted.
+            2. str: String representing actual number of files converted.
         """
         in_files = self.input_files()
         out_dir = self.output_path()
@@ -80,13 +107,21 @@ class PppTest(unittest.TestCase):
         actual = 'N files: ' + str(len(self.output_files()))
         return expected, actual
 
-    def standard_conversion_test(self, options=[]):
+    def standard_conversion_test(self, options={}):
         """Checks standard convert success.
 
         Args:
-            options (list): Of the form '['--template', 'old', ...]
+            options (dict): Options in dictionary form, e.g. {
+                'OPTION_NAME': 'VALUE',
+                'OPTION_2_NAME': ...
+            }
+
+        Side effects:
+            assertEqual()
         """
-        expected, actual = self.standard_convert(options)
+        options_list = PppTest._dict_options_to_list(options)
+
+        expected, actual = self.standard_convert(options_list)
         self.assertEqual(expected, actual)
 
     @staticmethod
@@ -450,6 +485,17 @@ class IdStringSupport(PppTest):
     def test_convert(self):
         """Test that the file actually converts."""
         self.standard_conversion_test()
+
+
+class NamesToQnums(PppTest):
+    """Set question numbers for all variable name refs in relevants."""
+
+    def test_convert_and_check(self):
+        """Test that the file actually converts."""
+        self.standard_conversion_test(options={'preset': 'standard'})
+
+        with open(self.output_files()[0]) as file:
+            self.assertTrue(file.read().find("201a = 'yes'") != -1)
 
 
 class XlsFormNonStrictValidation(PppTest):

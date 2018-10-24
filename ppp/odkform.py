@@ -1,5 +1,6 @@
 """Module for the OdkForm class."""
 import os
+import re
 from sys import stderr
 
 from ppp.config import get_template_env
@@ -41,6 +42,9 @@ class OdkForm:
         questionnaire (list): An ordered representation of the ODK form,
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
 
+    unhandled_token_types: ['calculate', 'start', 'end', 'deviceid',
+        'simserial', 'phonenumber', 'hidden', 'hidden string', 'hidden int',
+        'hidden geopoint']
     """
 
     def __init__(self, wb):
@@ -86,14 +90,9 @@ class OdkForm:
             'round': self.metadata['round'](),
             'type_of_form': self.metadata['type_of_form'](),
         }
-        self.questionnaire = self.convert_survey(wb, self.choices,
-                                                 self.ext_choices)
-
-    unhandled_token_types = \
-        ['calculate', 'start', 'end', 'deviceid', 'simserial',
-         'phonenumber', 'hidden', 'hidden string', 'hidden int',
-         'hidden geopoint']
-    warnings = None
+        qre = self.convert_survey(wb, self.choices, self.ext_choices)
+        qre = OdkForm._add_i_nums_to_questions(qre)
+        self.questionnaire = qre
 
     @classmethod
     def from_file(cls, path):
@@ -203,6 +202,71 @@ class OdkForm:
         backup_title = os.path.split(wb.file)[1]
         return settings.get(lookup_title, backup_title)
 
+    @staticmethod
+    def _get_name_to_q_num_map(prompt_list):
+        """Get map of variable name to question number in question list.
+
+        Args:
+        prompt_list (list): A list of objects representing form components.
+
+        Returns:
+            dict: Map of all variable names to question numbers for all
+            questions in a given prompt_list.
+        """
+        qnum_map = {}
+
+        for item in prompt_list:
+            if isinstance(item, OdkPrompt):
+                qnum_map[item.row['name']] = item.row['question_number']
+            elif isinstance(item, OdkCalculate):
+                qnum_map[item.row['name']] = ''
+            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup,
+                                                   OdkTable)):
+                qnum_map = {**qnum_map,
+                            **OdkForm._get_name_to_q_num_map(item.data)}
+
+        return qnum_map
+
+    # TODO: 2018/10/23
+    # TODO: handle headers
+    @staticmethod
+    def _set_name_refs_to_q_nums(prompt_list, question_map):
+        """Set question numbers for all variable name refs in relevants.
+
+        Using 'map', mutate the 'relevant' attribute of all prompts [OdkPrompt]
+        so that any references to a question variable name are converted to a
+        question number.
+
+        Args:
+        prompt_list (list): A list of objects representing form components.
+        question_map (dict): Map of all variable names to question numbers for
+            all questions/prompts in a given questionnaire.
+
+        Returns:
+            list: A new prompt list.
+        """
+        new_list = []
+
+        for item in prompt_list:
+            if any(isinstance(item, x) for x in (OdkPrompt, OdkCalculate)):
+                for fld_name in ('relevant', 'calculation', 'choice_filter'):
+                    fld = item.row[fld_name]
+                    if fld:
+                        matches = re.findall(r'\${[a-zA-Z0-9-_]*}', fld)
+                        for m in matches:
+                            m2 = m.replace('${', '').replace('}', '')
+                            if question_map[m2]:
+                                fld = fld.replace(m, question_map[m2])
+                                item.row[fld_name] = fld
+                new_list.append(item)
+            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup,
+                                                   OdkTable)):
+                item.data = OdkForm._set_name_refs_to_q_nums(
+                    item.data, question_map)
+                new_list.append(item)
+
+        return new_list
+
     def to_text(self, lang=None):
         """Get the text representation of an entire XLSForm.
 
@@ -276,8 +340,8 @@ class OdkForm:
         OdkPrompt._extract_question_numbers.
 
         Args:
-            obj (list): From either: OdkForm.questionnaire, OdkGroup.row, or
-            OdkRepeat.row.
+            obj (list): From either: OdkForm.questionnaire (a list of objects
+            representing form components.), OdkGroup.row, or OdkRepeat.row.
             data (dict): Running data. Tracks current question number 'qnum'
             and also current iteration 'i'. The 'i' should increment by 1 for
             each new question number. In this case, a question number is
@@ -292,7 +356,8 @@ class OdkForm:
             list: OdkForm.questionnaire with new 'i' values included.
         """
         for i, element in enumerate(obj):
-            if isinstance(element, OdkGroup) or isinstance(element, OdkRepeat):
+            if any(isinstance(element, x) for x in (OdkRepeat, OdkGroup,
+                                                    OdkTable)):
                 element.data, data = OdkForm._add_i_nums_to_questions(
                     element.data, data, depth+1)
             elif isinstance(element, OdkPrompt):
@@ -304,10 +369,6 @@ class OdkForm:
                 element.row['i'] = data['i']
             elif isinstance(element, OdkCalculate):
                 element.row['i'] = data['i']
-            elif isinstance(element, OdkTable):  # TODO
-                pass
-            else:
-                pass
         if depth == 0:
             return obj
         return obj, data
@@ -328,6 +389,10 @@ class OdkForm:
         language = lang if lang else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
+        qre = self.questionnaire
+        if kwargs['preset'] == 'standard':
+            name_to_q_nums = OdkForm._get_name_to_q_num_map(qre)
+            qre = OdkForm._set_name_refs_to_q_nums(qre, name_to_q_nums)
         data = {
             'header': {
                 'title': self.get_title(settings=self.settings,
@@ -337,8 +402,7 @@ class OdkForm:
             'footer': {
                 'data': self.to_json(pretty=True) if debug else 'false'
             },
-            'questionnaire': OdkForm._add_i_nums_to_questions(
-                self.questionnaire)
+            'questionnaire': qre
         }
 
         # - Render Header
@@ -368,11 +432,10 @@ class OdkForm:
             else:
                 html_questionnaire += item.to_html(lang=language, **kwargs)
             prev_item = item
-        OdkForm.warnings = OdkForm.warnings if OdkForm.warnings else 'false'
 
         # pylint: disable=no-member
         footer = TEMPLATE_ENV.get_template('footer.html')\
-            .render(info=None, warnings=OdkForm.warnings,
+            .render(info=None, warnings='false',  # to-do: no warnings yet
                     data=data['footer']['data'], **kwargs, settings=kwargs)
         html_questionnaire += footer
 

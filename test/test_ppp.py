@@ -518,7 +518,10 @@ class RenderCalculatesInPlace(PppTest):
 
     def test_convert(self):
         """Test that the file actually converts."""
-        self.standard_conversion_test()
+        self.standard_conversion_test(options={
+            'template': 'detailed',
+            'style': 'old'
+        })
 
 
 if __name__ == '__main__':

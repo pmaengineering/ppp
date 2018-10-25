@@ -25,7 +25,13 @@
                               {% if question.relevant %}
                                   <div class="relevant{{ relevant_highlight }}">
                                     {{ question.relevant }}
-                                    {% if side_letters %}<span class="side-letter-relevant{{ side_letter_styling }}">R</span>{% endif %}
+                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">R</span>{% endif %}
+                                  </div>
+                              {% endif %}
+                              {% if question.calculation %}
+                                  <div class="relevant{{ relevant_highlight }}">
+                                    {{ question.calculation }}
+                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">C</span>{% endif %}
                                   </div>
                               {% endif %}
                             </div>
@@ -66,7 +72,7 @@
                             <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
                               {% if question.choice_filter %}
                                 {{ question.choice_filter }}
-                                {% if side_letters %}<span class="side-letter-choice-filter{{ side_letter_styling }}">F</span>{% endif %}
+                                {% if side_letters %}<span style="color: #898989;" class="side-letter-choice-filter{{ side_letter_styling }}">F</span>{% endif %}
                               {% endif %}
                             </div>
                           </div>

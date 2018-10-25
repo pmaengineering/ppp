@@ -13,6 +13,8 @@ from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
 from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
 from ppp.odktable import OdkTable, set_template_env as odktable_template
+from ppp.odkabstractprompt import set_template_env as \
+    odkabstractprompt_template
 from ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
@@ -27,6 +29,7 @@ def set_template_env(template):
     odkpromt_template(template)
     odkrepeat_template(template)
     odktable_template(template)
+    odkabstractprompt_template(template)
 
 
 class OdkForm:
@@ -399,6 +402,7 @@ class OdkForm:
         Returns:
             str: A detailed HTML representation of the XLSForm.
         """
+        render_calculates = True
         language = lang if lang else self.language
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
@@ -408,6 +412,7 @@ class OdkForm:
         if kwargs['template'] == 'standard':
             name_to_q_nums = OdkForm._get_name_to_q_num_map(qre)
             qre = OdkForm._set_name_refs_to_q_nums(qre, name_to_q_nums)
+            render_calculates = False
         data = {
             'header': {
                 'title': self.get_title(settings=self.settings,
@@ -434,7 +439,8 @@ class OdkForm:
         for index, item in enumerate(data['questionnaire']):
             if exclusion(item=item, settings=kwargs):
                 continue
-
+            if isinstance(item, OdkCalculate):
+                item.renderable = render_calculates
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
             elif isinstance(prev_item, OdkGroup) \
@@ -445,7 +451,8 @@ class OdkForm:
                 html_questionnaire += \
                     item.to_html(lang=language, **kwargs, bottom_border=True)
             else:
-                html_questionnaire += item.to_html(lang=language, **kwargs)
+                html = item.to_html(lang=language, **kwargs)
+                html_questionnaire += html
             prev_item = item
 
         # pylint: disable=no-member
@@ -558,7 +565,8 @@ class OdkForm:
     def make_simple_calculate():
         """Make a simple calculate."""
         simple_row = {
-            'token_type': 'calculate'
+            'token_type': 'calculate',
+            'simple_type': 'calculate'
         }
         return simple_row
 
@@ -585,7 +593,8 @@ class OdkForm:
             dict: simple_row information from parsing.
         """
         row_type = row['type']
-        simple_types = OdkPrompt.response_types + OdkPrompt.non_response_types
+        simple_types = OdkPrompt.visible_response_types + \
+            OdkPrompt.visible_non_response_types
         if row_type in simple_types:
             simple_row = OdkForm.make_simple_prompt(row_type)
         elif row_type == 'calculate':
@@ -649,6 +658,7 @@ class OdkForm:
                     this_prompt = OdkPrompt(dict_row, choice_list)
                     context.add_prompt(this_prompt)
                 elif token['token_type'] == 'calculate':
+                    dict_row['simple_type'] = token['simple_type']
                     this_calculate = OdkCalculate(dict_row)
                     context.add_calculate(this_calculate)
                 elif token['token_type'] == 'begin group':

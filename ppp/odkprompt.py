@@ -34,9 +34,10 @@ class OdkPrompt:
     Class Attributes:
         select_types (tuple): Prompt types which can accept data and include a
             list of choices.
-        response_types (tuple): Prompt types which can accept data and do not
-            include a list of choices.
-        non_response_types (tuple): Prompt types which do not accept data.
+        visible_response_types (tuple): Prompt types which can accept data and
+        do not include a list of choices.
+        visible_non_response_types (tuple): Prompt types which do not accept
+        data.
 
     """
 
@@ -44,7 +45,7 @@ class OdkPrompt:
         'select_one',
         'select_multiple'
     )
-    response_types = (
+    visible_response_types = (
         'integer',
         'decimal',
         'geopoint',
@@ -54,7 +55,7 @@ class OdkPrompt:
         'date',
         'dateTime'
     )
-    non_response_types = (
+    visible_non_response_types = (
         'note',
     )
 
@@ -64,8 +65,8 @@ class OdkPrompt:
         Args:
             row (dict): XLSForm headers as keys, row entries as values. It is
                 guaranteed to have the "simple_type" key with a value from the
-                class member variables `select_types`, `response_types`, or
-                `non_response_types`.
+                class member variables `select_types`, `visible_response_types`
+                , or `visible_non_response_types`.
             choices (OdkChoices): Answer choices, if applicable.
         """
         self.row = row
@@ -393,7 +394,8 @@ class OdkPrompt:
                                         prompt[to_replace] = \
                                             prompt[replace_with]
 
-            if 'choice names' in TEMPLATES[template]['other_specific_exclusions']:
+            if 'choice names' in \
+                    TEMPLATES[template]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [
@@ -477,12 +479,12 @@ class OdkPrompt:
                 choices = ['{}. {}'.format(i+1, c) for i, c in
                            enumerate(choices)]
             text_str = '\n'.join(('* {}'.format(i) for i in choices))
-        elif self.odktype in OdkPrompt.response_types:
+        elif self.odktype in OdkPrompt.visible_response_types:
             text_str = '_'*30 + '({})'.format(self.odktype)
 
         # try:
-        #     question_type = self.odktype in Odkprompt.response_types or \
-        #                     self.odktype in Odkprompt.select_types
+        #     question_type = self.odktype in Odkprompt.visible_response_types
+        # or self.odktype in Odkprompt.select_types
         #     if text_str and self.row['read_only'] and question_type:
         #         # TODO: Fix read_only lookup.
         #         text_str = '\n'.join(('[Read only]', text_str))
@@ -509,7 +511,7 @@ class OdkPrompt:
         field = None
         if self.odktype in ['select_multiple', 'select_one']:
             field = self.choices.name_labels(lang=lang)
-        elif self.odktype in OdkPrompt.response_types:
+        elif self.odktype in OdkPrompt.visible_response_types:
             field = '_' * 30 + '({})'.format(self.odktype)
         return field
 
@@ -565,7 +567,8 @@ class OdkPrompt:
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
         if 'template' in kwargs:
-            prompt = self.handle_template_presets(prompt, lang, kwargs['template'])
+            prompt = \
+                self.handle_template_presets(prompt, lang, kwargs['template'])
         return prompt
 
     @staticmethod

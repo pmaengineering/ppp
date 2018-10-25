@@ -8,7 +8,7 @@
                           <div class="header-container flex-container-row">
                             <div class="align-left {{ name_highlight }}">
                               {% if question.name %}
-                                {% if side_letters %}<span class="side-letter-left">N</span>{% endif %}
+{#                                {% if side_letters %}<span style="color: #898989;" class="side-letter-left">N</span>{% endif %}#}
                                 <div class="variable">{{ question.name }}</div>
                               {% endif %}
                             </div>
@@ -16,7 +16,7 @@
                             {% if question.relevant %}
                               <div class="relevant{{ relevant_highlight }} align-right">
                                 {{ question.relevant }}
-                                {% if side_letters %}<span class="side-letter-right">R</span>{% endif %}
+                                {% if side_letters %}<span style="color: #898989;" class="side-letter-right">R</span>{% endif %}
                               </div>
                             {% endif %}
                           </div>

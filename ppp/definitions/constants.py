@@ -9,6 +9,17 @@ TRUNCATABLE_FIELDS (tuple): Fields that should be limited to a specific
     length. Current limit is 100 chars, which is somewhat arbitrary but
     turns out good in converted forms.
 """
+ODK_SUPERGLOBALS = (
+    'start',
+    'end',
+    'deviceid',
+    'phonenumber',
+    'simserial',
+    'meta',
+    'instanceID',
+    'instanceName'
+)
+EXCLUSION_TOKEN = 'X'
 SYNTAX = {
     'xlsforms': {
         'language_field_delimiters': [':', '::']
@@ -34,10 +45,10 @@ LANGUAGE_DEPENDENT_FIELDS = LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS + \
                             MEDIA_FIELDS
 RELEVANCE_FIELD_TOKENS = ('relevant', 'relevance')
 TRUNCATABLE_FIELDS = ('constraint',) + RELEVANCE_FIELD_TOKENS
-MULTI_ARGUMENT_CONVERSION_OPTIONS = ('preset', 'format', 'language')
+MULTI_ARGUMENT_CONVERSION_OPTIONS = ('template', 'format', 'language')
 PPP_REPLACEMENTS_FIELDS = ('label',) + RELEVANCE_FIELD_TOKENS
 CHOICE_NAME_VARIATIONS = ('name', 'value')
-PRESETS = {
+TEMPLATES = {
     'detailed': {
         'field_replacements': (),
         'field_exclusions': (),
@@ -84,7 +95,7 @@ PRESETS = {
         }
     },
 }
-PRESETS['full'] = PRESETS['detailed']
-PRESETS['developer'] = PRESETS['detailed']  # alias
-PRESETS['minimal'] = PRESETS['standard']  # alias
-PRESETS['basic'] = PRESETS['standard']  # alias
+TEMPLATES['full'] = TEMPLATES['detailed']
+TEMPLATES['developer'] = TEMPLATES['detailed']  # alias
+TEMPLATES['minimal'] = TEMPLATES['standard']  # alias
+TEMPLATES['basic'] = TEMPLATES['standard']  # alias

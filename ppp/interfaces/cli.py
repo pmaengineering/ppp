@@ -24,23 +24,23 @@ def _required_fields(parser):
     #   type:'string'
     file_help = 'Path to source XLSForm(s).'
     parser.add_argument('xlsxfiles', nargs='+', help=file_help)
-    presets_help = \
-        ('Select from a preset of bundled options. The \'developer\' or '
-         '\'detailed\' preset'
+    templates_help = \
+        ('Select from a template of bundled options. The \'developer\' or '
+         '\'detailed\' template'
          ' renders a form that is the most similar to the original XlsForm. '
-         'The \'internal\' preset is more human readable but is not stripped '
+         'The \'internal\' template is more human readable but is not stripped '
          'of sensitive information. The \'public\' option is like the '
          '\'internal\' optoin, only with sensitive information removed.')
-    parser.add_argument('-p', '--preset', nargs='+',
+    parser.add_argument('-p', '--template', nargs='+',
                         choices=('standard', 'detailed'),
                         # choices=('public', 'internal', 'standard',
                         # 'detailed')  # TODO
-                        default='standard', help=presets_help)
+                        default='standard', help=templates_help)
     return parser
 
 
-def _non_preset_optional_fields(parser):
-    """Add non-preset optional fields to parser.
+def _non_template_optional_fields(parser):
+    """Add non-template optional fields to parser.
 
     Args:
         parser (ArgumentParser): Argparse object.
@@ -66,24 +66,24 @@ def _non_preset_optional_fields(parser):
     parser.add_argument('-f', '--format', nargs='+',
                         choices=SUPPORTED_FORMATS, default='doc',
                         help=format_help)
-    # Choose Template
+    # Choose style
     #   type='single selection', default:'default'
-    template_help = 'Choose template to render results.'
-    parser.add_argument('-t', '--template', nargs='+',
+    style_help = 'Choose style to render results.'
+    parser.add_argument('-t', '--style', nargs='+',
                         choices=('default', 'old', 'test'),
                         default='default',
-                        help=template_help)
+                        help=style_help)
     return parser
 
 
-def _preset_optional_fields(parser):
-    """Add preset options to parser.
+def _template_optional_fields(parser):
+    """Add template options to parser.
 
     These options are all boolean toggles. Their value should automatically
-    update based on the bundle option preset selected. Also, they should either
-    (a) greyed out unless the 'custom bundle option preset is selected, or (b)
-    if a bundle option preset other than 'custom' is selected, the bundle
-    option preset should automatically change to 'custom' if any of the
+    update based on the bundle option template selected. Also, they should either
+    (a) greyed out unless the 'custom bundle option template is selected, or (b)
+    if a bundle option template other than 'custom' is selected, the bundle
+    option template should automatically change to 'custom' if any of the
     options are changed.
 
 
@@ -202,8 +202,8 @@ def _add_arguments(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    return chain(parser, funcs=[_cli_only_fields, _non_preset_optional_fields,
-                                _preset_optional_fields, _required_fields])
+    return chain(parser, funcs=[_cli_only_fields, _non_template_optional_fields,
+                                _template_optional_fields, _required_fields])
 
 
 def cli():
@@ -234,8 +234,8 @@ def cli():
             format=args.format,
             debug=args.debug,
             highlight=args.highlight,
-            preset=args.preset,
             template=args.template,
+            style=args.style,
             outpath=args.outpath)
     except OdkException as err:
         err = 'An error occurred while attempting to convert \'{}\':\n{}'\

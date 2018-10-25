@@ -20,28 +20,28 @@ class OdkGroup:
     """Class to represent a field-list group in XLSForm.
 
     Attributes:
-        opener (dict): A dictionary row representing first row of group.
+        row (dict): A dictionary row representing first row of group.
         data (list): A list of group components.
         pending_table (OdkTable): A variable for storing an OdkTable object as
             it is being constructed.
         in_repeat (bool): Is this group part of a repeat group?
     """
 
-    def __init__(self, opener):
+    def __init__(self, row):
         """Initialize a group.
 
         Args:
-            opener (dict): A dictionary row representing first row of group.
+            row (dict): A dictionary row representing first row of group.
                 In ODK Specification, this would be of 'begin group' type.
         """
-        self.opener = opener
+        self.row = row
         self.data = []
         self.pending_table = None
         self.in_repeat = False
 
     def __repr__(self):
         """Print representation."""
-        return "<OdkGroup {}: {}>".format(self.opener['name'], self.data)
+        return "<OdkGroup {}: {}>".format(self.row['name'], self.data)
 
     @staticmethod
     def format_header(header):
@@ -121,13 +121,14 @@ class OdkGroup:
         # - Render header
         html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
             .render(**kwargs, settings=kwargs)
-        header = self.format_header(self.opener)
+        header = self.format_header(self.row)
 
         html += OdkPrompt(header).to_html(lang, **kwargs)
 
         # - Render body
         for i in self.data:
-            if exclusion(item=i, settings=kwargs):
+            row = i.data[0] if isinstance(i, OdkTable) else i
+            if exclusion(item=row, settings=kwargs):
                 continue
 
             if isinstance(i, OdkPrompt):

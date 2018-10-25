@@ -23,24 +23,24 @@ class OdkRepeat:
     """Class to represent repeat construct from XLSForm.
 
     Attributes:
-        opener (dict): A dictionary row representing first row of repeat group.
+        row (dict): A dictionary row representing first row of repeat group.
         data (list): A list of repeat group components.
 
     """
 
-    def __init__(self, opener):
+    def __init__(self, row):
         """Initialize a repeat group.
 
         Args:
-            opener (dict): A dictionary row representing first row of group.
+            row (dict): A dictionary row representing first row of group.
                 In ODK Specification, this would be of 'begin repeat' type.
         """
-        self.opener = opener
+        self.row = row
         self.data = []
 
     def __repr__(self):
         """Print representation of instance."""
-        return "<OdkRepeat {}: {}>".format(self.opener['name'], self.data)
+        return "<OdkRepeat {}: {}>".format(self.row['name'], self.data)
 
     @staticmethod
     def render_header(i, lang, **kwargs):
@@ -121,7 +121,7 @@ class OdkRepeat:
         html = ''
 
         # - Render header
-        html += self.render_header(self.opener, lang, **kwargs)
+        html += self.render_header(self.row, lang, **kwargs)
 
         # - Render body
         for i in self.data:

@@ -27,6 +27,7 @@ class OdkTable:
         """Initialize table object with empty initial values."""
         self.data = []
         self.header = None
+        self.row = self.header
         self.contents = None
         self.in_repeat = False
 

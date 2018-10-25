@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Unit tests for PPP package."""
 import os
-import re
 import subprocess
 import unittest
 from glob import glob
@@ -88,7 +87,7 @@ class PppTest(unittest.TestCase):
         """Converts input/* --> output/*. Returns n files each.
 
         Args:
-            options (list): Of the form '['--template', 'old', ...]
+            options (list): Of the form '['--style', 'old', ...]
 
         Returns:
             1. str: String representing expected number of files converted.
@@ -398,8 +397,8 @@ class MultiConversionTest(unittest.TestCase):
         src_dir = TEST_STATIC_DIR + 'multiple_file_language_option_conversion/'
         out_dir = src_dir + 'ignored/'
         src_dir_ls_input = os.listdir(src_dir)
-        src_files = \
-            [src_dir + x for x in src_dir_ls_input if x.endswith('.xlsx')]
+        src_files = [src_dir + x for x in src_dir_ls_input
+                     if x.endswith('.xlsx') and not x.startswith('~$')]
         subprocess.call(['rm', '-rf', out_dir])
         os.makedirs(out_dir)
         command = ['python3', '-m', 'ppp'] + src_files + [
@@ -447,6 +446,33 @@ class MultipleFieldLanguageDelimiterSupport(PppTest):
         self.standard_conversion_test()
 
 
+class XlsFormNonStrictValidation(PppTest):
+    """Creates a form when the form ID is called "id_string" or "form_id"."""
+
+    def test_warnings(self):
+        command = ['python3', '-m', 'ppp'] + self.input_files() + \
+                  ['-o', self.output_path()]
+        process = subprocess.Popen(command,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        process.wait()
+        stream = process.stderr
+        err = stream.read().decode().strip()
+        stream.close()
+        self.assertTrue('Warning!' in err)
+
+
+class NamesToQnums(PppTest):
+    """Set question numbers for all variable name refs in relevants."""
+
+    def test_convert_and_check(self):
+        """Test that the file actually converts."""
+        self.standard_conversion_test(options={'template': 'standard'})
+
+        with open(self.output_files()[0]) as file:
+            self.assertTrue(file.read().find("201a = 'yes'") != -1)
+
+
 class SkipPatternColRelevantOrRelevance(PppTest):
     """Allow [relevant || relevance]"""
 
@@ -487,31 +513,12 @@ class IdStringSupport(PppTest):
         self.standard_conversion_test()
 
 
-class NamesToQnums(PppTest):
-    """Set question numbers for all variable name refs in relevants."""
+class RenderCalculatesInPlace(PppTest):
+    """Tests whether calculates are rendered in place as if 'note' type."""
 
-    def test_convert_and_check(self):
+    def test_convert(self):
         """Test that the file actually converts."""
-        self.standard_conversion_test(options={'preset': 'standard'})
-
-        with open(self.output_files()[0]) as file:
-            self.assertTrue(file.read().find("201a = 'yes'") != -1)
-
-
-class XlsFormNonStrictValidation(PppTest):
-    """Creates a form when the form ID is called "id_string" or "form_id"."""
-
-    def test_warnings(self):
-        command = ['python3', '-m', 'ppp'] + self.input_files() + \
-                  ['-o', self.output_path()]
-        process = subprocess.Popen(command,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        process.wait()
-        stream = process.stderr
-        err = stream.read().decode().strip()
-        stream.close()
-        self.assertTrue('Warning!' in err)
+        self.standard_conversion_test()
 
 
 if __name__ == '__main__':

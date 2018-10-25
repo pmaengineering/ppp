@@ -6,7 +6,7 @@ import textwrap
 from ppp.config import get_template_env
 from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
     LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
-    PRESETS, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
+    TEMPLATES, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
     PPP_REPLACEMENTS_FIELDS
 from ppp.definitions.error import OdkException, OdkChoicesError
 
@@ -246,7 +246,7 @@ class OdkPrompt:
     def _ignore_relevant(prompt):
         """If applicable, ignores relevant, setting it to an empty string.
 
-         In cases where a preset is used which makes use of human-readable
+         In cases where a template is used which makes use of human-readable
          relevants via the ppp_relevant::<language> field of an XlsForm, this
          function looks for any IGNORE_RELEVANT_TOKEN present in the field and,
          if present, sets it to an empty string.
@@ -359,13 +359,13 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
-    def handle_preset(prompt, lang, preset):
-        """Handle preset.
+    def handle_template_presets(prompt, lang, template):
+        """Handle template presets.
 
         Args:
             prompt (dict): Dictionary representation of prompt.
             lang (str): The language.
-            preset (str): The preset supplied.
+            template (str): The template name supplied.
 
         Returns
             dict: Reformatted representation.
@@ -373,13 +373,13 @@ class OdkPrompt:
         # TODO: (jef 2017.09.24) Human readable: hint variables.
         # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
         for key in prompt:
-            for exclusion in PRESETS[preset]['field_exclusions']:
+            for exclusion in TEMPLATES[template]['field_exclusions']:
                 if key.startswith(exclusion):
                     prompt[key] = ''
                     continue
 
             if lang:
-                for to_replace in PRESETS[preset]['field_replacements']:
+                for to_replace in TEMPLATES[template]['field_replacements']:
                     replace_withs = ['ppp_'+to_replace+'::'+lang,
                                      'ppp_'+to_replace+':'+lang]
                     for replace_with in replace_withs:
@@ -393,7 +393,7 @@ class OdkPrompt:
                                         prompt[to_replace] = \
                                             prompt[replace_with]
 
-            if 'choice names' in PRESETS[preset]['other_specific_exclusions']:
+            if 'choice names' in TEMPLATES[template]['other_specific_exclusions']:
                 if key == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [
@@ -564,8 +564,8 @@ class OdkPrompt:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
-        if 'preset' in kwargs:
-            prompt = self.handle_preset(prompt, lang, kwargs['preset'])
+        if 'template' in kwargs:
+            prompt = self.handle_template_presets(prompt, lang, kwargs['template'])
         return prompt
 
     @staticmethod
@@ -579,9 +579,9 @@ class OdkPrompt:
         Returns:
             dict: Modified settings based on keyword arguments.
         """
-        if 'preset' not in kwargs:
+        if 'template' not in kwargs:
             return kwargs
-        for k, v in PRESETS[kwargs['preset']]['render_settings']['html']\
+        for k, v in TEMPLATES[kwargs['template']]['render_settings']['html']\
                 .items():
             kwargs[k] = v
         if 'language' not in kwargs:

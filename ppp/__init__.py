@@ -47,7 +47,7 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
         OdkFormError: General form related exception.
     """
     
-    set_template_env(kwargs['template'] if 'template' in kwargs else 'default')
+    set_template_env(kwargs['style'] if 'style' in kwargs else 'default')
 
     form = OdkForm.from_file(in_file)
 
@@ -67,8 +67,8 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
             if os.path.isdir(outpath):
                 base_filename = os.path.basename(os.path.splitext(in_file)[0])
                 lang = '-' + language if language else ''
-                options_affix = '-' + kwargs['preset'] \
-                    if 'preset' in kwargs and kwargs['preset'] \
+                options_affix = '-' + kwargs['template'] \
+                    if 'template' in kwargs and kwargs['template'] \
                        not in ('standard', 'minimal') else ''
                 out_file = '{}{}{}{}.{}'.format(outpath, base_filename, lang,
                                                 options_affix, output_format)

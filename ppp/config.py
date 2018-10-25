@@ -3,9 +3,6 @@ from jinja2 import Environment, PackageLoader
 import re
 
 
-EXCLUSION_TOKEN = 'X'
-
-
 def question_number(question_num, max_length=4):
     """Splitting question number.
 

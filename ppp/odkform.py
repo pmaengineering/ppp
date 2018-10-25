@@ -5,8 +5,10 @@ from sys import stderr
 
 from ppp.config import get_template_env
 from ppp.definitions.error import OdkFormError
+from ppp.definitions.constants import ODK_SUPERGLOBALS, RELEVANCE_FIELD_TOKENS
 from ppp.odkcalculate import OdkCalculate
 from ppp.odkchoices import OdkChoices
+from ppp.odkcustomtype import OdkCustomType
 from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
 from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
@@ -42,8 +44,7 @@ class OdkForm:
         questionnaire (list): An ordered representation of the ODK form,
             comprised of OdkPrompt, OdkGroup, OdkRepeat, and OdkTable objects.
 
-    unhandled_token_types: ['calculate', 'start', 'end', 'deviceid',
-        'simserial', 'phonenumber', 'hidden', 'hidden string', 'hidden int',
+    custom_token_types: ['hidden', 'hidden string', 'hidden int',
         'hidden geopoint']
     """
 
@@ -218,17 +219,19 @@ class OdkForm:
         for item in prompt_list:
             if isinstance(item, OdkPrompt):
                 qnum_map[item.row['name']] = item.row['question_number']
-            elif isinstance(item, OdkCalculate):
+            if isinstance(item, OdkTable):
+                qnum_map = {**qnum_map,
+                            **OdkForm._get_name_to_q_num_map(item.data)}
+            elif any([isinstance(item, x)
+                      for x in (OdkCalculate, OdkCustomType)]):
                 qnum_map[item.row['name']] = ''
-            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup,
-                                                   OdkTable)):
+            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup)):
+                qnum_map[item.row['name']] = ''
                 qnum_map = {**qnum_map,
                             **OdkForm._get_name_to_q_num_map(item.data)}
 
         return qnum_map
 
-    # TODO: 2018/10/23
-    # TODO: handle headers
     @staticmethod
     def _set_name_refs_to_q_nums(prompt_list, question_map):
         """Set question numbers for all variable name refs in relevants.
@@ -245,19 +248,29 @@ class OdkForm:
         Returns:
             list: A new prompt list.
         """
+        logic_field_variations = (
+            RELEVANCE_FIELD_TOKENS,
+            ('calculation', ),
+            ('choice_filter', )
+        )
         new_list = []
 
         for item in prompt_list:
             if any(isinstance(item, x) for x in (OdkPrompt, OdkCalculate)):
-                for fld_name in ('relevant', 'calculation', 'choice_filter'):
-                    fld = item.row[fld_name]
-                    if fld:
-                        matches = re.findall(r'\${[a-zA-Z0-9-_]*}', fld)
-                        for m in matches:
-                            m2 = m.replace('${', '').replace('}', '')
-                            if question_map[m2]:
-                                fld = fld.replace(m, question_map[m2])
-                                item.row[fld_name] = fld
+                for variations in logic_field_variations:
+                    for fld_name in variations:
+                        try:
+                            fld = item.row[fld_name]
+                        except KeyError:
+                            continue
+                        if fld:
+                            matches = re.findall(r'\${[a-zA-Z0-9-_]*}', fld)
+                            for m in matches:
+                                if not m[2:-1] in ODK_SUPERGLOBALS:
+                                    m2 = m.replace('${', '').replace('}', '')
+                                    if m2 in question_map and question_map[m2]:
+                                        fld = fld.replace(m, question_map[m2])
+                                        item.row[fld_name] = fld
                 new_list.append(item)
             elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup,
                                                    OdkTable)):
@@ -390,7 +403,9 @@ class OdkForm:
         debug = True if 'debug' in kwargs and kwargs['debug'] else False
         html_questionnaire = ''
         qre = self.questionnaire
-        if kwargs['preset'] == 'standard':
+        if 'template' not in kwargs:
+            kwargs['template'] = 'standard'
+        if kwargs['template'] == 'standard':
             name_to_q_nums = OdkForm._get_name_to_q_num_map(qre)
             qre = OdkForm._set_name_refs_to_q_nums(qre, name_to_q_nums)
         data = {
@@ -548,6 +563,14 @@ class OdkForm:
         return simple_row
 
     @staticmethod
+    def make_simple_custom_type():
+        """Make a simple custom type."""
+        simple_row = {
+            'token_type': 'custom'
+        }
+        return simple_row
+
+    @staticmethod
     def parse_type(row, choices, ext_choices):
         """Describe the 'type' column of a row XLSForm.
 
@@ -571,8 +594,10 @@ class OdkForm:
             simple_row = OdkForm.parse_select_type(row, choices, ext_choices)
         elif row_type.startswith('begin ') or row_type.startswith('end '):
             simple_row = OdkForm.parse_group_repeat(row)
-        else:  # Note - Some unhandled token types remain.
-            simple_row = {'token_type': 'unhandled', 'simple_type': row_type}
+        elif row_type.startswith('hidden'):
+            simple_row = OdkForm.make_simple_custom_type()
+        else:  # Note - Some other custom token types remain.
+            simple_row = {'token_type': 'custom', 'simple_type': row_type}
         return simple_row
 
     # pylint: disable=too-many-branches
@@ -644,10 +669,9 @@ class OdkForm:
                     choice_list = token['choice_list']
                     this_prompt = OdkPrompt(dict_row, choice_list)
                     context.add_table(this_prompt)
-                elif token['token_type'] == 'unhandled':
-                    # Intentionally no handling for these types.
-                    # TODO: Possibly start logging?
-                    pass
+                elif token['token_type'] == 'custom':
+                    this_custom = OdkCustomType(dict_row)
+                    context.add_custom_type(this_custom)
                 else:
                     # TODO: Make an error?
                     pass
@@ -682,7 +706,7 @@ class OdkForm:
             otherwise it is added to the list of components.
 
             Args:
-                prompt (OdkPrompt | OdkCalculate): A prompt to add.
+                prompt (OdkPrompt, OdkCalculate, OdkCustomType): Prompt to add.
 
             """
             if self.pending_stack:
@@ -701,6 +725,21 @@ class OdkForm:
 
             """
             self.add_prompt(calculate)
+
+        def add_custom_type(self, custom_type):
+            """Add a calculate to the questionnaire.
+
+            custom_token_types: ['hidden', 'hidden string', 'hidden int',
+            'hidden geopoint']
+
+            If there is an item on the pending stack, it is added there,
+            otherwise it is added to the list of components.
+
+            Args:
+                custom_type (OdkCustomType): A custom type to add.
+
+            """
+            self.add_prompt(custom_type)
 
         def add_group(self, group):
             """Add a group to the pending stack.

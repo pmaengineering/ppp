@@ -1,5 +1,4 @@
-SRC=./ppp/
-TEST=./test/
+SRC=ppp/
 
 .PHONY: lint tags ltags test all lintall codestyle docstyle lintsrc \
 linttest doctest doc docs code linters_all codesrc codetest docsrc \
@@ -21,7 +20,7 @@ lintall: lintsrc linttest
 lintsrc:
 	${PYLINT_BASE} ${SRC}
 linttest:
-	${PYLINT_BASE} ${TEST}
+	${PYLINT_BASE} test/
 
 # PyCodeStyle Only
 PYCODESTYLE_BASE=python3 -m pycodestyle
@@ -32,7 +31,7 @@ code: codestyle
 codestylesrc:
 	${PYCODESTYLE_BASE} ${SRC}
 codestyletest:
-	 ${PYCODESTYLE_BASE} ${TEST}
+	 ${PYCODESTYLE_BASE} test/
 
 # PyDocStyle Only
 PYDOCSTYLE_BASE=python3 -m pydocstyle
@@ -43,13 +42,11 @@ docs: docstyle
 docstylesrc:
 	${PYDOCSTYLE_BASE} ${SRC}
 docstyletest:
-	${PYDOCSTYLE_BASE} ${TEST}
+	${PYDOCSTYLE_BASE} test/
 codetest:
-	${CODE-test}
+	python -m pycodestyle test/
 codeall: code codetest
 doc: docstyle
-doc:
-	${DOC_SRC}
 
 # Testing
 test:

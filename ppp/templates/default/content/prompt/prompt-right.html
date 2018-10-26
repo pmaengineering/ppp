@@ -17,19 +17,25 @@
                         {% else %}
                           {% set input_margins = '' %}
                         {% endif %}
-                        <td style="border-top: 1px solid black; border-right: 1px solid black;" width="25%" class="response-cell" valign="top">
-
+                        <td width="25%" class="response-cell" valign="top" style="
+                          border-top: 1px solid black;
+                          border-right: 1px solid black;
+                        ">
                           <div class="flex-container-column">
                             <div class="flex-container-row">
                               <div class="question-type{{ type_highlight }}">{{ question.type }}</div>
                               {% if question.relevant %}
                                   <div class="relevant{{ relevant_highlight }}">
-                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">R</span>{% endif %}
+                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">
+                                      R
+                                    </span>{% endif %}
                                   </div>
                               {% endif %}
                               {% if question.calculation %}
                                   <div class="relevant{{ relevant_highlight }}">
-                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">C</span>{% endif %}
+                                    {% if side_letters %}<span style="color: #898989;" class="side-letter-relevant{{ side_letter_styling }}">
+                                      C
+                                    </span>{% endif %}
                                   </div>
                               {% endif %}
                             </div>
@@ -46,7 +52,9 @@
                                     {% for option in question.input_field %}
                                       {% set select_option = question %}
                                       {% include "content/prompt/inputs/selects.html" %}
-                                      <label for="{{ question.name }}_{{ loop.index }}">{{ option.label }} <span class="choice-name">{{ option.name }}</span></label>
+                                      <label for="{{ question.name }}_{{ loop.index }}">
+                                        {{ option.label }} <span class="choice-name">{{ option.name }}</span>
+                                      </label>
                                       {% if loop.last == False %}
                                         <br/>
                                       {% endif %}
@@ -72,13 +80,19 @@
                             <div class="choice-filter align-bottom align-text-bottom{{ filter_highlight }}">
                               {% if question.choice_filter %}
                                 {{ question.choice_filter }}
-                                {% if side_letters %}<span style="color: #898989;" class="side-letter-choice-filter{{ side_letter_styling }}">F</span>{% endif %}
+                                {% if side_letters %}<span style="color: #898989;" class="side-letter-choice-filter{{ side_letter_styling }}">
+                                  F
+                                </span>{% endif %}
                               {% endif %}
                             </div>
                           </div>
 
                         </td>
-                        <td style="word-wrap:break-word; border-top: 1px solid black; border-right: 1px solid black" width="20%" class="skip" valign="top">
+                        <td width="20%" class="skip" valign="top" style="
+                        word-wrap: break-word;
+                        border-top: 1px solid black;
+                        border-right: 1px solid black
+                        ">
                           {% if question.relevant %}
                             {{ question.relevant }}
                           {% endif %}

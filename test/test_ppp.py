@@ -367,7 +367,7 @@ class OdkFormTest(PppTest):
         """
         rel_file_path = 'test__add_prompt_iteration_numbers_to_form/1.xlsx'
         form = OdkForm.from_file(TEST_STATIC_DIR + rel_file_path)
-        with_iterations = form._add_i_nums_to_questions(form.questionnaire)
+        with_iterations = form._add_question_iter_nums(form.questionnaire)
         expected = 137
         actual = int(with_iterations[-1].row['i'])
         msg = 'Expected iteration {} does not match actual value of {}.'\
@@ -471,6 +471,32 @@ class NamesToQnums(PppTest):
 
         with open(self.output_files()[0]) as file:
             self.assertTrue(file.read().find("201a = 'yes'") != -1)
+        file.close()
+
+
+class RenderCalculatesInPlace(PppTest):
+    """Tests whether calculates are rendered in place as if 'note' type."""
+
+    def test_convert(self):
+        """Test that the file actually converts."""
+        self.standard_conversion_test(options={
+            'template': 'detailed',
+            'style': 'old'
+        })
+
+    def test_render(self):
+        """Test that the calculate renders correctly."""
+        file_path = self.output_files()[0]
+        with open(file_path) as file:
+            text = file.read()
+            for str in [
+                '<div class="variable">today</div>',
+                'Placeholder text for: today',
+                'if(${system_date_check} = \'yes\','
+                '${system_date},${manual_date})'
+            ]:
+                self.assertNotEqual(text.find(str), -1)
+        file.close()
 
 
 class SkipPatternColRelevantOrRelevance(PppTest):
@@ -513,15 +539,23 @@ class IdStringSupport(PppTest):
         self.standard_conversion_test()
 
 
-class RenderCalculatesInPlace(PppTest):
-    """Tests whether calculates are rendered in place as if 'note' type."""
+class IgnoreRelevant(PppTest):
+    """Test does not render relevant when IGNORE_RELEVANT_TOKEN is present."""
 
     def test_convert(self):
         """Test that the file actually converts."""
-        self.standard_conversion_test(options={
-            'template': 'detailed',
-            'style': 'old'
-        })
+        self.standard_conversion_test()
+
+    def test_render(self):
+        """Test that the relevant renders correctly."""
+        file_path = self.output_files()[0]
+        with open(file_path) as file:
+            text = file.read()
+            for str in [
+                'not(${unlinked}) and (${photo_of_home} = \'\')',
+            ]:
+                self.assertEqual(text.find(str), -1)
+        file.close()
 
 
 if __name__ == '__main__':

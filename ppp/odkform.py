@@ -95,7 +95,7 @@ class OdkForm:
             'type_of_form': self.metadata['type_of_form'](),
         }
         qre = self.convert_survey(wb, self.choices, self.ext_choices)
-        qre = OdkForm._add_i_nums_to_questions(qre)
+        qre = OdkForm._add_question_iter_nums(qre)
         self.questionnaire = qre
 
     @classmethod
@@ -349,7 +349,7 @@ class OdkForm:
         return json.dumps(raw_survey)
 
     @staticmethod
-    def _add_i_nums_to_questions(obj, data={'qnum': '', 'i': 0}, depth=0):
+    def _add_question_iter_nums(obj, data={'qnum': '', 'i': 0}, depth=0):
         """Add iteration numbers to unique question prompts.
 
         Possible improvements: Make it so that this doesn't depend on
@@ -374,7 +374,7 @@ class OdkForm:
         for i, element in enumerate(obj):
             if any(isinstance(element, x) for x in (OdkRepeat, OdkGroup,
                                                     OdkTable)):
-                element.data, data = OdkForm._add_i_nums_to_questions(
+                element.data, data = OdkForm._add_question_iter_nums(
                     element.data, data, depth+1)
             elif isinstance(element, OdkPrompt):
                 element.row = OdkPrompt.extract_question_numbers(element.row)
@@ -412,7 +412,7 @@ class OdkForm:
         if kwargs['template'] == 'standard':
             name_to_q_nums = OdkForm._get_name_to_q_num_map(qre)
             qre = OdkForm._set_name_refs_to_q_nums(qre, name_to_q_nums)
-            render_calculates = False
+            # render_calculates = False
         data = {
             'header': {
                 'title': self.get_title(settings=self.settings,
@@ -427,8 +427,11 @@ class OdkForm:
 
         # - Render Header
         # pylint: disable=no-member
-        header = TEMPLATE_ENV.get_template('header.html')\
-            .render(data=data['header'], **kwargs, settings=kwargs)
+        header = TEMPLATE_ENV.get_template('header.html').render(
+            data=data['header'],
+            render_image=False if kwargs['format'] == 'doc' else True,
+            **kwargs,
+            settings=kwargs)
         # pylint: disable=no-member
         grp_spc = TEMPLATE_ENV\
             .get_template('content/group/group-spacing.html').render()

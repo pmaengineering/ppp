@@ -3,4 +3,4 @@ pycodestyle
 pydocstyle
 pylint
 twine
-pmix
+pmix>=0.5.0

@@ -1,3 +1,10 @@
+# v1.2.12, 2019-01-23
+## Bugfixes
+- Fixed runtime error due to pmix.xlsform.XlsForm dependency missing 'warnings' attribute
+
+# v1.2.11, 2019-01-23
+- Pre-release testing version for 1.2.11
+
 # v1.2.10, 2018-09-27
 ## Bugfixes
 - Fixed an error in which inconsistent language use between survey and choices worksheet was not throwing an error.

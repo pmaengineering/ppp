@@ -1,3 +1,27 @@
+# v1.3.0, (Pre-Release)
+## New Features
+- Added feature - render question numbers in logic in place of question variable names.
+- Added handling for 'hidden' (for JHU Collect specific Android client app case) and other custom types.
+## Improvements
+- Fixed graphical issues in new style template.
+- Remove all side-letters other than for 'relevant', 'calculation', and 'choice_filter'.
+- Made calculates renderable.
+- Renamed options 'template' --> 'style' and 'preset' --> 'template'.
+## Bugfixes
+- Upgraded dependency of pmix to 0.5.0 to fix error stemming from xlsform module, causing runtime errors
+- Removed image rendering new new style template for now .doc format due to render error.
+## Developer updates
+- Refactorings
+- Removed some no longer needed code
+- Added test for 'ignore relevant token' (#####).
+- Removed 'test' template directory.
+- Added abstract class around calculate and custom types.
+- Various refactorings.
+- Continued work around relevant --> question number implementation.
+- Made OdkPrompt.extract_question_numbers non-private
+- Added new static test folder.
+- Improved error message for InvalidLanguageException.
+
 # v1.2.10, 2018-09-27
 ## Bugfixes
 - Fixed an error in which inconsistent language use between survey and choices worksheet was not throwing an error.

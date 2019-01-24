@@ -70,7 +70,7 @@ def _non_template_optional_fields(parser):
     #   type='single selection', default:'default'
     style_help = 'Choose style to render results.'
     parser.add_argument('-t', '--style', nargs='+',
-                        choices=('default', 'old', 'test'),
+                        choices=('default', 'old'),
                         default='default',
                         help=style_help)
     return parser

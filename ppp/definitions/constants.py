@@ -73,8 +73,11 @@ TEMPLATES = {
     },
     'standard': {
         'field_replacements': PPP_REPLACEMENTS_FIELDS,
-        'field_exclusions':
-        ('constraint', 'constraint_message', 'type') + CHOICE_NAME_VARIATIONS,
+        'field_exclusions': (
+            'constraint',
+            'constraint_message',
+            'type'),
+        # 'type') + CHOICE_NAME_VARIATIONS,
         'other_specific_exclusions': ('choice names',),
         'general_exclusions': True,
         'render_settings': {

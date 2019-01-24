@@ -12,26 +12,36 @@
                             {% set constraint_highlight = ' bg-light-red' %}
                         {% endif %}
 
-                        <td width="7%" class="number" valign="top" style="
+                        <td width="7%" class="number align-top align-text-top{{ name_highlight }}" valign="top" style="
                           {# {% if question.question_number %}border-top: 1px solid black; {% endif %}#}
                           border-top: 1px solid black;
                           border-left: 1px solid black;
                           border-right: 1px solid black;
                           word-break: break-all;
+                          vertical-align: text-top;
                         ">
                           {{ question.question_number|question_number }}
+                            {% if question.name %}
+                              <br/>
+                              {# {% if side_letters %}<span style="color: #898989;" class="{{ side_letter_styling }}">N</span>{% endif %}#}
+                              <span class="variable" style="color: #898989; font-size: 0.75em;">
+                                {{ question.name }}
+                              </span>
+                            {% endif %}
                         </td>
 
                         <td width="48%" class="question-cell" valign="top" style="
                           border-top: 1px solid black;
                           border-right: 1px solid black;
+                          vertical-align: text-top;
                         ">
-                          <div class="align-top align-text-top{{ name_highlight }}">
-                            {% if question.name %}
+{#                          {% if question.name %}#}
+{#                            <div class="align-top align-text-top{{ name_highlight }}">#}
+{##}
                               {# {% if side_letters %}<span style="color: #898989;" class="{{ side_letter_styling }}">N</span>{% endif %}#}
-                              <div class="variable">{{ question.name }}</div>
-                            {% endif %}
-                          </div>
+{#                              <div class="variable">{{ question.name }}</div>#}
+{#                            </div>#}
+{#                          {% endif %}#}
                           <div>
                             {% include 'content/prompt/label-hint-media-block.html' %}
                             <div class="align-bottom align-text-bottom{{ constraint_highlight }}">

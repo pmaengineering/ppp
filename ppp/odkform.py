@@ -109,7 +109,7 @@ class OdkForm:
         Returns:
             Odkform
         """
-        xlsform = Xlsform(path, strict_validation=False)
+        xlsform = Xlsform(path)
         odkform = cls(xlsform)
         if xlsform.warnings:
             msg = 'Warning! File {} contained spreadsheet errors. This may ' \

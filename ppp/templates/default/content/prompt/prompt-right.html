@@ -53,7 +53,8 @@
                                       {% set select_option = question %}
                                       {% include "content/prompt/inputs/selects.html" %}
                                       <label for="{{ question.name }}_{{ loop.index }}">
-                                        {{ option.label }} <span class="choice-name">{{ option.name }}</span>
+                                        {{ option.label }} <span class="choice-name" style="color: #898989; font-size: 0.75em">
+                                        {{ option.name }}</span>
                                       </label>
                                       {% if loop.last == False %}
                                         <br/>

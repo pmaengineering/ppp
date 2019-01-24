@@ -200,7 +200,8 @@ class OdkPrompt:
         """Find the relevant text for this row."""
         pass
 
-    def _truncate_fields(self, row):
+    @staticmethod
+    def _truncate_fields(row):
         """Call truncate_text() method for all truncatable fields in component.
 
         Args:
@@ -213,10 +214,11 @@ class OdkPrompt:
         for field in TRUNCATABLE_FIELDS:
             if field in new_row:
                 new_row[field + '_original'] = new_row[field]
-                new_row[field] = self.truncate_text(new_row[field])
+                new_row[field] = OdkPrompt.truncate_text(new_row[field])
         return new_row
 
-    def _format_media_labels(self, row):
+    @staticmethod
+    def _format_media_labels(row):
         """Format text for all media labels to be enclosed in brackets.
 
         Args:
@@ -228,7 +230,7 @@ class OdkPrompt:
         arbitrary_media_prefixes = ['media::', 'media:']
         for arb in arbitrary_media_prefixes:
             new_row = \
-                self.create_additional_media_fields(row, arb)
+                OdkPrompt.create_additional_media_fields(row, arb)
             for key, val in new_row.items():
                 for field in MEDIA_FIELDS:
                     if key.startswith(field) and val:
@@ -329,6 +331,28 @@ class OdkPrompt:
         return prompt
 
     @staticmethod
+    def _remove_question_nums_from_labels(prompt):
+        """Removes question numbers from labels.
+
+        Args:
+            prompt (dict): Dictionary representation of prompt.
+
+        Returns
+            dict: Reformatted representation.
+        """
+        label_fields = [x for x in prompt if
+                        any([x.startswith(y) for y in ('label', 'ppp_label')])]
+        for fld in label_fields:
+            if isinstance(prompt[fld], str):
+                prompt[fld] = prompt[fld].replace(
+                    prompt['question_number']+'.', '').strip()
+            elif isinstance(prompt[fld], list):
+                for i in range(len(prompt[fld])):
+                    prompt[fld][i] = prompt[fld][i].replace(
+                        prompt['question_number']+'.', '').strip()
+        return prompt
+
+    @staticmethod
     def _streamline_constraint_message(prompt):
         """Ensure constraint_message field name is consistent.
 
@@ -373,10 +397,10 @@ class OdkPrompt:
         """
         # TODO: (jef 2017.09.24) Human readable: hint variables.
         # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
-        for key in prompt:
+        for fld in prompt:
             for exclusion in TEMPLATES[template]['field_exclusions']:
-                if key.startswith(exclusion):
-                    prompt[key] = ''
+                if fld.startswith(exclusion):
+                    prompt[fld] = ''
                     continue
 
             if lang:
@@ -384,7 +408,7 @@ class OdkPrompt:
                     replace_withs = ['ppp_'+to_replace+'::'+lang,
                                      'ppp_'+to_replace+':'+lang]
                     for replace_with in replace_withs:
-                        if key == replace_with and prompt[replace_with]:
+                        if fld == replace_with and prompt[replace_with]:
                             for x in PPP_REPLACEMENTS_FIELDS:
                                 if to_replace.startswith(x):
                                     if x == 'label':
@@ -396,7 +420,7 @@ class OdkPrompt:
 
             if 'choice names' in \
                     TEMPLATES[template]['other_specific_exclusions']:
-                if key == 'input_field' and prompt['simple_type'] in \
+                if fld == 'input_field' and prompt['simple_type'] in \
                         ('select_one', 'select_multiple'):
                     prompt['input_field'] = [
                         {'name': '', 'value': '', 'label': i['label']}
@@ -550,15 +574,16 @@ class OdkPrompt:
         Returns:
             dict: The text from all parts of the prompt.
         """
-        # TODO: Refactor so that the dict row is only looped through once.
-        prompt = self._format_media_labels(self.row)
-        prompt = self._set_grouped_media_field(prompt)
-        prompt = self._set_descriptive_metadata(prompt)
-        prompt = self._reformat_default_lang_vars(prompt, lang)
-        prompt = self._truncate_fields(prompt)
-        prompt = self._reformat_double_line_breaks(prompt)
-        prompt = self._streamline_constraint_message(prompt)
-        prompt = self.extract_question_numbers(prompt)
+        prompt = OdkPrompt._format_media_labels(self.row)
+        prompt = OdkPrompt._set_grouped_media_field(prompt)
+        prompt = OdkPrompt._set_descriptive_metadata(prompt)
+        prompt = OdkPrompt._reformat_default_lang_vars(prompt, lang)
+        prompt = OdkPrompt._truncate_fields(prompt)
+        prompt = OdkPrompt._reformat_double_line_breaks(prompt)
+        prompt = OdkPrompt._streamline_constraint_message(prompt)
+        prompt = OdkPrompt.extract_question_numbers(prompt)
+        if 'style' in kwargs and kwargs['style'] != 'old':
+            prompt = OdkPrompt._remove_question_nums_from_labels(prompt)
 
         prompt['input_field'] = self.to_html_input_field(lang)
 
@@ -566,9 +591,10 @@ class OdkPrompt:
             prompt['is_section_header'] = True
         if 'bottom_border' in kwargs:
             prompt['bottom_border'] = True
-        if 'template' in kwargs:
-            prompt = \
-                self.handle_template_presets(prompt, lang, kwargs['template'])
+        kwargs['template'] = kwargs['template'] if 'template' in kwargs \
+            else 'standard'
+        prompt = \
+            OdkPrompt.handle_template_presets(prompt, lang, kwargs['template'])
         return prompt
 
     @staticmethod

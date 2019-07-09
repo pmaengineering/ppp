@@ -19,6 +19,9 @@ Both tools are open source and free to install. You can also use it online with 
 ![demo.png](docs/demo.png)
 
 ## Documentation for end users
+### Installation  
+`pip install odk-ppp`
+
 ### CLI
 #### Positional Arguments
 | Argument | Description |

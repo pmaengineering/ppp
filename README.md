@@ -60,3 +60,76 @@ Both tools are open source and free to install. You can also use it online with 
 - Clone: `git clone <url>`
 - Install dependencies: `cd ppp && pip3 install -r requirements.txt`
 - Test to make sure everything's ok: `make test`
+
+---
+
+# PPP
+
+## A propos
+
+PPP est un projet visant à aider les utilisateurs à convertir les fichiers Excel XlsForm en des formats imprimables, plus lisibles par l'homme, appelés communément "questionnaires sur papier". Officiellement, PPP signifie "Pretty PDF Printer", mais d'autres formats sont supportés. Le projet consiste en :
+
+- une [application Web] (https://github.com/pma-2020/ppp)
+- Un [outil de ligne de commande] (https://github.com/pma-2020/ppp-web)
+
+Les deux outils sont open source et gratuits à installer. Vous pouvez également l'utiliser en ligne sans aucune installation nécessaire, à l'adresse http://ppp.pma2020.org.
+
+#### Echantillons
+- Fichier Excel source: [demo.xlsx] (docs / demo.xlsx)
+- Converti en PDF: [demo.pdf] (docs / demo.pdf)
+- Converti en DOC: [demo.doc] (docs / demo.doc)
+- enregistré manuellement au format DOCX à partir de DOC: [demo.docx] (docs / demo.docx)
+- Converti en HTML: [demo.html] (docs / demo.html)
+
+
+** Exemple Capture d’écran **
+
+! [demo.png] (docs / demo.png)
+
+## Documentation pour les utilisateurs finaux
+### Installation
+`pip install odk-ppp`
+
+### CLI
+#### Arguments de position
+| Argument | Description |
+|: --------- |: ------------ |
+| xlsxfile | Chemin d'accès à la source XLSForm. |
+
+#### Options
+| Drapeau court | Drapeau long | Description |
+|: ----------- |: ---------- |: ------------ |
+| -h | --help | Afficher ce message d'aide et quitter.
+| -d | --debug | Active le mode débogage. Actuellement, ne fonctionne que pour le format 'html'. La seule caractéristique du mode débogage est qu’il imprime une représentation JSON sous forme de chaîne de sondage sur la console JavaScript.
+| -H | --highlight | Active la mise en évidence de différentes parties des composants de l’enquête. Utile pour évaluer le positionnement.
+| -o | --outpath | Chemin pour écrire la sortie. Si cet argument n'est pas fourni, STDOUT est utilisé. Options: `-o OUPATH`.
+
+| -l | --language | Langue dans laquelle écrire la version papier. S'il n'est pas spécifié, le ‘langage’' par défaut’ dans les ‘’settings’’ de la  feuille de calcul  est utilisé. Si cela n'est pas spécifié et qu'il existe plusieurs langues  dans la XLSForm, la langue qui vient en premier par ordre alphabétique sera utilisée. Option: `-l LANGUAGE`.
+
+| -f | --format | les formats de fichier.HTML et DOC sont des formats pris en charge. PDF n'est pas pris en charge, mais vous pouvez facilement  de convertir un fichier PPP .doc en PDF en utilisant 
+* wkhtmltopdf * (https://wkhtmltopdf.org/). Si cet indicateur ( flag) n'est pas fourni, la sortie est HTML par défaut. Option `-f {html, doc}`.
+
+| -i | --input-replacement | L'ajout de cette option activera le remplacement des options de choix visibles dans les champs de saisie. Au lieu des options de choix normales, tout ce qui a été placé dans le champ 'ppp_input' du XlsForm sera utilisé. C'est normalement pour cacher les informations sensibles.
+
+| -e | --exclusion | L'ajout de cette option activera l'exclusion de certains composants du formulaire d'enquête du formulaire rendu. Cela peut être utilisé pour supprimer du formulaire des éléments d'implémentation spécifiques à ODK qui ne sont utiles que pour les développeurs et peuvent également être utilisés pour supprimer complètement les informations sensibles sans aucun remplacement.
+
+| -r | --hr-relevant | L'ajout de cette option activera l'affichage du texte «relevant» lisible par l'homme, plutôt que la logique codifiée , qui exige beaucoup de syntaxe,.
+| -c | --hr-contrainte | L'ajout de cette option basculera l'affichage du texte de «constraint» lisible par l'homme, plutôt que la logique codée, très lourde en syntaxe du XlsForm d’origine.
+
+| -C | --no-contrainte | L'ajout de cette option activera la suppression de toutes les contraintes du formulaire rendu.
+
+| -t | --text-remplacements | L'ajout de cette option basculera les remplacements de texte, comme indiqué dans la feuille de calcul 'text_replacements' du XlsForm. La fonction la plus courante du remplacement de texte consiste à rendre davantage de noms de variables lisibles par l’homme, mais elle peut également être utilisée pour supprimer des informations sensibles ou pour ajouter de la concision / clarté si nécessaire.
+| -p | --preset | Choisissez parmi un préréglage d'options groupées. Le préréglage 'developer' rend le formulaire le plus similaire possible au XlsForm d'origine. Le préréglage «internal» est plus lisible par l’homme mais n’est pas dépourvu d’informations sensibles. L'option "public" est similaire à l'option "internal", mais sans informations sensibles supprimées. Options: `-p {public, internal, developper, standard}
+
+
+#### Examples d'usage
+
+`python3 -m ppp myXlsForm.xlsx`
+> * Imprime des XlsForm convertis en HTML avec les paramètres par défaut sur la console *
+
+> `python3 -m ppp mon XlsForm.xlsx -l Français-f doc -p standard> myXlsForm.doc`
+> * Convertit un fichier ODK Excel en un fichier .doc lisible en MS Word (c'est vraiment du HTML sous le capot), avec le préréglage de "standard" et la langue définie au  Français *
+
+> `python3 -m ppp monXlsForm1.xlsx monXlsForm2.xlsx -l Luganda Lusoga anglais -f doc pdf -p standard détaillé`
+> * Enregistre un document pour chaque combinaison de formulaires et d'options passés, dans ce cas :
+** 2 ** fichiers d'entrée \ * ** 3 ** langues \ * ** 2 ** formats de fichier \ * ** 2 ** formats de détail , ou ** 24 ** fichiers de sortie *

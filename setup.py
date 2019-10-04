@@ -54,14 +54,15 @@ setup(
         'ppp': 'ppp'
     },
     package_data={
-        'ppp': get_pkg_data(pkg_name='ppp',
-                            data_dirs=['templates'],
-                            extensions=['html', 'css'])
+        'ppp': get_pkg_data(
+            pkg_name='ppp',
+            data_dirs=['templates'],
+            extensions=['html', 'css'])
     },
     license='LICENSE.txt',
-    description='Converts XlsForm Excel files (ODK, SurveyCTO, etc) into '
-                'readable formats.',
+    description='Converts XlsForms into readable formats.',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     install_requires=[
         'Jinja2>=2.9.6',
         'pmix>=0.2.2'

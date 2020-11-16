@@ -41,7 +41,7 @@ class OdkGroup:
 
     def __repr__(self):
         """Print representation."""
-        return "<OdkGroup {}: {}>".format(self.row['name'], self.data)
+        return "<OdkGroup {}: {}>".format(self.row["name"], self.data)
 
     @staticmethod
     def format_header(header):
@@ -56,9 +56,9 @@ class OdkGroup:
         Returns:
             dict: A reformatted representation.
         """
-        header['in_group'] = True
-        header['simple_type'] = header['type']
-        header['is_group_header'] = True
+        header["in_group"] = True
+        header["simple_type"] = header["type"]
+        header["is_group_header"] = True
         return header
 
     def add(self, row):
@@ -102,7 +102,7 @@ class OdkGroup:
             str: The text for this group.
         """
         obj_texts = (d.to_text(lang) for d in self.data)
-        sep = '\n\n{}\n\n'.format(' -' * 25)
+        sep = "\n\n{}\n\n".format(" -" * 25)
         group_text = sep.join(obj_texts)
         return group_text
 
@@ -115,12 +115,13 @@ class OdkGroup:
         Returns:
             str: A rendered html concatenation of component templates.
         """
-        html = ''
+        html = ""
         # pylint: disable=no-member
 
         # - Render header
-        html += TEMPLATE_ENV.get_template('content/group/group-opener.html')\
-            .render(**kwargs, settings=kwargs)
+        html += TEMPLATE_ENV.get_template("content/group/group-opener.html").render(
+            **kwargs, settings=kwargs
+        )
         header = self.format_header(self.row)
 
         html += OdkPrompt(header).to_html(lang, **kwargs)
@@ -132,8 +133,8 @@ class OdkGroup:
                 continue
 
             if isinstance(i, OdkPrompt):
-                i.row['in_repeat'] = self.in_repeat
-                i.row['in_group'] = True
+                i.row["in_repeat"] = self.in_repeat
+                i.row["in_group"] = True
                 html += i.to_html(lang, **kwargs)
             elif isinstance(i, OdkTable):
                 i.in_repeat = self.in_repeat
@@ -141,7 +142,8 @@ class OdkGroup:
 
         # - Render footer
         # pylint: disable=no-member
-        html += TEMPLATE_ENV.get_template('content/group/group-closer.html')\
-            .render(**kwargs, settings=kwargs)
+        html += TEMPLATE_ENV.get_template("content/group/group-closer.html").render(
+            **kwargs, settings=kwargs
+        )
 
         return html

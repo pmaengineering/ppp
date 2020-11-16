@@ -1,9 +1,14 @@
 """Module for the OdkPrompt class."""
 from ppp.config import get_template_env
-from ppp.definitions.constants import TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
-    TEMPLATES, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
-    PPP_REPLACEMENTS_FIELDS
+from ppp.definitions.constants import (
+    TRUNCATABLE_FIELDS,
+    LANGUAGE_DEPENDENT_FIELDS,
+    LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS,
+    TEMPLATES,
+    IGNORE_RELEVANT_TOKEN,
+    RELEVANCE_FIELD_TOKENS,
+    PPP_REPLACEMENTS_FIELDS,
+)
 from ppp.odkabstractformelement import OdkAbstractFormElement
 
 TEMPLATE_ENV = None
@@ -27,6 +32,7 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
             section header.
 
     """
+
     def __init__(self, row):
         """Initialize the XLSForm prompt (a single row of a specific type).
 
@@ -37,9 +43,8 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
                 `visible_non_response_types`.
         """
         super().__init__(row)
-        self.odktype = self.row['simple_type']
-        self.is_section_header = True if self.row['name'].startswith('sect_') \
-            else False
+        self.odktype = self.row["simple_type"]
+        self.is_section_header = True if self.row["name"].startswith("sect_") else False
 
     @staticmethod
     def truncate_text(text):
@@ -52,7 +57,7 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
             str: Truncated text.
         """
         if len(text) > 100:
-            text = text[0:98] + ' …'
+            text = text[0:98] + " …"
         return text
 
     @staticmethod
@@ -69,10 +74,11 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            if True in [k.startswith(x) for x in
-                        LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS]:
+            if True in [
+                k.startswith(x) for x in LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS
+            ]:
                 if v:
-                    row[k] = v.split('\n\n')
+                    row[k] = v.split("\n\n")
         return row
 
     @staticmethod
@@ -92,10 +98,10 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         new_row = row.copy()
         if lang:
             for field in LANGUAGE_DEPENDENT_FIELDS:
-                if field + '::' + lang in new_row:
-                    new_row[field] = new_row[field + '::' + lang]
-                elif field + ':' + lang in new_row:
-                    new_row[field] = new_row[field + ':' + lang]
+                if field + "::" + lang in new_row:
+                    new_row[field] = new_row[field + "::" + lang]
+                elif field + ":" + lang in new_row:
+                    new_row[field] = new_row[field + ":" + lang]
         return new_row
 
     def _truncate_fields(self, row):
@@ -110,7 +116,7 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         new_row = row.copy()
         for field in TRUNCATABLE_FIELDS:
             if field in new_row:
-                new_row[field + '_original'] = new_row[field]
+                new_row[field + "_original"] = new_row[field]
                 new_row[field] = self.truncate_text(new_row[field])
         return new_row
 
@@ -132,7 +138,7 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         for x in RELEVANCE_FIELD_TOKENS:
             if x in prompt:
                 if prompt[x] == IGNORE_RELEVANT_TOKEN:
-                    prompt[x] = ''
+                    prompt[x] = ""
         return prompt
 
     @staticmethod
@@ -145,10 +151,9 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         Returns
             dict: Reformatted representation.
         """
-        prompt['is_section'] = False
-        if prompt['simple_type'] == 'note' \
-                and prompt['name'].startswith('sect_'):
-            prompt['is_section'] = True
+        prompt["is_section"] = False
+        if prompt["simple_type"] == "note" and prompt["name"].startswith("sect_"):
+            prompt["is_section"] = True
         return prompt
 
     @staticmethod
@@ -166,33 +171,34 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         # TODO: (jef 2017.09.24) Human readable: hint variables.
         # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
         for key in prompt:
-            for exclusion in TEMPLATES[template]['field_exclusions']:
+            for exclusion in TEMPLATES[template]["field_exclusions"]:
                 if key.startswith(exclusion):
-                    prompt[key] = ''
+                    prompt[key] = ""
                     continue
 
             if lang:
-                for to_replace in TEMPLATES[template]['field_replacements']:
-                    replace_withs = ['ppp_'+to_replace+'::'+lang,
-                                     'ppp_'+to_replace+':'+lang]
+                for to_replace in TEMPLATES[template]["field_replacements"]:
+                    replace_withs = [
+                        "ppp_" + to_replace + "::" + lang,
+                        "ppp_" + to_replace + ":" + lang,
+                    ]
                     for replace_with in replace_withs:
                         if key == replace_with and prompt[replace_with]:
                             for x in PPP_REPLACEMENTS_FIELDS:
                                 if to_replace.startswith(x):
-                                    if x == 'label':
-                                        prompt[to_replace] = \
-                                            [prompt[replace_with]]
+                                    if x == "label":
+                                        prompt[to_replace] = [prompt[replace_with]]
                                     elif x in RELEVANCE_FIELD_TOKENS:
-                                        prompt[to_replace] = \
-                                            prompt[replace_with]
+                                        prompt[to_replace] = prompt[replace_with]
 
-            if 'choice names' \
-                    in TEMPLATES[template]['other_specific_exclusions']:
-                if key == 'input_field' and prompt['simple_type'] in \
-                        ('select_one', 'select_multiple'):
-                    prompt['input_field'] = [
-                        {'name': '', 'value': '', 'label': i['label']}
-                        for i in prompt['input_field']
+            if "choice names" in TEMPLATES[template]["other_specific_exclusions"]:
+                if key == "input_field" and prompt["simple_type"] in (
+                    "select_one",
+                    "select_multiple",
+                ):
+                    prompt["input_field"] = [
+                        {"name": "", "value": "", "label": i["label"]}
+                        for i in prompt["input_field"]
                     ]
 
         OdkAbstractPrompt._ignore_relevant(prompt)
@@ -214,10 +220,10 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         value = None
         try:
             if lang:
-                if '{}::{}'.format(field, lang) in self.row:
-                    key = '{}::{}'.format(field, lang)
+                if "{}::{}".format(field, lang) in self.row:
+                    key = "{}::{}".format(field, lang)
                 else:
-                    key = '{}:{}'.format(field, lang)
+                    key = "{}:{}".format(field, lang)
                 value = self.row[key]
             else:
                 keys = (k for k in self.row if k.startswith(field))
@@ -239,10 +245,10 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
             str: The text representation of the relevant.
         """
         formatted_relevant = None
-        relevant_text = self.text_field('relevant_text', lang)
+        relevant_text = self.text_field("relevant_text", lang)
         if relevant_text:
             # formatted_relevant = '[{}]'.format(relevant_text).rjust(50)
-            formatted_relevant = '{}'.format(relevant_text).rjust(50)
+            formatted_relevant = "{}".format(relevant_text).rjust(50)
         return formatted_relevant
 
     def to_dict(self, lang, **kwargs):
@@ -262,12 +268,11 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         prompt = self._reformat_double_line_breaks(prompt)
 
         if self.is_section_header:
-            prompt['is_section_header'] = True
-        if 'bottom_border' in kwargs:
-            prompt['bottom_border'] = True
-        if 'template' in kwargs:
-            prompt = \
-                self.handle_template_presets(prompt, lang, kwargs['template'])
+            prompt["is_section_header"] = True
+        if "bottom_border" in kwargs:
+            prompt["bottom_border"] = True
+        if "template" in kwargs:
+            prompt = self.handle_template_presets(prompt, lang, kwargs["template"])
         return prompt
 
     @staticmethod
@@ -281,14 +286,13 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         Returns:
             dict: Modified settings based on keyword arguments.
         """
-        if 'template' not in kwargs:
+        if "template" not in kwargs:
             return kwargs
-        for k, v in TEMPLATES[kwargs['template']]['render_settings']['html']\
-                .items():
+        for k, v in TEMPLATES[kwargs["template"]]["render_settings"]["html"].items():
             kwargs[k] = v
-        if 'language' not in kwargs:
+        if "language" not in kwargs:
             # noinspection PyTypeChecker
-            kwargs['language'] = lang
+            kwargs["language"] = lang
         return kwargs
 
     def to_html(self, lang, **kwargs):
@@ -305,5 +309,6 @@ class OdkAbstractPrompt(OdkAbstractFormElement):
         settings = self.html_options(lang=lang, **kwargs)
         question = self.to_dict(lang=lang, **settings)
         # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=question, **settings)
+        return TEMPLATE_ENV.get_template("content/content-tr-base.html").render(
+            question=question, **settings
+        )

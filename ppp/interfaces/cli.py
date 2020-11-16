@@ -22,20 +22,26 @@ def _required_fields(parser):
     """
     # File
     #   type:'string'
-    file_help = 'Path to source XLSForm(s).'
-    parser.add_argument('xlsxfiles', nargs='+', help=file_help)
-    templates_help = \
-        ('Select from a template of bundled options. The \'developer\' or '
-         '\'detailed\' template'
-         ' renders a form that is the most similar to the original XlsForm. '
-         'The \'internal\' template is more human readable but is not stripped '
-         'of sensitive information. The \'public\' option is like the '
-         '\'internal\' optoin, only with sensitive information removed.')
-    parser.add_argument('-p', '--template', nargs='+',
-                        choices=('standard', 'detailed'),
-                        # choices=('public', 'internal', 'standard',
-                        # 'detailed')  # TODO
-                        default='standard', help=templates_help)
+    file_help = "Path to source XLSForm(s)."
+    parser.add_argument("xlsxfiles", nargs="+", help=file_help)
+    templates_help = (
+        "Select from a template of bundled options. The 'developer' or "
+        "'detailed' template"
+        " renders a form that is the most similar to the original XlsForm. "
+        "The 'internal' template is more human readable but is not stripped "
+        "of sensitive information. The 'public' option is like the "
+        "'internal' optoin, only with sensitive information removed."
+    )
+    parser.add_argument(
+        "-p",
+        "--template",
+        nargs="+",
+        choices=("standard", "detailed"),
+        # choices=('public', 'internal', 'standard',
+        # 'detailed')  # TODO
+        default="standard",
+        help=templates_help,
+    )
     return parser
 
 
@@ -50,29 +56,41 @@ def _non_template_optional_fields(parser):
     """
     # Language
     #   type='single selection', default:''
-    language_help = \
-        ('Language to write the paper version in. If not specified, the '
-         '\'default_language\' in the \'settings\' worksheet is used. If that '
-         'is not specified and more than one language is in the XLSForm, the '
-         'language that comes first alphabetically will be used.')
-    parser.add_argument('-l', '--language', nargs='+', help=language_help)
+    language_help = (
+        "Language to write the paper version in. If not specified, the "
+        "'default_language' in the 'settings' worksheet is used. If that "
+        "is not specified and more than one language is in the XLSForm, the "
+        "language that comes first alphabetically will be used."
+    )
+    parser.add_argument("-l", "--language", nargs="+", help=language_help)
 
     # Output Format
     #   type='single selection', default:'html'
-    format_help = ('File format. HTML and DOC are supported formats. PDF is '
-                   'not supported, but one can easily convert a PPP .doc file '
-                   'into PDF via the use of WKHTMLtoPDF '
-                   '(https://wkhtmltopdf.org/).')
-    parser.add_argument('-f', '--format', nargs='+',
-                        choices=SUPPORTED_FORMATS, default='doc',
-                        help=format_help)
+    format_help = (
+        "File format. HTML and DOC are supported formats. PDF is "
+        "not supported, but one can easily convert a PPP .doc file "
+        "into PDF via the use of WKHTMLtoPDF "
+        "(https://wkhtmltopdf.org/)."
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        nargs="+",
+        choices=SUPPORTED_FORMATS,
+        default="doc",
+        help=format_help,
+    )
     # Choose style
     #   type='single selection', default:'default'
-    style_help = 'Choose style to render results.'
-    parser.add_argument('-t', '--style', nargs='+',
-                        choices=('default', 'old'),
-                        default='default',
-                        help=style_help)
+    style_help = "Choose style to render results."
+    parser.add_argument(
+        "-t",
+        "--style",
+        nargs="+",
+        choices=("default", "old"),
+        default="default",
+        help=style_help,
+    )
     return parser
 
 
@@ -172,24 +190,30 @@ def _cli_only_fields(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    debug_help = \
-        'Turns on debug mode. Currently only works for \'html\' format. Only' \
-        ' feature of debug mode currently is that it prints a stringified ' \
-        'JSON representation of survey to the JavaScript console.'
-    parser.add_argument('-d', '--debug', action='store_true', help=debug_help)
+    debug_help = (
+        "Turns on debug mode. Currently only works for 'html' format. Only"
+        " feature of debug mode currently is that it prints a stringified "
+        "JSON representation of survey to the JavaScript console."
+    )
+    parser.add_argument("-d", "--debug", action="store_true", help=debug_help)
 
     # Survey Form Component Highlighting
-    highlighting_help = 'Turns on highlighting of various portions of survey' \
-                        ' components. Useful to assess positioning.'
-    parser.add_argument('-H', '--highlight', action='store_true',
-                        help=highlighting_help)
+    highlighting_help = (
+        "Turns on highlighting of various portions of survey"
+        " components. Useful to assess positioning."
+    )
+    parser.add_argument(
+        "-H", "--highlight", action="store_true", help=highlighting_help
+    )
 
     # Out path
-    out_help = ('Path (including file name) to save converted file if 1 file, '
-                'else path to directory for multiple files, in which case file'
-                ' names will be automatically generated.\n\nIf this argument '
-                'is not supplied, then STDOUT is used.')
-    parser.add_argument('-o', '--outpath', help=out_help)
+    out_help = (
+        "Path (including file name) to save converted file if 1 file, "
+        "else path to directory for multiple files, in which case file"
+        " names will be automatically generated.\n\nIf this argument "
+        "is not supplied, then STDOUT is used."
+    )
+    parser.add_argument("-o", "--outpath", help=out_help)
     return parser
 
 
@@ -202,8 +226,15 @@ def _add_arguments(parser):
     Returns:
         ArgumentParser: Argeparse object.
     """
-    return chain(parser, funcs=[_cli_only_fields, _non_template_optional_fields,
-                                _template_optional_fields, _required_fields])
+    return chain(
+        parser,
+        funcs=[
+            _cli_only_fields,
+            _non_template_optional_fields,
+            _template_optional_fields,
+            _required_fields,
+        ],
+    )
 
 
 def cli():
@@ -217,31 +248,36 @@ def cli():
         # Creates a 'myFile.html' in English with component highlighting.
         python3 -m ppp myFile.xlsx -l 'English' -h > myFile.html
     """
-    prog_desc = 'Convert XLSForm to Paper version.'
+    prog_desc = "Convert XLSForm to Paper version."
 
     argeparser = ArgumentParser(description=prog_desc)
     parser = _add_arguments(copy(argeparser))
     args = parser.parse_args()
 
     if args.highlight and args.format and args.format not in SUPPORTED_FORMATS:
-        msg = 'Can only specify highlighting when using the following ' \
-              'formats: \'html\', \'pdf\'.'
+        msg = (
+            "Can only specify highlighting when using the following "
+            "formats: 'html', 'pdf'."
+        )
         raise OdkFormError(msg)
 
     try:
-        run(files=list(args.xlsxfiles),
+        run(
+            files=list(args.xlsxfiles),
             languages=[l for l in args.language] if args.language else [None],
             format=args.format,
             debug=args.debug,
             highlight=args.highlight,
             template=args.template,
             style=args.style,
-            outpath=args.outpath)
+            outpath=args.outpath,
+        )
     except OdkException as err:
-        err = 'An error occurred while attempting to convert \'{}\':\n{}'\
-            .format(args.xlsxfiles, err)
+        err = "An error occurred while attempting to convert '{}':\n{}".format(
+            args.xlsxfiles, err
+        )
         print(err, file=stderr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

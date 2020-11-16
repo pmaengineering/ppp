@@ -1,5 +1,6 @@
 """Module for the OdkRepeat class."""
 import textwrap
+
 # from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
@@ -40,7 +41,7 @@ class OdkRepeat:
 
     def __repr__(self):
         """Print representation of instance."""
-        return "<OdkRepeat {}: {}>".format(self.row['name'], self.data)
+        return "<OdkRepeat {}: {}>".format(self.row["name"], self.data)
 
     @staticmethod
     def render_header(i, lang, **kwargs):
@@ -60,11 +61,12 @@ class OdkRepeat:
             str: A rendered html representation of repeat group header.
         """
         # pylint: disable=no-member
-        html = TEMPLATE_ENV.get_template('content/repeat/repeat-opener.html')\
-            .render(**kwargs, settings=kwargs)
-        i['simple_type'] = i['type']
-        i['in_repeat'] = True
-        i['is_repeat_header'] = True
+        html = TEMPLATE_ENV.get_template("content/repeat/repeat-opener.html").render(
+            **kwargs, settings=kwargs
+        )
+        i["simple_type"] = i["type"]
+        i["in_repeat"] = True
+        i["is_repeat_header"] = True
         html += OdkPrompt(i).to_html(lang, **kwargs, settings=kwargs)
         return html
 
@@ -78,8 +80,7 @@ class OdkRepeat:
             str: A rendered html representation of repeat group footer.
         """
         # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/repeat/repeat-closer.html')\
-            .render()
+        return TEMPLATE_ENV.get_template("content/repeat/repeat-closer.html").render()
 
     def add(self, obj):
         """Add XLSForm object to repeat.
@@ -101,9 +102,9 @@ class OdkRepeat:
             str: The text for this repeat.
         """
         obj_texts = (d.to_text(lang) for d in self.data)
-        sep = '\n\n{}\n\n'.format('=' * 50)
+        sep = "\n\n{}\n\n".format("=" * 50)
         repeat_text = sep.join(obj_texts)
-        wrapped = textwrap.indent(repeat_text, '|  ', lambda x: True)
+        wrapped = textwrap.indent(repeat_text, "|  ", lambda x: True)
         return wrapped
 
     def to_html(self, lang, **kwargs):
@@ -118,7 +119,7 @@ class OdkRepeat:
         Returns:
             str: A rendered html concatenation of component templates.
         """
-        html = ''
+        html = ""
 
         # - Render header
         html += self.render_header(self.row, lang, **kwargs)
@@ -129,7 +130,7 @@ class OdkRepeat:
                 continue
 
             if isinstance(i, OdkPrompt):
-                i.row['in_repeat'] = True
+                i.row["in_repeat"] = True
                 html += i.to_html(lang, **kwargs)
             elif isinstance(i, OdkGroup):
                 i.in_repeat = True

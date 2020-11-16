@@ -2,6 +2,7 @@
 # from ppp.config import TEMPLATE_ENV
 from ppp.config import get_template_env
 from ppp.definitions.utils import exclusion
+
 # from ppp.definitions.error import OdkformError
 
 TEMPLATE_ENV = None
@@ -33,8 +34,9 @@ class OdkTable:
 
     def __repr__(self):
         """Print representation of instance."""
-        return '<OdkTable w/ Header \'{}\': {}>'\
-            .format(self.data[0].row['name'], self.data)
+        return "<OdkTable w/ Header '{}': {}>".format(
+            self.data[0].row["name"], self.data
+        )
 
     def add(self, odkprompt):
         """Add a row of data from XLSForm.
@@ -68,14 +70,14 @@ class OdkTable:
             **kwargs: Keyword arguments
         """
         for i in self.data:
-            i.row['in_group'] = True
+            i.row["in_group"] = True
             i.row = self.format_row(prompt=i, lang=lang, **kwargs)
         self.header = self.data[0]
         self.contents = self.data[1:]
 
         # - De-list labels
         for con in self.contents:
-            con.row['label'] = con.row['label'][0] if con.row['label'] else ''
+            con.row["label"] = con.row["label"][0] if con.row["label"] else ""
 
     # Temporary noinspection until method is added.
     # noinspection PyUnusedLocal
@@ -121,7 +123,7 @@ class OdkTable:
         # option_labels))
         # body = '\n'.join(full_prompts)
         # result = '\n'.join((choice_row, body))
-        result = 'ODK TABLE TEXT'  # Placeholder
+        result = "ODK TABLE TEXT"  # Placeholder
         return result
 
     def to_html(self, lang, **kwargs):
@@ -148,5 +150,6 @@ class OdkTable:
             table.append(i.row)
 
         # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/table/table.html')\
-            .render(table=table, lang=lang, **kwargs, settings=kwargs)
+        return TEMPLATE_ENV.get_template("content/table/table.html").render(
+            table=table, lang=lang, **kwargs, settings=kwargs
+        )

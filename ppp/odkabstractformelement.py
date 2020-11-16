@@ -10,12 +10,12 @@ class OdkAbstractFormElement:
 
     def to_html(self, *args, **kwargs):
         """Convert to html."""
-        return ''
+        return ""
 
     def to_text(self, *args, **kwargs):
         """Convert to text."""
-        return ''
+        return ""
 
     def __repr__(self):
         """Return a console string representation."""
-        return '<' + self.__class__.__name__ + ' ' + self.row['name'] + '>'
+        return "<" + self.__class__.__name__ + " " + self.row["name"] + ">"

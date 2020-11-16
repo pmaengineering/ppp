@@ -20,19 +20,20 @@ def exclusion(item, settings):
     Returns
         bool: True if item should be excluded, else False.
     """
-    config = {
-        'error_on_no_exclude_column': False
-    }
+    config = {"error_on_no_exclude_column": False}
     exclude = False
 
     try:
-        if 'exclusion' in settings or 'template' in settings \
-                and TEMPLATES[settings['template']]['general_exclusions']:
+        if (
+            "exclusion" in settings
+            or "template" in settings
+            and TEMPLATES[settings["template"]]["general_exclusions"]
+        ):
 
-            if hasattr(item, 'row'):
-                item_data = 'row'
-            elif hasattr(item, 'row'):
-                item_data = 'row'
+            if hasattr(item, "row"):
+                item_data = "row"
+            elif hasattr(item, "row"):
+                item_data = "row"
             else:
                 # Table; Rather than explicitly exluding a table, the group
                 # itself should be excluded.
@@ -40,18 +41,20 @@ def exclusion(item, settings):
 
             token = EXCLUSION_TOKEN.lower()
             try:
-                exclude = getattr(item, item_data)['ppp_excludes'].lower() == token
+                exclude = getattr(item, item_data)["ppp_excludes"].lower() == token
             except TypeError:
                 pass
 
         return exclude
     except KeyError:
         err = True
-        if not config['error_on_no_exclude_column'] and 'template' in settings:
+        if not config["error_on_no_exclude_column"] and "template" in settings:
             err = False
         if err:
-            msg = 'If using exclusion option or template that uses ' \
-                  'exclusions, XlsForm must have field named \'ppp_excludes\'.'
+            msg = (
+                "If using exclusion option or template that uses "
+                "exclusions, XlsForm must have field named 'ppp_excludes'."
+            )
             raise KeyError(msg)
         else:
             return exclude

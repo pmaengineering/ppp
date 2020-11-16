@@ -29,6 +29,7 @@ def immutable_chain(_input, funcs):
         Recusive call if any functions remaining, else the altered input.
     """
     from copy import copy
+
     new_functions = copy(funcs)
     new_input = new_functions.pop()(copy(_input)) if funcs else None
     return chain(new_input, new_functions) if funcs else copy(_input)

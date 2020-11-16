@@ -17,6 +17,7 @@ Functions
 """
 import os
 from copy import copy
+
 try:
     # noinspection PyUnresolvedReferences
     from signal import signal, SIGPIPE, SIG_DFL
@@ -46,19 +47,18 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
         OdkChoicesError: Choice or choice list related.
         OdkFormError: General form related exception.
     """
-    
-    set_template_env(kwargs['style'] if 'style' in kwargs else 'default')
+
+    set_template_env(kwargs["style"] if "style" in kwargs else "default")
 
     form = OdkForm.from_file(in_file)
 
     try:
         output = None
-        output_format = \
-            kwargs['format'] if 'format' in kwargs else 'html'
-        if output_format == 'text':
+        output_format = kwargs["format"] if "format" in kwargs else "html"
+        if output_format == "text":
             output = form.to_text(lang=language, **kwargs)
 
-        elif output_format in ('html', 'doc'):
+        elif output_format in ("html", "doc"):
             output = form.to_html(lang=language, **kwargs)
 
         if outpath:
@@ -66,19 +66,23 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
                 os.makedirs(outpath)
             if os.path.isdir(outpath):
                 base_filename = os.path.basename(os.path.splitext(in_file)[0])
-                lang = '-' + language if language else ''
-                options_affix = '-' + kwargs['template'] \
-                    if 'template' in kwargs and kwargs['template'] \
-                       not in ('standard', 'minimal') else ''
-                out_file = '{}{}{}{}.{}'.format(outpath, base_filename, lang,
-                                                options_affix, output_format)
+                lang = "-" + language if language else ""
+                options_affix = (
+                    "-" + kwargs["template"]
+                    if "template" in kwargs
+                    and kwargs["template"] not in ("standard", "minimal")
+                    else ""
+                )
+                out_file = "{}{}{}{}.{}".format(
+                    outpath, base_filename, lang, options_affix, output_format
+                )
 
                 if isinstance(out_file, list):
-                    if out_file[0] == '/':
+                    if out_file[0] == "/":
                         out_file = out_file[1:]
             else:
                 out_file = outpath
-            with open(out_file, mode='w', encoding='utf-8') as file:
+            with open(out_file, mode="w", encoding="utf-8") as file:
                 file.write(output)
             print(out_file)
         else:
@@ -91,9 +95,11 @@ def convert_file(in_file, language=None, outpath=None, **kwargs):
         if str(err):
             raise InvalidLanguageException(err)
         elif language is None:
-            msg = 'InvalidLanguageException: An unknown error occurred when ' \
-                  'attempting to convert form. If a language was not ' \
-                  'supplied, please supply and try again.'
+            msg = (
+                "InvalidLanguageException: An unknown error occurred when "
+                "attempting to convert form. If a language was not "
+                "supplied, please supply and try again."
+            )
             raise InvalidLanguageException(msg)
     except OdkException as err:
         raise OdkException(err)
@@ -109,11 +115,12 @@ def enumerate_combos(dict_with_lists):
         list: A list of dicts, where each list in dict_of_lists has been
         de-listed to a single value.
     """
-    dict_with_only_lists = \
-        OrderedDict({k: v for k, v in dict_with_lists.items()
-                     if isinstance(v, list)})
-    dict_without_lists = \
-        {k: v for k, v in dict_with_lists.items() if not isinstance(v, list)}
+    dict_with_only_lists = OrderedDict(
+        {k: v for k, v in dict_with_lists.items() if isinstance(v, list)}
+    )
+    dict_without_lists = {
+        k: v for k, v in dict_with_lists.items() if not isinstance(v, list)
+    }
 
     ds1 = dict_with_only_lists.values()
     ds2 = [i for i in ds1]
@@ -148,11 +155,11 @@ def run(files, languages=[None], outpath=None, **kwargs):
     num_output = num_args(files) * num_args(languages) * num_args(combos)
 
     if num_output > 1 or outpath:
-        print('Creating files.')
+        print("Creating files.")
 
     for file in files:
         if num_output > 1 and not outpath:
-            _outpath = os.path.dirname(file) + '/'
+            _outpath = os.path.dirname(file) + "/"
         for language in languages:
             for combo in combos:
                 convert_file(file, language, outpath=_outpath, **combo)

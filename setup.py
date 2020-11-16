@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 
-version = '1.3.0'
+version = '1.4.0'
 packages = find_packages(exclude=['test'])
 
 
@@ -65,6 +65,6 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         'Jinja2>=2.9.6',
-        'pmix>=0.2.2'
+        'pmix>=0.7.0'
     ]
 )

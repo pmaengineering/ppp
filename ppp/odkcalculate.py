@@ -23,4 +23,4 @@ class OdkCalculate(OdkAbstractPrompt):
         if self.renderable:
             return super(OdkCalculate, self).to_html(lang, **kwargs)
         else:
-            return ''
+            return ""

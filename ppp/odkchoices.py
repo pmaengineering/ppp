@@ -23,12 +23,11 @@ class OdkChoices:
 
     def __repr__(self):
         """Print representation of instance."""
-        return "<Odkchoices '{}(len: {})'>".format(self.list_name,
-                                                   len(self.data))
+        return "<Odkchoices '{}(len: {})'>".format(self.list_name, len(self.data))
 
     def __str__(self):
         """Convert instance to string."""
-        return '{}: {}'.format(self.list_name, self.labels(lang='English'))
+        return "{}: {}".format(self.list_name, self.labels(lang="English"))
 
     def add(self, choice):
         """Add a choice to this choice list.
@@ -38,7 +37,7 @@ class OdkChoices:
         """
         self.data.append(choice)
 
-    def labels(self, lang=''):
+    def labels(self, lang=""):
         """Get the labels for this choice list in the desired language.
 
         Args:
@@ -52,13 +51,12 @@ class OdkChoices:
         """
         label_variations = []
         if lang:
-            label_variations += \
-                [x.format(lang) for x in ('label::{}', 'label:{}')]
+            label_variations += [x.format(lang) for x in ("label::{}", "label:{}")]
         else:
-            label_variations.append('label')
+            label_variations.append("label")
 
         try:
-            col_header = ''
+            col_header = ""
             for label in label_variations:
                 if label in self.data[0]:
                     col_header = label
@@ -66,14 +64,15 @@ class OdkChoices:
                 raise KeyError
             return [d[col_header] for d in self.data]
         except (KeyError, IndexError):
-            msg = 'InvalidLanguageException: ' \
-                  'Language \'{}\' not found in choice list \'{}\'.\n' \
-                  'You may want to check for the following:\n' \
-                  '- Are the languages in the \'survey\' and \'choices\' ' \
-                  'worksheets consistent?\n' \
-                  '- Is there an issue with \'default_language\' in the ' \
-                  '\'settings\' worksheet?'\
-                .format(lang, self.list_name)
+            msg = (
+                "InvalidLanguageException: "
+                "Language '{}' not found in choice list '{}'.\n"
+                "You may want to check for the following:\n"
+                "- Are the languages in the 'survey' and 'choices' "
+                "worksheets consistent?\n"
+                "- Is there an issue with 'default_language' in the "
+                "'settings' worksheet?".format(lang, self.list_name)
+            )
             raise InvalidLanguageException(msg)
 
     def name_labels(self, lang):
@@ -89,10 +88,10 @@ class OdkChoices:
         labels = self.labels(lang)
         formatted_rows = []
         for i, row in rows:
-            formatted_row = {'label': labels[i]}
+            formatted_row = {"label": labels[i]}
             for x in CHOICE_NAME_VARIATIONS:
                 if x in row:
-                    formatted_row['name'] = row[x]
+                    formatted_row["name"] = row[x]
             formatted_rows.append(formatted_row)
         return formatted_rows
 
@@ -110,18 +109,18 @@ class OdkChoices:
         for datum in self.data:
             these_langs = set()
             for k in datum:
-                if k == 'label':
-                    these_langs.add('')  # Default language
-                elif k.startswith('label::'):
-                    lang = k[len('label::'):]
+                if k == "label":
+                    these_langs.add("")  # Default language
+                elif k.startswith("label::"):
+                    lang = k[len("label::") :]
                     these_langs.add(lang)
-                elif k.startswith('label:'):
-                    lang = k[len('label:'):]
+                elif k.startswith("label:"):
+                    lang = k[len("label:") :]
                     these_langs.add(lang)
             if not langs:
                 langs = these_langs
             elif langs != these_langs:
-                msg = 'In choice list {}, different languages found: {} and {}'
+                msg = "In choice list {}, different languages found: {} and {}"
                 msg = msg.format(self.list_name, langs, these_langs)
                 raise InvalidLanguageException(msg)
         lang_list = sorted(list(langs))

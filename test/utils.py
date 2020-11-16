@@ -10,13 +10,16 @@ from test.config import TEST_DIR
 
 def get_args():
     """CLI for PPP test runner."""
-    desc = 'Run tests for PPP package.'
+    desc = "Run tests for PPP package."
     parser = ArgumentParser(description=desc)
-    doctests_only_help = 'Specifies whether to run doctests only, as ' \
-                         'opposed to doctests with unittests. Default is' \
-                         ' False.'
-    parser.add_argument('-d', '--doctests-only', action='store_true',
-                        help=doctests_only_help)
+    doctests_only_help = (
+        "Specifies whether to run doctests only, as "
+        "opposed to doctests with unittests. Default is"
+        " False."
+    )
+    parser.add_argument(
+        "-d", "--doctests-only", action="store_true", help=doctests_only_help
+    )
     args = parser.parse_args()
     return args
 
@@ -31,20 +34,20 @@ def get_test_modules(test_package):
         list: List of all python modules in package.
 
     """
-    if test_package == 'ppp':  # TODO: Make dynamic.
+    if test_package == "ppp":  # TODO: Make dynamic.
         root_dir = TEST_DIR + "../" + "pmix/ppp"
-    elif test_package == 'test':
+    elif test_package == "test":
         root_dir = TEST_DIR
     else:
-        raise Exception('Test package not found.')
+        raise Exception("Test package not found.")
 
     test_modules = []
     for dirpath, dummy, filenames in os.walk(root_dir):
         for filename in filenames:
-            if filename.endswith('.py'):
+            if filename.endswith(".py"):
                 filename = filename[:-3]
-                sub_pkg = dirpath.replace(root_dir, '').replace('/', '.')
-                test_module = test_package + sub_pkg + '.' + filename
+                sub_pkg = dirpath.replace(root_dir, "").replace("/", ".")
+                test_module = test_package + sub_pkg + "." + filename
                 test_modules.append(test_module)
     return test_modules
 

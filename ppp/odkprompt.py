@@ -4,10 +4,16 @@ import re
 import textwrap
 
 from ppp.config import get_template_env
-from ppp.definitions.constants import MEDIA_FIELDS, TRUNCATABLE_FIELDS, \
-    LANGUAGE_DEPENDENT_FIELDS, LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS, \
-    TEMPLATES, IGNORE_RELEVANT_TOKEN, RELEVANCE_FIELD_TOKENS, \
-    PPP_REPLACEMENTS_FIELDS
+from ppp.definitions.constants import (
+    MEDIA_FIELDS,
+    TRUNCATABLE_FIELDS,
+    LANGUAGE_DEPENDENT_FIELDS,
+    LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS,
+    TEMPLATES,
+    IGNORE_RELEVANT_TOKEN,
+    RELEVANCE_FIELD_TOKENS,
+    PPP_REPLACEMENTS_FIELDS,
+)
 from ppp.definitions.error import OdkException, OdkChoicesError
 
 TEMPLATE_ENV = None
@@ -41,23 +47,18 @@ class OdkPrompt:
 
     """
 
-    select_types = (
-        'select_one',
-        'select_multiple'
-    )
+    select_types = ("select_one", "select_multiple")
     visible_response_types = (
-        'integer',
-        'decimal',
-        'geopoint',
-        'barcode',
-        'image',
-        'text',
-        'date',
-        'dateTime'
+        "integer",
+        "decimal",
+        "geopoint",
+        "barcode",
+        "image",
+        "text",
+        "date",
+        "dateTime",
     )
-    visible_non_response_types = (
-        'note',
-    )
+    visible_non_response_types = ("note",)
 
     def __init__(self, row, choices=None):
         """Initialize the XLSForm prompt (a single row of a specific type).
@@ -71,17 +72,17 @@ class OdkPrompt:
         """
         self.row = row
         self.choices = choices
-        self.odktype = self.row['simple_type']
-        self.is_section_header = True if self.row['name'].startswith('sect_') \
-            else False
+        self.odktype = self.row["simple_type"]
+        self.is_section_header = True if self.row["name"].startswith("sect_") else False
         if self.odktype in OdkPrompt.select_types and self.choices is None:
-            msg = 'No choices found for prompt \'{}\' of type \'{}\'.'\
-                .format(self.row['name'], self.odktype)
+            msg = "No choices found for prompt '{}' of type '{}'.".format(
+                self.row["name"], self.odktype
+            )
             raise OdkChoicesError(msg)
 
     def __repr__(self):
         """Print representation of instance."""
-        return "<OdkPrompt {}>".format(self.row['name'])
+        return "<OdkPrompt {}>".format(self.row["name"])
 
     @staticmethod
     def truncate_text(text):
@@ -94,7 +95,7 @@ class OdkPrompt:
             str: Truncated text.
         """
         if len(text) > 100:
-            text = text[0:98] + ' …'
+            text = text[0:98] + " …"
         return text
 
     @staticmethod
@@ -111,10 +112,11 @@ class OdkPrompt:
             dict: Reformatted representation.
         """
         for k, v in row.items():
-            if True in [k.startswith(x) for x in
-                        LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS]:
+            if True in [
+                k.startswith(x) for x in LANGUAGE_DEPENDENT_FIELDS_NONMEDIA_FIELDS
+            ]:
                 if v:
-                    row[k] = v.split('\n\n')
+                    row[k] = v.split("\n\n")
         return row
 
     @staticmethod
@@ -134,10 +136,10 @@ class OdkPrompt:
         new_row = row.copy()
         if lang:
             for field in LANGUAGE_DEPENDENT_FIELDS:
-                if field + '::' + lang in new_row:
-                    new_row[field] = new_row[field + '::' + lang]
-                elif field + ':' + lang in new_row:
-                    new_row[field] = new_row[field + ':' + lang]
+                if field + "::" + lang in new_row:
+                    new_row[field] = new_row[field + "::" + lang]
+                elif field + ":" + lang in new_row:
+                    new_row[field] = new_row[field + ":" + lang]
         return new_row
 
     # pylint: disable=too-many-branches
@@ -165,14 +167,14 @@ class OdkPrompt:
                     if field not in row:
                         fields_to_add.append(field)
                     if field.startswith(prefix):
-                        non_prefixed_mf = field.replace(prefix, '')
+                        non_prefixed_mf = field.replace(prefix, "")
                         if non_prefixed_mf not in row:
                             fields_to_add.append(non_prefixed_mf)
 
         for field in fields_to_add:
-            row[field] = ''
+            row[field] = ""
         if fields_to_add:
-            row['media'] = []
+            row["media"] = []
         return row
 
     @staticmethod
@@ -186,12 +188,11 @@ class OdkPrompt:
             dict: Reformatted representation of prompt.
         """
         new_row = row.copy()
-        if 'media' in new_row:
+        if "media" in new_row:
             for key, val in new_row.items():
                 for field in MEDIA_FIELDS:
-                    if val and key.startswith(field) \
-                            and val not in new_row['media']:
-                        new_row['media'].append(val)
+                    if val and key.startswith(field) and val not in new_row["media"]:
+                        new_row["media"].append(val)
         return new_row
 
     @staticmethod
@@ -213,7 +214,7 @@ class OdkPrompt:
         new_row = row.copy()
         for field in TRUNCATABLE_FIELDS:
             if field in new_row:
-                new_row[field + '_original'] = new_row[field]
+                new_row[field + "_original"] = new_row[field]
                 new_row[field] = OdkPrompt.truncate_text(new_row[field])
         return new_row
 
@@ -227,21 +228,19 @@ class OdkPrompt:
         Returns:
             dict: Reformatted representation.
         """
-        arbitrary_media_prefixes = ['media::', 'media:']
+        arbitrary_media_prefixes = ["media::", "media:"]
         for arb in arbitrary_media_prefixes:
-            new_row = \
-                OdkPrompt.create_additional_media_fields(row, arb)
+            new_row = OdkPrompt.create_additional_media_fields(row, arb)
             for key, val in new_row.items():
                 for field in MEDIA_FIELDS:
                     if key.startswith(field) and val:
                         formatted_media_label = val
-                        if val[0] != '[' and val[-1] != ']':
-                            formatted_media_label = '[' + val + ']'
+                        if val[0] != "[" and val[-1] != "]":
+                            formatted_media_label = "[" + val + "]"
                         row[field] = formatted_media_label
                         row[key] = formatted_media_label
                         if field.startswith(arb):
-                            non_prefixed_mf = field.replace(
-                                arb, '')
+                            non_prefixed_mf = field.replace(arb, "")
                             row[non_prefixed_mf] = formatted_media_label
         return row
 
@@ -263,7 +262,7 @@ class OdkPrompt:
         for x in RELEVANCE_FIELD_TOKENS:
             if x in prompt:
                 if prompt[x] == IGNORE_RELEVANT_TOKEN:
-                    prompt[x] = ''
+                    prompt[x] = ""
         return prompt
 
     @staticmethod
@@ -288,45 +287,56 @@ class OdkPrompt:
         # TODO: Won't need if better regexp. Current one matches sentences with
         # multiple spaces and include a number in them.
         arbitrary_character_threshold = 20
-        warning = ''
-        prompt['question_number'] = \
-            prompt['question_number'] if 'question_number' in prompt else ''
+        warning = ""
+        prompt["question_number"] = (
+            prompt["question_number"] if "question_number" in prompt else ""
+        )
         # This could be better. Doesn't get at default language.
-        lang_labels = [x for x in prompt if x.startswith('label:')]
-        label = prompt['label'] if 'label' in prompt \
-            else prompt['label::English'] if 'label::English' in prompt \
+        lang_labels = [x for x in prompt if x.startswith("label:")]
+        label = (
+            prompt["label"]
+            if "label" in prompt
+            else prompt["label::English"]
+            if "label::English" in prompt
             else prompt[lang_labels[0]]
+        )
         label_type = type(label).__name__
-        if label_type == 'str':
+        if label_type == "str":
             label = label
-        elif label_type == 'list':
+        elif label_type == "list":
             label = label[0]
         else:
-            msg = "Unsure how to handle label with type {} in the following " \
-                  "label.\n\n{}.".format(label_type, label)
+            msg = (
+                "Unsure how to handle label with type {} in the following "
+                "label.\n\n{}.".format(label_type, label)
+            )
             raise OdkException(msg)
 
-        match = \
-            re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].',
-                      label[0:arbitrary_character_threshold])
+        match = re.search(
+            r"^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[ \n\t](.+?)[a-zA-Z].",
+            label[0:arbitrary_character_threshold],
+        )
         # Tries to match with space after '.'. If not, looks for w/ no space.
         if not match:
-            match = re.search(r'^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[a-zA-Z].',
-                              label[0:arbitrary_character_threshold])
+            match = re.search(
+                r"^(?=.*\d)[a-zA-Z0-9._\-](.+?)\.[a-zA-Z].",
+                label[0:arbitrary_character_threshold],
+            )
             if match:
-                warning = 'Warning: Question number {} does not have a space '\
-                          'after \'.\''
+                warning = (
+                    "Warning: Question number {} does not have a space " "after '.'"
+                )
 
         if match:
             q_number = match.group(0)  # gets the first match
             # removes . and anything to the right of it from q_number
             for i in range(len(q_number)):
-                if q_number[-i] == '.':
+                if q_number[-i] == ".":
                     q_number = q_number[0:-i]
                     break
-            prompt['question_number'] = q_number
+            prompt["question_number"] = q_number
         if warning:
-            print(warning.format(prompt['question_number']), file=stderr)
+            print(warning.format(prompt["question_number"]), file=stderr)
 
         return prompt
 
@@ -340,16 +350,21 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        label_fields = [x for x in prompt if
-                        any([x.startswith(y) for y in ('label', 'ppp_label')])]
+        label_fields = [
+            x for x in prompt if any([x.startswith(y) for y in ("label", "ppp_label")])
+        ]
         for fld in label_fields:
             if isinstance(prompt[fld], str):
-                prompt[fld] = prompt[fld].replace(
-                    prompt['question_number']+'.', '').strip()
+                prompt[fld] = (
+                    prompt[fld].replace(prompt["question_number"] + ".", "").strip()
+                )
             elif isinstance(prompt[fld], list):
                 for i in range(len(prompt[fld])):
-                    prompt[fld][i] = prompt[fld][i].replace(
-                        prompt['question_number']+'.', '').strip()
+                    prompt[fld][i] = (
+                        prompt[fld][i]
+                        .replace(prompt["question_number"] + ".", "")
+                        .strip()
+                    )
         return prompt
 
     @staticmethod
@@ -362,7 +377,7 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        old, new = 'constraint message', 'constraint_message'
+        old, new = "constraint message", "constraint_message"
         if old in prompt:
             prompt[new] = prompt[old]
         return prompt
@@ -377,10 +392,9 @@ class OdkPrompt:
         Returns
             dict: Reformatted representation.
         """
-        prompt['is_section'] = False
-        if prompt['simple_type'] == 'note' \
-                and prompt['name'].startswith('sect_'):
-            prompt['is_section'] = True
+        prompt["is_section"] = False
+        if prompt["simple_type"] == "note" and prompt["name"].startswith("sect_"):
+            prompt["is_section"] = True
         return prompt
 
     @staticmethod
@@ -398,33 +412,34 @@ class OdkPrompt:
         # TODO: (jef 2017.09.24) Human readable: hint variables.
         # TODO: (jef 2017.09.24) Human readable: choice filters, calcs.
         for fld in prompt:
-            for exclusion in TEMPLATES[template]['field_exclusions']:
+            for exclusion in TEMPLATES[template]["field_exclusions"]:
                 if fld.startswith(exclusion):
-                    prompt[fld] = ''
+                    prompt[fld] = ""
                     continue
 
             if lang:
-                for to_replace in TEMPLATES[template]['field_replacements']:
-                    replace_withs = ['ppp_'+to_replace+'::'+lang,
-                                     'ppp_'+to_replace+':'+lang]
+                for to_replace in TEMPLATES[template]["field_replacements"]:
+                    replace_withs = [
+                        "ppp_" + to_replace + "::" + lang,
+                        "ppp_" + to_replace + ":" + lang,
+                    ]
                     for replace_with in replace_withs:
                         if fld == replace_with and prompt[replace_with]:
                             for x in PPP_REPLACEMENTS_FIELDS:
                                 if to_replace.startswith(x):
-                                    if x == 'label':
-                                        prompt[to_replace] = \
-                                            [prompt[replace_with]]
+                                    if x == "label":
+                                        prompt[to_replace] = [prompt[replace_with]]
                                     elif x in RELEVANCE_FIELD_TOKENS:
-                                        prompt[to_replace] = \
-                                            prompt[replace_with]
+                                        prompt[to_replace] = prompt[replace_with]
 
-            if 'choice names' in \
-                    TEMPLATES[template]['other_specific_exclusions']:
-                if fld == 'input_field' and prompt['simple_type'] in \
-                        ('select_one', 'select_multiple'):
-                    prompt['input_field'] = [
-                        {'name': '', 'value': '', 'label': i['label']}
-                        for i in prompt['input_field']
+            if "choice names" in TEMPLATES[template]["other_specific_exclusions"]:
+                if fld == "input_field" and prompt["simple_type"] in (
+                    "select_one",
+                    "select_multiple",
+                ):
+                    prompt["input_field"] = [
+                        {"name": "", "value": "", "label": i["label"]}
+                        for i in prompt["input_field"]
                     ]
 
         OdkPrompt._ignore_relevant(prompt)
@@ -446,10 +461,10 @@ class OdkPrompt:
         value = None
         try:
             if lang:
-                if '{}::{}'.format(field, lang) in self.row:
-                    key = '{}::{}'.format(field, lang)
+                if "{}::{}".format(field, lang) in self.row:
+                    key = "{}::{}".format(field, lang)
                 else:
-                    key = '{}:{}'.format(field, lang)
+                    key = "{}:{}".format(field, lang)
                 value = self.row[key]
             else:
                 keys = (k for k in self.row if k.startswith(field))
@@ -471,10 +486,10 @@ class OdkPrompt:
             str: The text representation of the relevant.
         """
         formatted_relevant = None
-        relevant_text = self.text_field('relevant_text', lang)
+        relevant_text = self.text_field("relevant_text", lang)
         if relevant_text:
             # formatted_relevant = '[{}]'.format(relevant_text).rjust(50)
-            formatted_relevant = '{}'.format(relevant_text).rjust(50)
+            formatted_relevant = "{}".format(relevant_text).rjust(50)
         return formatted_relevant
 
     def to_text_response(self, lang, numbered=False):
@@ -491,20 +506,18 @@ class OdkPrompt:
             str: The text representation of the response entry field.
         """
         text_str = None
-        if self.odktype == 'select_multiple':
+        if self.odktype == "select_multiple":
             choices = self.choices.labels(lang=lang)
             if numbered:
-                choices = ['{}. {}'.format(i+1, c) for i, c in
-                           enumerate(choices)]
-            text_str = '\n'.join(('_ {}'.format(i) for i in choices))
-        elif self.odktype == 'select_one':
+                choices = ["{}. {}".format(i + 1, c) for i, c in enumerate(choices)]
+            text_str = "\n".join(("_ {}".format(i) for i in choices))
+        elif self.odktype == "select_one":
             choices = self.choices.labels(lang=lang)
             if numbered:
-                choices = ['{}. {}'.format(i+1, c) for i, c in
-                           enumerate(choices)]
-            text_str = '\n'.join(('* {}'.format(i) for i in choices))
+                choices = ["{}. {}".format(i + 1, c) for i, c in enumerate(choices)]
+            text_str = "\n".join(("* {}".format(i) for i in choices))
         elif self.odktype in OdkPrompt.visible_response_types:
-            text_str = '_'*30 + '({})'.format(self.odktype)
+            text_str = "_" * 30 + "({})".format(self.odktype)
 
         # try:
         #     question_type = self.odktype in Odkprompt.visible_response_types
@@ -516,7 +529,7 @@ class OdkPrompt:
         #     pass
 
         if text_str:
-            text_str = textwrap.indent(text_str, '  ')
+            text_str = textwrap.indent(text_str, "  ")
 
         return text_str
 
@@ -533,10 +546,10 @@ class OdkPrompt:
             str or dict: The representation of the entry field.
         """
         field = None
-        if self.odktype in ['select_multiple', 'select_one']:
+        if self.odktype in ["select_multiple", "select_one"]:
             field = self.choices.name_labels(lang=lang)
         elif self.odktype in OdkPrompt.visible_response_types:
-            field = '_' * 30 + '({})'.format(self.odktype)
+            field = "_" * 30 + "({})".format(self.odktype)
         return field
 
     def to_text(self, lang):
@@ -550,17 +563,12 @@ class OdkPrompt:
         """
         # Note: May not need 'relevant_text'.
         # relevant_text = self.text_field('relevant_text', lang)
-        label = self.text_field('label', lang)
-        hint = self.text_field('hint', lang)
+        label = self.text_field("label", lang)
+        hint = self.text_field("hint", lang)
         # Need done: Audio, Image, Video, Relevant
-        fields = (
-            self.to_text_relevant(lang),
-            label,
-            hint,
-            self.to_text_response(lang)
-        )
+        fields = (self.to_text_relevant(lang), label, hint, self.to_text_response(lang))
         text = filter(None, fields)
-        result = '\n\n'.join(text)
+        result = "\n\n".join(text)
         return result
 
     def to_dict(self, lang, **kwargs):
@@ -582,19 +590,17 @@ class OdkPrompt:
         prompt = OdkPrompt._reformat_double_line_breaks(prompt)
         prompt = OdkPrompt._streamline_constraint_message(prompt)
         prompt = OdkPrompt.extract_question_numbers(prompt)
-        if 'style' in kwargs and kwargs['style'] != 'old':
+        if "style" in kwargs and kwargs["style"] != "old":
             prompt = OdkPrompt._remove_question_nums_from_labels(prompt)
 
-        prompt['input_field'] = self.to_html_input_field(lang)
+        prompt["input_field"] = self.to_html_input_field(lang)
 
         if self.is_section_header:
-            prompt['is_section_header'] = True
-        if 'bottom_border' in kwargs:
-            prompt['bottom_border'] = True
-        kwargs['template'] = kwargs['template'] if 'template' in kwargs \
-            else 'standard'
-        prompt = \
-            OdkPrompt.handle_template_presets(prompt, lang, kwargs['template'])
+            prompt["is_section_header"] = True
+        if "bottom_border" in kwargs:
+            prompt["bottom_border"] = True
+        kwargs["template"] = kwargs["template"] if "template" in kwargs else "standard"
+        prompt = OdkPrompt.handle_template_presets(prompt, lang, kwargs["template"])
         return prompt
 
     @staticmethod
@@ -608,14 +614,13 @@ class OdkPrompt:
         Returns:
             dict: Modified settings based on keyword arguments.
         """
-        if 'template' not in kwargs:
+        if "template" not in kwargs:
             return kwargs
-        for k, v in TEMPLATES[kwargs['template']]['render_settings']['html']\
-                .items():
+        for k, v in TEMPLATES[kwargs["template"]]["render_settings"]["html"].items():
             kwargs[k] = v
-        if 'language' not in kwargs:
+        if "language" not in kwargs:
             # noinspection PyTypeChecker
-            kwargs['language'] = lang
+            kwargs["language"] = lang
         return kwargs
 
     def to_html(self, lang, **kwargs):
@@ -632,5 +637,6 @@ class OdkPrompt:
         settings = self.html_options(lang=lang, **kwargs)
         question = self.to_dict(lang=lang, **settings)
         # pylint: disable=no-member
-        return TEMPLATE_ENV.get_template('content/content-tr-base.html')\
-            .render(question=question, **settings)
+        return TEMPLATE_ENV.get_template("content/content-tr-base.html").render(
+            question=question, **settings
+        )

@@ -13,8 +13,7 @@ from ppp.odkgroup import OdkGroup, set_template_env as odkgroup_template
 from ppp.odkprompt import OdkPrompt, set_template_env as odkpromt_template
 from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
 from ppp.odktable import OdkTable, set_template_env as odktable_template
-from ppp.odkabstractprompt import set_template_env as \
-    odkabstractprompt_template
+from ppp.odkabstractprompt import set_template_env as odkabstractprompt_template
 from ppp.definitions.utils import exclusion
 from pmix.xlsform import Xlsform
 
@@ -68,31 +67,31 @@ class OdkForm:
 
         self.title = self.get_title(settings=self.settings, wb=wb)
         self.metadata = {  # TODO Finish filling this out.
-            'last_author': str(),
-            'last_updated': str(),
-            'changelog': None,
-            'info': None,
-            'raw_data': wb
+            "last_author": str(),
+            "last_updated": str(),
+            "changelog": None,
+            "info": None,
+            "raw_data": wb,
         }
-        self.choices = self.get_choices(wb, 'choices')
-        self.ext_choices = self.get_choices(wb, 'external_choices')
+        self.choices = self.get_choices(wb, "choices")
+        self.ext_choices = self.get_choices(wb, "external_choices")
         self.metadata = {
             **self.metadata,
             **{
-                'file_name': os.path.split(wb.file)[1],
-                'form_id': self.settings.get('form_id') if
-                self.settings.get('form_id')
-                else self.settings.get('id_string'),
-                'country': lambda: self.metadata['form_id'][3:5],
-                'round': lambda: self.metadata['form_id'][6:7],
-                'type_of_form': lambda: self.metadata['form_id'][0:2],
-            }
+                "file_name": os.path.split(wb.file)[1],
+                "form_id": self.settings.get("form_id")
+                if self.settings.get("form_id")
+                else self.settings.get("id_string"),
+                "country": lambda: self.metadata["form_id"][3:5],
+                "round": lambda: self.metadata["form_id"][6:7],
+                "type_of_form": lambda: self.metadata["form_id"][0:2],
+            },
         }
         self.metadata = {
             **self.metadata,
-            'country': self.metadata['country'](),
-            'round': self.metadata['round'](),
-            'type_of_form': self.metadata['type_of_form'](),
+            "country": self.metadata["country"](),
+            "round": self.metadata["round"](),
+            "type_of_form": self.metadata["type_of_form"](),
         }
         qre = self.convert_survey(wb, self.choices, self.ext_choices)
         qre = OdkForm._add_question_iter_nums(qre)
@@ -112,13 +111,16 @@ class OdkForm:
         xlsform = Xlsform(path)
         odkform = cls(xlsform)
         if xlsform.warnings:
-            msg = 'Warning! File {} contained spreadsheet errors. This may ' \
-                  'or may not cause problems in the resulting converted ' \
-                  'files. Just to be on the safe side, you may want to open ' \
-                  'the original spreadsheet file, take a look at the errors,' \
-                  ' and fix and convert again if you feel the need.\nThe ' \
-                  'errors found are as follows:\n{}'\
-                .format(odkform.title, xlsform.warnings)
+            msg = (
+                "Warning! File {} contained spreadsheet errors. This may "
+                "or may not cause problems in the resulting converted "
+                "files. Just to be on the safe side, you may want to open "
+                "the original spreadsheet file, take a look at the errors,"
+                " and fix and convert again if you feel the need.\nThe "
+                "errors found are as follows:\n{}".format(
+                    odkform.title, xlsform.warnings
+                )
+            )
             print(msg, file=stderr)
         return odkform
 
@@ -134,7 +136,7 @@ class OdkForm:
         """
         settings_dict = {}
         try:
-            settings = wb['settings']
+            settings = wb["settings"]
             header = settings[0]
             details = settings[1]
             settings_dict = {k: v for k, v in zip(header, details)}
@@ -166,7 +168,7 @@ class OdkForm:
             choices = wb[ws]
             header = [str(x) for x in choices[0]]
 
-            if 'list_name' not in header:
+            if "list_name" not in header:
                 msg = 'Column "list_name" not found in {} tab'.format(ws)
                 raise OdkFormError(msg)
 
@@ -174,7 +176,7 @@ class OdkForm:
                 if i == 0:
                     continue
                 dict_row = {str(k): str(v) for k, v in zip(header, row)}
-                list_name = dict_row['list_name']
+                list_name = dict_row["list_name"]
                 if list_name in formatted_choices:
                     formatted_choices[list_name].add(dict_row)
                 elif list_name:  # Not "else:" because possibly blank rows.
@@ -198,10 +200,10 @@ class OdkForm:
         Returns:
             str: The title.
         """
-        lookup_title = 'form_title'
+        lookup_title = "form_title"
         if lang:
-            try1 = settings.get('ppp_form_title' + '::' + lang)
-            try2 = settings.get('ppp_form_title' + ':' + lang)
+            try1 = settings.get("ppp_form_title" + "::" + lang)
+            try2 = settings.get("ppp_form_title" + ":" + lang)
             lookup_title = try1 if try1 else try2
         backup_title = os.path.split(wb.file)[1]
         return settings.get(lookup_title, backup_title)
@@ -221,17 +223,14 @@ class OdkForm:
 
         for item in prompt_list:
             if isinstance(item, OdkPrompt):
-                qnum_map[item.row['name']] = item.row['question_number']
+                qnum_map[item.row["name"]] = item.row["question_number"]
             if isinstance(item, OdkTable):
-                qnum_map = {**qnum_map,
-                            **OdkForm._get_name_to_q_num_map(item.data)}
-            elif any([isinstance(item, x)
-                      for x in (OdkCalculate, OdkCustomType)]):
-                qnum_map[item.row['name']] = ''
+                qnum_map = {**qnum_map, **OdkForm._get_name_to_q_num_map(item.data)}
+            elif any([isinstance(item, x) for x in (OdkCalculate, OdkCustomType)]):
+                qnum_map[item.row["name"]] = ""
             elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup)):
-                qnum_map[item.row['name']] = ''
-                qnum_map = {**qnum_map,
-                            **OdkForm._get_name_to_q_num_map(item.data)}
+                qnum_map[item.row["name"]] = ""
+                qnum_map = {**qnum_map, **OdkForm._get_name_to_q_num_map(item.data)}
 
         return qnum_map
 
@@ -253,8 +252,8 @@ class OdkForm:
         """
         logic_field_variations = (
             RELEVANCE_FIELD_TOKENS,
-            ('calculation', ),
-            ('choice_filter', )
+            ("calculation",),
+            ("choice_filter",),
         )
         new_list = []
 
@@ -267,18 +266,16 @@ class OdkForm:
                         except KeyError:
                             continue
                         if fld:
-                            matches = re.findall(r'\${[a-zA-Z0-9-_]*}', fld)
+                            matches = re.findall(r"\${[a-zA-Z0-9-_]*}", fld)
                             for m in matches:
                                 if not m[2:-1] in ODK_SUPERGLOBALS:
-                                    m2 = m.replace('${', '').replace('}', '')
+                                    m2 = m.replace("${", "").replace("}", "")
                                     if m2 in question_map and question_map[m2]:
                                         fld = fld.replace(m, question_map[m2])
                                         item.row[fld_name] = fld
                 new_list.append(item)
-            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup,
-                                                   OdkTable)):
-                item.data = OdkForm._set_name_refs_to_q_nums(
-                    item.data, question_map)
+            elif any(isinstance(item, x) for x in (OdkRepeat, OdkGroup, OdkTable)):
+                item.data = OdkForm._set_name_refs_to_q_nums(item.data, question_map)
                 new_list.append(item)
 
         return new_list
@@ -293,16 +290,17 @@ class OdkForm:
             str: The detailed string of the XLSForm, ready to print or save.
         """
         title_lines = (
-            '+{:-^50}+'.format(''),
-            '|{:^50}|'.format(self.title),
-            '+{:-^50}+'.format('')
+            "+{:-^50}+".format(""),
+            "|{:^50}|".format(self.title),
+            "+{:-^50}+".format(""),
         )
-        title_box = '\n'.join(title_lines)
+        title_box = "\n".join(title_lines)
 
         q_text = (q.to_text(lang) for q in self.questionnaire)
-        sep = '\n\n' + '=' * 52 + '\n\n'
+        sep = "\n\n" + "=" * 52 + "\n\n"
         result = sep.join(q_text)
         return title_box + sep + result + sep  # TODO: Finish below to_dict or
+
     # TODO: change debug feature. If fixed, change to_json to
     # TODO: call dump return of this method instead of raw data.
 
@@ -337,9 +335,10 @@ class OdkForm:
             json: A detailed JSON representation of the XLSForm.
         """
         import json
+
         raw_survey = []
-        header = self.metadata['raw_data']['survey'][0]
-        for i, row in enumerate(self.metadata['raw_data']['survey']):
+        header = self.metadata["raw_data"]["survey"][0]
+        for i, row in enumerate(self.metadata["raw_data"]["survey"]):
             if i == 0:
                 continue
             raw_survey.append({str(k): str(v) for k, v in zip(header, row)})
@@ -349,7 +348,7 @@ class OdkForm:
         return json.dumps(raw_survey)
 
     @staticmethod
-    def _add_question_iter_nums(obj, data={'qnum': '', 'i': 0}, depth=0):
+    def _add_question_iter_nums(obj, data={"qnum": "", "i": 0}, depth=0):
         """Add iteration numbers to unique question prompts.
 
         Possible improvements: Make it so that this doesn't depend on
@@ -372,19 +371,19 @@ class OdkForm:
             list: OdkForm.questionnaire with new 'i' values included.
         """
         for i, element in enumerate(obj):
-            if any(isinstance(element, x) for x in (OdkRepeat, OdkGroup,
-                                                    OdkTable)):
+            if any(isinstance(element, x) for x in (OdkRepeat, OdkGroup, OdkTable)):
                 element.data, data = OdkForm._add_question_iter_nums(
-                    element.data, data, depth+1)
+                    element.data, data, depth + 1
+                )
             elif isinstance(element, OdkPrompt):
                 element.row = OdkPrompt.extract_question_numbers(element.row)
-                qnum = element.row['question_number']
-                if qnum not in (data['qnum'], ''):
-                    data['i'] += 1
-                    data['qnum'] = qnum
-                element.row['i'] = data['i']
+                qnum = element.row["question_number"]
+                if qnum not in (data["qnum"], ""):
+                    data["i"] += 1
+                    data["qnum"] = qnum
+                element.row["i"] = data["i"]
             elif isinstance(element, OdkCalculate):
-                element.row['i'] = data['i']
+                element.row["i"] = data["i"]
         if depth == 0:
             return obj
         return obj, data
@@ -404,64 +403,69 @@ class OdkForm:
         """
         render_calculates = True
         language = lang if lang else self.language
-        debug = True if 'debug' in kwargs and kwargs['debug'] else False
-        html_questionnaire = ''
+        debug = True if "debug" in kwargs and kwargs["debug"] else False
+        html_questionnaire = ""
         qre = self.questionnaire
-        if 'template' not in kwargs:
-            kwargs['template'] = 'standard'
-        if kwargs['template'] == 'standard':
+        if "template" not in kwargs:
+            kwargs["template"] = "standard"
+        if kwargs["template"] == "standard":
             name_to_q_nums = OdkForm._get_name_to_q_num_map(qre)
             qre = OdkForm._set_name_refs_to_q_nums(qre, name_to_q_nums)
             # render_calculates = False
         data = {
-            'header': {
-                'title': self.get_title(settings=self.settings,
-                                        wb=self.metadata['raw_data'],
-                                        lang=lang)
+            "header": {
+                "title": self.get_title(
+                    settings=self.settings, wb=self.metadata["raw_data"], lang=lang
+                )
             },
-            'footer': {
-                'data': self.to_json(pretty=True) if debug else 'false'
-            },
-            'questionnaire': qre
+            "footer": {"data": self.to_json(pretty=True) if debug else "false"},
+            "questionnaire": qre,
         }
 
         # - Render Header
         # pylint: disable=no-member
-        header = TEMPLATE_ENV.get_template('header.html').render(
-            data=data['header'],
-            render_image=False if kwargs['format'] == 'doc' else True,
+        header = TEMPLATE_ENV.get_template("header.html").render(
+            data=data["header"],
+            render_image=False if kwargs["format"] == "doc" else True,
             **kwargs,
-            settings=kwargs)
+            settings=kwargs
+        )
         # pylint: disable=no-member
-        grp_spc = TEMPLATE_ENV\
-            .get_template('content/group/group-spacing.html').render()
+        grp_spc = TEMPLATE_ENV.get_template("content/group/group-spacing.html").render()
         html_questionnaire += header
 
         # - Render Body
         prev_item = None
-        for index, item in enumerate(data['questionnaire']):
+        for index, item in enumerate(data["questionnaire"]):
             if exclusion(item=item, settings=kwargs):
                 continue
             if isinstance(item, OdkCalculate):
                 item.renderable = render_calculates
             if prev_item is not None and isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
-            elif isinstance(prev_item, OdkGroup) \
-                    and not isinstance(item, OdkGroup):
+            elif isinstance(prev_item, OdkGroup) and not isinstance(item, OdkGroup):
                 html_questionnaire += grp_spc
-            if isinstance(item, OdkPrompt) and item.is_section_header and \
-                    isinstance(data['questionnaire'][index+1], OdkGroup):
-                html_questionnaire += \
-                    item.to_html(lang=language, **kwargs, bottom_border=True)
+            if (
+                isinstance(item, OdkPrompt)
+                and item.is_section_header
+                and isinstance(data["questionnaire"][index + 1], OdkGroup)
+            ):
+                html_questionnaire += item.to_html(
+                    lang=language, **kwargs, bottom_border=True
+                )
             else:
                 html = item.to_html(lang=language, **kwargs)
                 html_questionnaire += html
             prev_item = item
 
         # pylint: disable=no-member
-        footer = TEMPLATE_ENV.get_template('footer.html')\
-            .render(info=None, warnings='false',  # to-do: no warnings yet
-                    data=data['footer']['data'], **kwargs, settings=kwargs)
+        footer = TEMPLATE_ENV.get_template("footer.html").render(
+            info=None,
+            warnings="false",  # to-do: no warnings yet
+            data=data["footer"]["data"],
+            **kwargs,
+            settings=kwargs
+        )
         html_questionnaire += footer
 
         return html_questionnaire
@@ -489,34 +493,34 @@ class OdkForm:
             OdkFormError: If the row is not select_[one|multiple](_external)?
             KeyError: If the select question's choice list is not found.
         """
-        simple_row = {'token_type': 'prompt'}
-        simple_type = 'select_one'
-        row_type = row['type']
+        simple_row = {"token_type": "prompt"}
+        simple_type = "select_one"
+        row_type = row["type"]
         list_name = row_type.split(maxsplit=1)[1]
 
         try:
-            if row_type.startswith('select_one_external '):
+            if row_type.startswith("select_one_external "):
                 choice_list = ext_choices[list_name]
-            elif row_type.startswith('select_multiple_external '):
-                simple_type = 'select_multiple'
+            elif row_type.startswith("select_multiple_external "):
+                simple_type = "select_multiple"
                 choice_list = ext_choices[list_name]
 
-            elif row_type.startswith('select_one '):
+            elif row_type.startswith("select_one "):
                 choice_list = choices[list_name]
-            elif row_type.startswith('select_multiple '):
-                simple_type = 'select_multiple'
+            elif row_type.startswith("select_multiple "):
+                simple_type = "select_multiple"
                 choice_list = choices[list_name]
             else:
                 raise OdkFormError()
         except KeyError:
-            raise OdkFormError('List \'{}\' not found.'.format(list_name))
+            raise OdkFormError("List '{}' not found.".format(list_name))
 
-        simple_row['simple_type'] = simple_type
-        simple_row['choice_list'] = choice_list
+        simple_row["simple_type"] = simple_type
+        simple_row["choice_list"] = choice_list
 
-        appearance = row.get('appearance', '')
-        if appearance in ('label', 'list-nolabel'):
-            simple_row['token_type'] = 'table'
+        appearance = row.get("appearance", "")
+        if appearance in ("label", "list-nolabel"):
+            simple_row["token_type"] = "table"
 
         return simple_row
 
@@ -533,15 +537,15 @@ class OdkForm:
         Raises:
             OdkFormError: If type is not begin/end group/repeat.
         """
-        row_type = row['type']
+        row_type = row["type"]
         token_type = row_type
-        appearance = row.get('appearance', '')
-        good = ('begin group', 'end group', 'begin repeat', 'end repeat')
-        if row_type == 'begin group' and 'field-list' not in appearance:
-            token_type = 'context group'
+        appearance = row.get("appearance", "")
+        good = ("begin group", "end group", "begin repeat", "end repeat")
+        if row_type == "begin group" and "field-list" not in appearance:
+            token_type = "context group"
         elif row_type not in good:
             raise OdkFormError()
-        simple_row = {'token_type': token_type}
+        simple_row = {"token_type": token_type}
         return simple_row
 
     @staticmethod
@@ -558,27 +562,22 @@ class OdkForm:
             A dictionary with the simple information about this prompt.
         """
         simple_row = {
-            'token_type': 'prompt',
-            'simple_type': row_type,
-            'choice_list': None
+            "token_type": "prompt",
+            "simple_type": row_type,
+            "choice_list": None,
         }
         return simple_row
 
     @staticmethod
     def make_simple_calculate():
         """Make a simple calculate."""
-        simple_row = {
-            'token_type': 'calculate',
-            'simple_type': 'calculate'
-        }
+        simple_row = {"token_type": "calculate", "simple_type": "calculate"}
         return simple_row
 
     @staticmethod
     def make_simple_custom_type():
         """Make a simple custom type."""
-        simple_row = {
-            'token_type': 'custom'
-        }
+        simple_row = {"token_type": "custom"}
         return simple_row
 
     @staticmethod
@@ -595,21 +594,22 @@ class OdkForm:
         Returns:
             dict: simple_row information from parsing.
         """
-        row_type = row['type']
-        simple_types = OdkPrompt.visible_response_types + \
-            OdkPrompt.visible_non_response_types
+        row_type = row["type"]
+        simple_types = (
+            OdkPrompt.visible_response_types + OdkPrompt.visible_non_response_types
+        )
         if row_type in simple_types:
             simple_row = OdkForm.make_simple_prompt(row_type)
-        elif row_type == 'calculate':
+        elif row_type == "calculate":
             simple_row = OdkForm.make_simple_calculate()
-        elif row_type.startswith('select_'):
+        elif row_type.startswith("select_"):
             simple_row = OdkForm.parse_select_type(row, choices, ext_choices)
-        elif row_type.startswith('begin ') or row_type.startswith('end '):
+        elif row_type.startswith("begin ") or row_type.startswith("end "):
             simple_row = OdkForm.parse_group_repeat(row)
-        elif row_type.startswith('hidden'):
+        elif row_type.startswith("hidden"):
             simple_row = OdkForm.make_simple_custom_type()
         else:  # Note - Some other custom token types remain.
-            simple_row = {'token_type': 'custom', 'simple_type': row_type}
+            simple_row = {"token_type": "custom", "simple_type": row_type}
         return simple_row
 
     # pylint: disable=too-many-branches
@@ -643,7 +643,7 @@ class OdkForm:
         context = OdkForm.ConversionContext()
         survey, header = None, None
         try:
-            survey = wb['survey']
+            survey = wb["survey"]
             header = survey[0]
         except KeyError:  # No survey found.
             pass
@@ -655,34 +655,34 @@ class OdkForm:
                 dict_row = {str(k): str(v) for k, v in zip(header, row)}
                 token = OdkForm.parse_type(dict_row, choices, ext_choices)
 
-                if token['token_type'] == 'prompt':
-                    dict_row['simple_type'] = token['simple_type']
-                    choice_list = token['choice_list']
+                if token["token_type"] == "prompt":
+                    dict_row["simple_type"] = token["simple_type"]
+                    choice_list = token["choice_list"]
                     this_prompt = OdkPrompt(dict_row, choice_list)
                     context.add_prompt(this_prompt)
-                elif token['token_type'] == 'calculate':
-                    dict_row['simple_type'] = token['simple_type']
+                elif token["token_type"] == "calculate":
+                    dict_row["simple_type"] = token["simple_type"]
                     this_calculate = OdkCalculate(dict_row)
                     context.add_calculate(this_calculate)
-                elif token['token_type'] == 'begin group':
+                elif token["token_type"] == "begin group":
                     this_group = OdkGroup(dict_row)
                     context.add_group(this_group)
-                elif token['token_type'] == 'context group':
+                elif token["token_type"] == "context group":
                     # Possibly make an OdkGroup here...
                     context.add_context_group()
-                elif token['token_type'] == 'end group':
+                elif token["token_type"] == "end group":
                     context.end_group()
-                elif token['token_type'] == 'begin repeat':
+                elif token["token_type"] == "begin repeat":
                     this_repeat = OdkRepeat(dict_row)
                     context.add_repeat(this_repeat)
-                elif token['token_type'] == 'end repeat':
+                elif token["token_type"] == "end repeat":
                     context.end_repeat()
-                elif token['token_type'] == 'table':
-                    dict_row['simple_type'] = token['simple_type']
-                    choice_list = token['choice_list']
+                elif token["token_type"] == "table":
+                    dict_row["simple_type"] = token["simple_type"]
+                    choice_list = token["choice_list"]
                     this_prompt = OdkPrompt(dict_row, choice_list)
                     context.add_table(this_prompt)
-                elif token['token_type'] == 'custom':
+                elif token["token_type"] == "custom":
                     this_custom = OdkCustomType(dict_row)
                     context.add_custom_type(this_custom)
                 else:
@@ -772,7 +772,7 @@ class OdkForm:
             if self.pending_stack:
                 last = self.pending_stack[-1]
                 if isinstance(last, OdkGroup):
-                    msg = 'Groups cannot be nested in each other.'
+                    msg = "Groups cannot be nested in each other."
                     raise OdkFormError(msg)
             self.pending_stack.append(group)
             self.group_stack.append(group)
@@ -804,7 +804,7 @@ class OdkForm:
             if self.pending_stack:
                 last_pending = self.pending_stack.pop()
                 if not isinstance(last_pending, OdkGroup):
-                    msg = 'Found end group but no group in pending stack'
+                    msg = "Found end group but no group in pending stack"
                     raise OdkFormError(msg)
                 last_pending.add_pending()
                 if self.pending_stack:
@@ -812,7 +812,7 @@ class OdkForm:
                 else:
                     self.result.append(last_pending)
             else:
-                msg = 'Found end group but nothing pending stack.'
+                msg = "Found end group but nothing pending stack."
                 raise OdkFormError(msg)
 
         def end_group(self):
@@ -831,7 +831,7 @@ class OdkForm:
                 if isinstance(last_group, OdkGroup):
                     self.end_pending_group()
             else:
-                msg = 'Begin/end group mismatch'
+                msg = "Begin/end group mismatch"
                 raise OdkFormError(msg)
 
         def add_repeat(self, repeat):
@@ -851,7 +851,7 @@ class OdkForm:
             if not self.pending_stack:
                 self.pending_stack.append(repeat)
             else:
-                msg = 'Unable to nest repeat inside a group or repeat.'
+                msg = "Unable to nest repeat inside a group or repeat."
                 raise OdkFormError(msg)
 
         def end_repeat(self):
@@ -869,10 +869,10 @@ class OdkForm:
                 if isinstance(last_pending, OdkRepeat):
                     self.result.append(last_pending)
                 else:
-                    msg = 'Found end repeat but no repeat in pending stack.'
+                    msg = "Found end repeat but no repeat in pending stack."
                     raise OdkFormError(msg)
             else:
-                msg = 'Found end repeat but nothing in pending stack.'
+                msg = "Found end repeat but nothing in pending stack."
                 raise OdkFormError(msg)
 
         def add_table(self, prompt):
@@ -891,11 +891,14 @@ class OdkForm:
             if self.pending_stack:
                 last_pending = self.pending_stack[-1]
                 if not isinstance(last_pending, OdkGroup):
-                    msg = 'A table can only be in a group. Errored on: {}'\
-                        .format(prompt.row)
+                    msg = "A table can only be in a group. Errored on: {}".format(
+                        prompt.row
+                    )
                     raise OdkFormError(msg)
                 last_pending.add_table(prompt)
             else:
-                msg = 'A table can only be in a group, no group found. ' \
-                      'Errored on {}'.format(prompt.row)
+                msg = (
+                    "A table can only be in a group, no group found. "
+                    "Errored on {}".format(prompt.row)
+                )
                 raise OdkFormError(msg)

@@ -1,3 +1,7 @@
+# v1.4.0, 16 November 2020
+- Fixed imports from PMIX
+- Applied Black
+
 # v1.3.0, (Pre-Release)
 ## New Features
 - Added feature - render question numbers in logic in place of question variable names.

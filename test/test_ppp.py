@@ -501,23 +501,6 @@ class MultipleFieldLanguageDelimiterSupport(PppTest):
         self.standard_conversion_test()
 
 
-class XlsFormNonStrictValidation(PppTest):
-    """Creates a form when the form ID is called "id_string" or "form_id"."""
-
-    def test_warnings(self):
-        command = (
-            ["python3", "-m", "ppp"] + self.input_files() + ["-o", self.output_path()]
-        )
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        process.wait()
-        stream = process.stderr
-        err = stream.read().decode().strip()
-        stream.close()
-        self.assertTrue("Warning!" in err)
-
-
 class NamesToQnums(PppTest):
     """Set question numbers for all variable name refs in relevants."""
 

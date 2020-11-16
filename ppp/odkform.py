@@ -15,7 +15,7 @@ from ppp.odkrepeat import OdkRepeat, set_template_env as odkrepeat_template
 from ppp.odktable import OdkTable, set_template_env as odktable_template
 from ppp.odkabstractprompt import set_template_env as odkabstractprompt_template
 from ppp.definitions.utils import exclusion
-from pmix.xlsform import Xlsform
+from pmix import Xlsform
 
 TEMPLATE_ENV = None
 
@@ -78,7 +78,7 @@ class OdkForm:
         self.metadata = {
             **self.metadata,
             **{
-                "file_name": os.path.split(wb.file)[1],
+                "file_name": os.path.split(wb.filename)[1],
                 "form_id": self.settings.get("form_id")
                 if self.settings.get("form_id")
                 else self.settings.get("id_string"),
@@ -110,18 +110,6 @@ class OdkForm:
         """
         xlsform = Xlsform(path)
         odkform = cls(xlsform)
-        if xlsform.warnings:
-            msg = (
-                "Warning! File {} contained spreadsheet errors. This may "
-                "or may not cause problems in the resulting converted "
-                "files. Just to be on the safe side, you may want to open "
-                "the original spreadsheet file, take a look at the errors,"
-                " and fix and convert again if you feel the need.\nThe "
-                "errors found are as follows:\n{}".format(
-                    odkform.title, xlsform.warnings
-                )
-            )
-            print(msg, file=stderr)
         return odkform
 
     @staticmethod
@@ -205,7 +193,7 @@ class OdkForm:
             try1 = settings.get("ppp_form_title" + "::" + lang)
             try2 = settings.get("ppp_form_title" + ":" + lang)
             lookup_title = try1 if try1 else try2
-        backup_title = os.path.split(wb.file)[1]
+        backup_title = os.path.split(wb.filename)[1]
         return settings.get(lookup_title, backup_title)
 
     @staticmethod
